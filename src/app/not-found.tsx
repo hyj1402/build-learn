@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+/** 존재하지 않는 주소에 접근했을 때 보여주는 공통 404 화면입니다. */
 export default function NotFound() {
   return (
     <section className="container not-found">

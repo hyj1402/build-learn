@@ -2,6 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
 import type { Log } from "@/types/log";
+
+/** 목록과 Home에서 재사용하는 Log 요약 카드입니다. 썸네일이 없어도 같은 컴포넌트가 동작합니다. */
 export function LogCard({
   log,
   priority = false,
@@ -11,6 +13,7 @@ export function LogCard({
   priority?: boolean;
   headingLevel?: "h2" | "h3";
 }) {
+  // 페이지의 h1 다음 제목 단계가 건너뛰지 않도록 호출 위치에서 h2/h3를 선택합니다.
   const Heading = headingLevel;
 
   return (
@@ -24,6 +27,7 @@ export function LogCard({
             src={log.thumbnailImage}
             alt={`${log.title} 대표 이미지`}
             fill
+            // 실제 이미지가 있는 첫 카드만 빠르게 요청해 LCP 경고를 예방합니다.
             loading={priority ? "eager" : "lazy"}
             sizes="(max-width: 800px) 100vw, 220px"
           />

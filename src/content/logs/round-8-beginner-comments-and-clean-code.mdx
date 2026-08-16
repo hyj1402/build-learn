@@ -1,0 +1,83 @@
+---
+title: "[8차] 초보자도 코드 흐름을 따라갈 수 있게 주석 정리하기"
+summary: "기능은 유지하면서 함수·컴포넌트·Next.js 동작에 한국어 설명을 추가하고 앞으로의 주석 기준을 만든 작업"
+category: "dev"
+tags: ["Codex", "Clean Code", "Documentation", "Next.js", "TypeScript"]
+isPublished: true
+createdAt: "2026-08-16"
+order: 80
+---
+
+## 작업 전 상태
+
+사이트 기능과 문서는 있었지만 실제 코드에는 설명이 적었습니다. Next.js가 자동 실행하는 함수, Server와 Client Component의 차이, 필터 URL 유지, MDX 파일 변환 같은 흐름은 처음 보는 사람이 함수 이름만으로 이해하기 어려웠습니다.
+
+<InputBox label="작업 원칙">
+  동작을 바꾸기 위한 리팩터링은 하지 않고, 이해를 돕는 구조 정리와 이유 중심 주석만 추가합니다.
+</InputBox>
+
+## 점검 결과
+
+큰 구조를 다시 만들 필요는 없었습니다. `lib`의 데이터 흐름과 컴포넌트 분리는 현재 규모에 적절했습니다. 다만 `mdx.ts`에서 세 변수를 한 줄에 선언한 부분은 읽기 어려워 각각의 선언으로 분리했습니다.
+
+> 좋은 주석은 코드가 무엇을 하는지 반복하지 않고, 왜 그 코드가 필요한지를 설명합니다.
+
+## 변경한 내용
+
+### 데이터와 타입
+
+- MDX 파일 읽기, frontmatter 변환, 공개 콘텐츠 필터 흐름 설명
+- Project와 Log 타입의 역할 및 `slug`, `order`, `isFeatured` 의미 설명
+- 사이트 URL과 OG 이미지 선택 우선순위 설명
+- 검색 쿼리 병합과 안정적인 정렬 이유 설명
+
+### 페이지와 컴포넌트
+
+- 정적 경로 생성, metadata, 404 처리, MDX 컴파일 시점 설명
+- Client Component가 필요한 폼과 검색창의 이유 설명
+- 카드 제목 단계, 이미지 eager/lazy 로딩, iframe sandbox 설명
+- Header, Footer, Badge와 MDX 블록의 재사용 목적 설명
+
+### CSS와 프로젝트 규칙
+
+- 디자인 변수, 카드, 필터, 상세, MDX, 반응형 구역 주석 추가
+- `CODE_COMMENT_GUIDE.md` 작성
+- `AGENTS.md`에 앞으로 새 기능과 페이지의 한국어 주석 규칙 추가
+
+<Callout title="초보자 메모" tone="note">
+  주석은 실행되지 않는 설명입니다. 그래서 코드를 바꿀 때 주석도 함께 고치지 않으면 잘못된 길을
+  알려줄 수 있습니다. 앞으로는 기능과 주석을 하나의 변경으로 관리합니다.
+</Callout>
+
+## 확인한 내용
+
+### 자동 검사
+
+- [x] `npm run lint`
+- [x] `npm run type-check`
+- [x] `npm run format:check`
+- [x] `npm run build`
+
+### 직접 확인
+
+- [x] 기존 페이지와 기능에 동작 변경이 없는지 확인
+- [x] 주석이 실제 코드와 일치하는지 확인
+- [x] 브라우저 콘솔 오류 확인
+
+## 관련 파일
+
+- `CODE_COMMENT_GUIDE.md`
+- `AGENTS.md`
+- `src/lib/`
+- `src/types/`
+- `src/app/`
+- `src/components/`
+- `src/styles/globals.css`
+
+## 남아 있는 점
+
+새 기능을 추가할 때 이 기준을 계속 적용하고, 기능 변경으로 오래된 주석이 생기지 않도록 함께 갱신해야 합니다.
+
+## 다음에 할 일
+
+새 페이지나 기능을 구현할 때 함수 역할과 중요한 선택 이유를 코드 작성 단계부터 함께 기록합니다.

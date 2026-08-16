@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
 export const metadata: Metadata = { title: "About" };
+
+// 반복되는 기술 스택 카드를 데이터로 분리해 항목 추가와 순서 변경을 쉽게 합니다.
 const stacks = [
   { title: "Main", items: ["Java", "Spring", "PostgreSQL"] },
   { title: "Working With", items: ["Next.js", "TypeScript", "React"] },
   { title: "Exploring", items: ["AI-assisted development", "MDX", "Web performance"] },
 ];
+
+/** 개발자의 방향, 기술 스택, 관심사를 소개하는 정적 페이지입니다. */
 export default function AboutPage() {
   return (
     <div className="container">

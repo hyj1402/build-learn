@@ -1,0 +1,72 @@
+---
+title: "[8차 보완] Project와 Log의 MDX 색상 범위 분리하기"
+summary: "공용 MDX 가독성 스타일은 유지하면서 다색 에디토리얼 디자인을 Log 상세에만 한정한 작업"
+category: "dev"
+tags: ["Codex", "CSS", "MDX", "Scope", "Design"]
+isPublished: true
+createdAt: "2026-08-16"
+order: 85
+---
+
+## 작업 전 상태
+
+Log 상세을 위해 만든 파랑·보라·초록·앰버 색상이 공용 `.mdx-content` 선택자에 들어 있었습니다. Project와 Log가 같은 MDX 렌더러를 사용하므로 Project 상세 제목과 코드·표·안내 상자에도 Log 색상이 적용됐습니다.
+
+<InputBox label="수정 범위">
+  컴포넌트 구조는 바꾸지 않고 CSS 선택자의 적용 범위만 Project와 Log로 분리합니다.
+</InputBox>
+
+## 원인
+
+CSS 선택자에 `.log-detail` 조건이 없었습니다. 브라우저는 해당 요소가 Project인지 Log인지 알 수 없고 `.mdx-content`라는 공통 클래스만 보고 같은 규칙을 적용했습니다.
+
+> 공용 구조와 페이지 전용 디자인은 선택자의 범위로 구분해야 합니다.
+
+## 변경한 내용
+
+### Project 상세 기본 톤
+
+- `h2`, 목록, 체크박스, 인용, 인라인 코드, 표를 검정·흰색·주황 톤으로 복원
+- Callout과 InputBox도 주황 포인트 하나만 사용
+- 코드 블록, 체크박스, 표 같은 공용 가독성 기능은 유지
+
+### Log 상세 에디토리얼 톤
+
+- `.log-detail` 안에서만 네 가지 구역 제목 색상 적용
+- 파랑 메모, 보라 인용·정보, 초록 완료, 앰버 주의 색상 유지
+- Log의 인라인 코드 색상이 어두운 코드 블록 내부까지 침범하지 않도록 별도 예외 추가
+
+<Callout title="초보자 메모" tone="note">
+  `.log-detail .mdx-content h2`는 `log-detail` 안쪽의 `mdx-content` 안쪽 `h2`만 선택합니다. 앞에
+  조건을 하나 더 붙여 다른 페이지까지 스타일이 퍼지는 것을 막았습니다.
+</Callout>
+
+## 확인한 내용
+
+### 자동 검사
+
+- [x] `npm run lint`
+- [x] `npm run type-check`
+- [x] `npm run format:check`
+- [x] `npm run build`
+
+### 직접 확인
+
+- [x] Project 상세 제목에 다색 배경이 없는지 확인
+- [x] Project MDX 목록이 주황 단일 포인트인지 확인
+- [x] Log 상세의 네 가지 구역색이 유지되는지 확인
+- [x] 확인한 화면에서 가로 넘침이 없는지 확인
+- [x] 다른 주요 페이지와 브라우저 콘솔 오류 확인
+
+## 관련 파일
+
+- `src/styles/globals.css`
+- `src/content/logs/round-8-project-log-style-scope.mdx`
+
+## 남아 있는 점
+
+실제 Project 콘텐츠가 추가되면 Callout·InputBox·표가 포함된 글에서도 단일 포인트 원칙을 다시 확인합니다.
+
+## 다음에 할 일
+
+GitHub push와 Vercel 재배포 후 Project와 Log 상세의 최종 스타일을 확인합니다.

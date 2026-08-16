@@ -5,6 +5,7 @@ import { SectionHeading } from "@/components/ui/SectionHeading";
 import { getLogs } from "@/lib/logs";
 import { getProjects } from "@/lib/projects";
 
+/** Home은 데이터 함수가 이미 정렬한 공개 콘텐츠 중 대표 프로젝트와 최신 Log 세 개만 보여줍니다. */
 export default function Home() {
   const projects = getProjects({ featured: true }).slice(0, 3);
   const logs = getLogs().slice(0, 3);

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { ContactForm } from "@/components/contact/ContactForm";
 export const metadata: Metadata = { title: "Contact" };
+
+/** 연락 채널 안내와 현재 UI 단계의 ContactForm을 배치하는 정적 페이지입니다. */
 export default function ContactPage() {
   return (
     <div className="container">

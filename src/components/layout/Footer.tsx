@@ -1,3 +1,4 @@
+/** 모든 페이지 아래쪽에 공통으로 표시되는 사이트 설명과 연도입니다. */
 export function Footer() {
   return (
     <footer className="site-footer">

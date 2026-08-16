@@ -1,0 +1,88 @@
+---
+title: "[7차] 배포 SEO 주소를 고치고 Log에 의미색 더하기"
+summary: "Vercel 고정 프로덕션 주소와 PNG OG 이미지를 사용하고, 최신 Log 정렬 및 상세 본문의 색상 체계를 개선한 작업"
+category: "dev"
+tags: ["Codex", "Vercel", "SEO", "MDX", "CSS"]
+isPublished: true
+createdAt: "2026-08-16"
+order: 70
+---
+
+## 작업 전 상태
+
+실제 서비스는 `build-learn-five.vercel.app`에서 열렸지만 OG 이미지와 sitemap은 배포할 때마다 바뀌는 긴 임시 주소를 사용했습니다. 프로젝트 SVG 썸네일이 공유 이미지로 들어갈 가능성도 있었고, 날짜가 같은 Log는 Home에서 최신 순서로 나타나지 않았습니다.
+
+<InputBox label="디자인 요청">
+  Log 상세 내용을 한 가지 주황색에 의존하지 않고 흰색 종이 위에서 구역과 의미에 따라 여러 색으로
+  구분합니다.
+</InputBox>
+
+## 발견한 원인
+
+`VERCEL_URL`은 현재 배포 하나의 주소입니다. SEO처럼 오래 유지되어야 하는 URL에는 프로젝트의 고정 주소인 `VERCEL_PROJECT_PRODUCTION_URL`이 더 적합합니다. Log 정렬은 날짜만 비교했기 때문에 같은 날짜 안에서는 작업 순서를 알 수 없었습니다.
+
+> 고정되어야 하는 정보에는 고정 주소를, 일시적인 미리보기에는 배포 주소를 사용해야 합니다.
+
+## 변경한 내용
+
+### SEO와 배포 주소
+
+- `NEXT_PUBLIC_SITE_URL` 다음으로 `VERCEL_PROJECT_PRODUCTION_URL` 사용
+- 위 값이 없을 때만 `VERCEL_URL`, 마지막에는 localhost 사용
+- SVG 썸네일은 OG 이미지로 사용하지 않고 `/og-default.png`로 대체
+- PNG·JPG·JPEG·WebP 썸네일만 개별 OG 이미지로 허용
+
+### 최신 Log 정렬
+
+- Log frontmatter에 같은 날짜 안의 순서를 표현하는 `order` 추가
+- 날짜가 같으면 높은 `order`가 먼저 오도록 정렬
+- Home의 Recent Logs가 실제 최근 작업을 표시하도록 수정
+
+### Log 상세 색상
+
+- 상세 본문을 흰색 종이 영역으로 분리
+- 큰 구역 제목에 파랑·보라·초록·앰버 배경을 순환 적용
+- 메모는 파랑, 인용과 정보 상자는 보라, 완료는 초록, 주의는 앰버로 구분
+- 코드·표·체크박스도 역할에 맞는 색을 사용
+
+<Callout title="초보자 메모" tone="note">
+  색은 장식보다 정보 구분에 먼저 사용했습니다. 같은 역할은 같은 색을 사용해야 글이 길어져도 의미를
+  빠르게 찾을 수 있습니다.
+</Callout>
+
+## 확인한 내용
+
+### 자동 검사
+
+- [x] `npm run lint`
+- [x] `npm run type-check`
+- [x] `npm run format:check`
+- [x] `npm run build`
+
+### 직접 확인
+
+- [x] localhost URL 우선순위 확인
+- [x] Vercel 고정 프로덕션 URL 우선순위 확인
+- [x] 모든 상세 OG 이미지가 PNG인지 확인
+- [x] Home Recent Logs 순서 확인
+- [x] 모바일·데스크톱 Log 상세 색상과 가로 넘침 확인
+- [x] 브라우저 콘솔 오류 확인
+
+## 관련 파일
+
+- `src/lib/site.ts`
+- `src/lib/metadata.ts`
+- `src/lib/logs.ts`
+- `src/types/log.ts`
+- `src/app/projects/[slug]/page.tsx`
+- `src/app/log/[slug]/page.tsx`
+- `src/styles/globals.css`
+- `src/content/logs/`
+
+## 남아 있는 점
+
+코드를 GitHub에 push하고 Vercel에서 새 프로덕션 배포가 완료된 후 실제 OG·robots·sitemap 주소를 다시 확인해야 합니다.
+
+## 다음에 할 일
+
+재배포된 서비스에서 공유 미리보기와 sitemap의 고정 주소를 최종 확인합니다.

@@ -1,4 +1,6 @@
 import Link from "next/link";
+
+/** Home 섹션의 작은 영문 라벨, 제목, 선택적 전체 보기 링크를 같은 구조로 유지합니다. */
 export function SectionHeading({
   eyebrow,
   title,

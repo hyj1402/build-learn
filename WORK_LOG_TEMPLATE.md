@@ -12,6 +12,7 @@
 - 체크박스는 실제로 확인한 항목만 `[x]`로 표시합니다.
 - 관련 파일은 프로젝트 루트 기준 경로로 적습니다.
 - 새로운 Codex 작업 로그에는 `Codex` 태그를 반드시 넣습니다.
+- 새 코드나 기능을 추가했다면 `CODE_COMMENT_GUIDE.md` 기준의 초보자용 주석도 함께 작성했는지 확인합니다.
 
 ## 글 블록 사용법
 
@@ -90,6 +91,7 @@ tags: ["Codex", "관련 키워드 1", "관련 키워드 2"]
 isPublished: true
 createdAt: "YYYY-MM-DD"
 updatedAt: "YYYY-MM-DD"
+order: 70
 ---
 
 ## 작업 전 상태
