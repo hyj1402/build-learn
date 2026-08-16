@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" role="img" aria-labelledby="title desc">
+  <title id="title">Pixel Platformer placeholder</title><desc id="desc">Pixel-like platforms and orange player square</desc>
+  <rect width="1600" height="1000" fill="#e9e9e3"/><rect x="0" y="790" width="1600" height="210" fill="#111"/>
+  <rect x="170" y="590" width="360" height="70" fill="#111"/><rect x="720" y="430" width="310" height="70" fill="#111"/>
+  <rect x="1210" y="270" width="260" height="70" fill="#111"/><rect x="830" y="290" width="110" height="110" fill="#ff4d00"/>
+  <circle cx="1350" cy="145" r="70" fill="#ff4d00"/>
+</svg>

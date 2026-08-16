@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
+  <title id="title">Monochrome UI Experiment 그래픽</title><desc id="desc">흰 배경 위 검은 카드와 오렌지색 선으로 구성된 UI 실험 그래픽</desc>
+  <rect width="1200" height="760" fill="#f7f7f3"/><rect x="80" y="80" width="1040" height="600" fill="#fff" stroke="#111" stroke-width="3"/><rect x="130" y="150" width="430" height="360" fill="#111"/><rect x="610" y="150" width="450" height="80" fill="#ff4d00"/><path d="M610 300h450M610 370h360M610 440h410" stroke="#111" stroke-width="18"/><text x="130" y="600" fill="#111" font-family="Arial" font-size="54" font-weight="800">MONOCHROME / 01</text>
+</svg>

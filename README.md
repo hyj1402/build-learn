@@ -1,36 +1,35 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# BUILD & LEARN
 
-## Getting Started
+만들고 배우고, 그 과정을 기록하는 개인 개발 아카이브입니다.
 
-First, run the development server:
+## 실행
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+로컬 주소는 `http://localhost:3000`입니다.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 검증
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run lint
+npm run type-check
+npm run build
+```
 
-## Learn More
+## 콘텐츠 작성
 
-To learn more about Next.js, take a look at the following resources:
+- 프로젝트: `src/content/projects/*.mdx`
+- 로그: `src/content/logs/*.mdx`
+- 프로젝트와 로그의 메타데이터는 각 MDX 파일의 frontmatter에 작성합니다.
+- `isPublished: true`인 콘텐츠만 목록과 상세 페이지에 노출됩니다.
+- 프로젝트 데모는 `demoType: embed | link | download`와 `demoUrl` 또는 `downloadUrl`을 사용합니다.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## MVP 원칙
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- 콘텐츠는 MDX 파일로 관리합니다.
+- DB, Prisma, 회원가입, 로그인, Admin은 사용하지 않습니다.
+- 카테고리와 태그 필터는 URL 쿼리스트링으로 관리합니다.
+- 다크모드, 다국어, 통계는 현재 범위에 포함하지 않습니다.

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
+  <title id="title">BUILD &amp; LEARN 프로젝트 그래픽</title><desc id="desc">검은 배경 위에 흰 격자와 오렌지색 사각형이 배치된 추상 그래픽</desc>
+  <rect width="1200" height="760" fill="#111"/><g stroke="#343434" stroke-width="2"><path d="M0 190h1200M0 380h1200M0 570h1200"/><path d="M300 0v760M600 0v760M900 0v760"/></g>
+  <rect x="650" y="150" width="360" height="360" fill="#ff4d00"/><text x="75" y="180" fill="#fff" font-family="Arial" font-size="82" font-weight="800">BUILD</text><text x="75" y="275" fill="#fff" font-family="Arial" font-size="82" font-weight="800">&amp; LEARN.</text><text x="75" y="660" fill="#a0a0a0" font-family="monospace" font-size="24">MAKING / LEARNING / RECORDING</text>
+</svg>

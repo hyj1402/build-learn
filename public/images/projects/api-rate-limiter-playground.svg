@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" role="img" aria-labelledby="title desc">
+  <title id="title">API Rate Limiter Playground placeholder</title><desc id="desc">Repeated black lines stopped by an orange vertical bar</desc>
+  <rect width="1600" height="1000" fill="#f7f7f3"/><g stroke="#111" stroke-width="36">
+    <path d="M120 220h960"/><path d="M120 360h960"/><path d="M120 500h960"/><path d="M120 640h960"/><path d="M120 780h960"/>
+  </g><rect x="1110" y="110" width="150" height="780" fill="#ff4d00"/><rect x="1310" y="110" width="170" height="780" fill="#111"/>
+</svg>

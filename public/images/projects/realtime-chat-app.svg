@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" role="img" aria-labelledby="title desc">
+  <title id="title">Realtime Chat App placeholder</title><desc id="desc">Black and orange geometric chat bubbles</desc>
+  <rect width="1600" height="1000" fill="#e9e9e3"/><rect x="130" y="130" width="900" height="330" fill="#111"/>
+  <path d="M250 460v150l190-150z" fill="#111"/><rect x="570" y="540" width="900" height="300" fill="#ff4d00"/>
+  <path d="M1260 840v110l-160-110z" fill="#ff4d00"/><circle cx="340" cy="295" r="35" fill="#f7f7f3"/>
+  <circle cx="490" cy="295" r="35" fill="#f7f7f3"/><circle cx="640" cy="295" r="35" fill="#f7f7f3"/>
+</svg>

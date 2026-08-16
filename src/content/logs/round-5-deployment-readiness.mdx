@@ -1,0 +1,87 @@
+---
+title: "[5차] 실제 도메인 없이도 안전하게 배포 준비하기"
+summary: "사이트 URL을 환경변수로 통합하고 Node·이미지·보안 설정과 Vercel 배포 체크리스트를 정리한 작업"
+category: "dev"
+tags: ["Codex", "Vercel", "Deployment", "Environment"]
+isPublished: true
+createdAt: "2026-08-16"
+---
+
+## 작업 전 상태
+
+metadata 기준 주소가 아직 확정되지 않은 `buildnlearn.dev`로 고정되어 있었습니다. 모바일 검색 버튼의 두 글자가 줄바꿈될 수 있었고 배포 순서를 따라갈 문서도 없었습니다. 사이트 Log에는 실제 작업이 아닌 placeholder 글 6개가 함께 노출됐습니다.
+
+## 요청한 내용
+
+로컬과 Vercel 임시 주소, 미래의 실제 도메인에서 같은 코드가 동작하도록 사이트 주소를 한곳에서 계산했습니다. 배포에 필요한 Node와 이미지 설정을 점검하고 실제 작업 기록만 Log에 남겼습니다.
+
+## 문제 원인
+
+사이트 주소가 코드에 직접 적혀 있어 배포 환경에 따라 바뀔 수 없었습니다. 검색 버튼에는 줄바꿈 금지와 최소 너비가 없었습니다. 예시 콘텐츠는 UI 검증용으로 추가됐지만 실제 작업 Log와 함께 계속 공개되고 있었습니다.
+
+## 변경한 내용
+
+### 추가
+
+- 환경변수 우선순위로 주소를 계산하는 `src/lib/site.ts`
+- 실제 배포 절차를 정리한 `DEPLOY.md`
+- `next.config.ts`의 외부 이미지 도메인 안내
+- `package.json`의 Node `24.x` 지정
+
+### 수정
+
+- layout, robots, sitemap이 공통 `SITE_URL` 사용
+- 검색 버튼에 줄바꿈 금지, 최소 너비, 좌우 여백 적용
+- 공식 작업 로그 템플릿을 실제 경험만 작성하도록 변경
+
+### 삭제
+
+- 실제 작업이 아닌 placeholder Log 6개
+- 삭제한 예시 Log만 사용하던 SVG 5개
+- 코드에 직접 적혀 있던 미확정 `buildnlearn.dev` 주소
+
+## 왜 이렇게 변경했나
+
+실제 도메인이 정해지기 전에는 Vercel이 배포마다 제공하는 주소를 사용해야 미리보기 배포의 metadata와 sitemap이 깨지지 않습니다. 실제 도메인이 생기면 코드 대신 환경변수만 바꿔 재배포할 수 있습니다.
+
+## 초보자가 알아둘 점
+
+환경변수는 코드 밖에서 환경마다 다른 값을 전달하는 방법입니다. 로컬에서는 localhost, Vercel에서는 자동 주소, 실제 서비스에서는 커스텀 도메인을 사용해도 같은 코드를 유지할 수 있습니다.
+
+## 확인한 내용
+
+### 자동 검사
+
+- [x] `npm run lint`
+- [x] `npm run type-check`
+- [x] `npm run format:check`
+- [x] `npm run build`
+
+### 직접 확인
+
+- [x] 390px에서 검색 버튼이 한 줄인지 확인
+- [x] 로컬 metadata, robots, sitemap 주소 확인
+- [x] 환경변수 우선순위 확인
+- [x] 실제 작업 Log만 남았는지 확인
+- [x] 브라우저 콘솔 오류 확인
+
+## 관련 파일
+
+- `src/lib/site.ts`
+- `src/app/layout.tsx`
+- `src/app/robots.ts`
+- `src/app/sitemap.ts`
+- `src/styles/globals.css`
+- `next.config.ts`
+- `package.json`
+- `.gitignore`
+- `DEPLOY.md`
+- `src/content/logs/`
+
+## 남아 있는 점
+
+실제 Vercel 프로젝트 생성, GitHub push, 배포, 도메인 구매와 DNS 연결은 사용자가 직접 진행합니다.
+
+## 다음에 할 일
+
+실제 배포 후 `DEPLOY.md`의 화면·모바일·SEO 체크리스트를 확인합니다.

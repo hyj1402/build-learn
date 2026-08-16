@@ -1,0 +1,23 @@
+export type ProjectCategory = "web" | "app" | "game" | "experiment";
+export type ProjectStatus = "completed" | "in-progress" | "archived";
+export type ProjectDemoType = "embed" | "link" | "download";
+export type Project = {
+  slug: string;
+  title: string;
+  summary: string;
+  thumbnailImage: string;
+  category: ProjectCategory;
+  status: ProjectStatus;
+  techStack: string[];
+  period: { start: string; end?: string };
+  githubUrl?: string;
+  demoType?: ProjectDemoType;
+  demoUrl?: string;
+  downloadUrl?: string;
+  isPublished: boolean;
+  isFeatured: boolean;
+  createdAt: string;
+  updatedAt?: string;
+  content: string;
+};
+export type ProjectFilter = { category?: ProjectCategory; query?: string; featured?: boolean };
