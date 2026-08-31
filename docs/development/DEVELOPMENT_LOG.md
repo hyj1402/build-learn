@@ -8,7 +8,7 @@
 - 단순히 “수정함”이라고 쓰지 않고 **문제 → 판단 → 변경 → 검증** 순서로 기록합니다.
 - 파일 삭제가 없었더라도 `삭제` 항목에 “없음”이라고 명시합니다.
 - 아직 실제 정보가 없는 부분은 완료된 기능처럼 표현하지 않고 placeholder라고 표시합니다.
-- 현재 작업 요청은 `DEVELOPMENT_REQUEST.md`, 완료된 상세 과정은 이 문서에 남깁니다.
+- 현재 작업 요청은 `docs/development/DEVELOPMENT_REQUEST.md`, 완료된 상세 과정은 이 문서에 남깁니다.
 
 ---
 
@@ -41,6 +41,29 @@ CSS 선택자는 스타일을 받을 대상을 정하는 주소와 비슷합니�
 - Project 상세 제목은 투명 배경, 검정 글자, 왼쪽 테두리 없음으로 렌더링됐고 목록 표시는 주황색이었습니다.
 - Log 상세의 첫 네 제목은 파랑·보라·초록·앰버로 렌더링됐고 Callout과 InputBox 색상도 유지됐습니다.
 - Home, Projects, Log, About, Contact에서 가로 넘침과 브라우저 콘솔 오류가 없었습니다.
+- `npm run lint`, `npm run type-check`, `npm run format:check`, `npm run build`를 모두 통과했습니다.
+
+## 2026-08-31 — 프로젝트 하네스 문서 구조 정리
+
+### 시작 상태와 문제
+
+프로젝트 루트에 하네스 지침, 개발 이력, 학습 가이드, 배포 문서와 템플릿이 함께 있어 문서의 역할과 읽는 순서를 파악하기 어려웠습니다.
+
+### 판단
+
+Codex가 자동으로 발견해야 하는 `AGENTS.md`와 사람이 처음 읽는 `README.md`는 루트에 유지합니다. 상세 문서는 `docs/` 아래에서 하네스, 개발, 가이드, 배포, 템플릿 역할로 나눕니다.
+
+### 추가 및 수정
+
+- `docs/harness/`에 현재 상태, 작업 절차, 완료 조건 문서 추가
+- 기존 문서를 역할별 `docs/` 하위 폴더로 이동
+- `AGENTS.md`를 상세 문서로 연결하는 하네스 목차로 보강
+- Windows와 다른 환경의 줄바꿈을 LF로 통일하도록 `.gitattributes` 추가
+- 기존 문서와 사이트 Log의 파일 경로 참조 갱신
+
+### 검증 결과
+
+- 기존 문서와 사이트 Log의 파일 경로 참조를 새 위치에 맞게 갱신했습니다.
 - `npm run lint`, `npm run type-check`, `npm run format:check`, `npm run build`를 모두 통과했습니다.
 
 ---
@@ -120,7 +143,7 @@ MDX는 Markdown 문서 위에 제목, 카테고리, 날짜 같은 데이터를 �
 - Contact Form UI와 입력 검증
 - About의 전체 소개 섹션
 - Prettier 설정과 format 명령
-- 초보자용 `LEARNING_GUIDE.md`
+- 초보자용 `docs/guides/LEARNING_GUIDE.md`
 
 ### 삭제
 
@@ -235,13 +258,13 @@ MDX는 Markdown 문서 위에 제목, 카테고리, 날짜 같은 데이터를 �
 - 480px 이하 Hero/404용 모바일 글자 크기와 line-height
 - 모바일 내비게이션·필터 링크 최소 40px 터치 높이
 - 모바일 검색 입력·버튼 최소 44px 높이
-- 누적 작업 로그 `DEVELOPMENT_LOG.md`
-- 단일 요청 관리 문서 `DEVELOPMENT_REQUEST.md`
+- 누적 작업 로그 `docs/development/DEVELOPMENT_LOG.md`
+- 단일 요청 관리 문서 `docs/development/DEVELOPMENT_REQUEST.md`
 
 ### 수정
 
 - 프로젝트/로그 이미지는 기본 컬러, 마우스 환경에서만 흑백→Hover 컬러로 변경
-- `LEARNING_GUIDE.md`의 Hover 설명을 실제 동작과 일치하도록 수정
+- `docs/guides/LEARNING_GUIDE.md`의 Hover 설명을 실제 동작과 일치하도록 수정
 
 ### 삭제
 
@@ -275,7 +298,7 @@ CSS 미디어 쿼리는 화면 너비뿐 아니라 입력 장치의 특성도 �
 - app 페이지의 metadata, 정적 경로, MDX 컴파일, 404 처리 주석
 - Client Component, URL 검색 보존, 이미지 로딩, iframe 보안 주석
 - CSS의 디자인 변수, 카드, 필터, 상세 본문, 반응형 구역 주석
-- `CODE_COMMENT_GUIDE.md`와 `AGENTS.md`의 앞으로의 필수 주석 규칙
+- `docs/guides/CODE_COMMENT_GUIDE.md`와 `AGENTS.md`의 앞으로의 필수 주석 규칙
 - `mdx.ts`의 한 줄 다중 변수 선언을 세 줄로 분리
 
 ### 삭제
@@ -385,7 +408,7 @@ metadata, robots, sitemap의 기준 주소가 아직 소유하지 않은 `buildn
 ### 추가
 
 - 사이트 URL 우선순위를 관리하는 `src/lib/site.ts`
-- GitHub 연결부터 환경변수·도메인·배포 후 점검까지 설명한 `DEPLOY.md`
+- GitHub 연결부터 환경변수·도메인·배포 후 점검까지 설명한 `docs/deployment/DEPLOY.md`
 - Node 24.x 실행 환경을 알리는 `package.json`의 `engines`
 - 이번 작업을 기록한 5차 MDX Log
 - `next.config.ts`에 미래의 외부 이미지 도메인 등록 위치 안내
@@ -421,7 +444,7 @@ metadata, robots, sitemap의 기준 주소가 아직 소유하지 않은 `buildn
 
 ### 시작 상태와 문제
 
-루트의 `DEVELOPMENT_LOG.md`에는 개발 과정이 있었지만 실제 사이트의 `src/content/logs/`에는 예시 글 6개만 있었습니다. 예시 글도 하나의 짧은 섹션만 사용해 새로운 글을 작성할 때 따라갈 공통 기준이 없었습니다.
+`docs/development/DEVELOPMENT_LOG.md`에는 개발 과정이 있었지만 실제 사이트의 `src/content/logs/`에는 예시 글 6개만 있었습니다. 예시 글도 하나의 짧은 섹션만 사용해 새로운 글을 작성할 때 따라갈 공통 기준이 없었습니다.
 
 ### 판단
 
@@ -429,7 +452,7 @@ metadata, robots, sitemap의 기준 주소가 아직 소유하지 않은 `buildn
 
 ### 추가
 
-- 공식 사이트 작업 로그 템플릿 `WORK_LOG_TEMPLATE.md`
+- 공식 사이트 작업 로그 템플릿 `docs/templates/WORK_LOG_TEMPLATE.md`
 - 1차 MVP, 2차 품질·SEO, 3차 폰트·콘텐츠, 4차 모바일 작업 로그 MDX
 - 템플릿에 작업 전 상태, 원인, 추가·수정·삭제, 초보자 설명, 자동·수동 검증, 관련 파일, 남은 점 항목
 
