@@ -770,3 +770,135 @@ MDX → lib → page → component → HTML → 브라우저
 ```
 
 이 한 줄을 기준으로 각 파일의 역할을 찾아가면 프로젝트 전체가 훨씬 쉽게 보입니다.
+
+---
+
+## 부록 A. TypeScript가 낯설다면
+
+TypeScript는 JavaScript에 **타입**을 추가한 언어입니다. 코드를 실행하기 전에 "이 값은 문자열인데 숫자를 넣으려 했다" 같은 실수를 미리 잡아줍니다.
+
+### 기본 타입
+
+```ts
+const title: string = "BUILD & LEARN";
+const order: number = 1;
+const isPublished: boolean = true;
+const tags: string[] = ["Next.js", "MDX"];
+```
+
+콜론(`:`) 뒤에 타입을 적습니다. `string[]`은 "문자열이 여러 개 들어있는 배열"이라는 뜻입니다.
+
+### 객체 모양을 정의하는 `type`
+
+이 프로젝트는 `interface` 대신 `type`으로 데이터 모양을 정의합니다. 예를 들어 `src/types/project.ts`의 일부를 단순화하면 다음과 같습니다.
+
+```ts
+type Project = {
+  slug: string;
+  title: string;
+  isFeatured: boolean;
+  period: {
+    start: string;
+    end?: string;
+  };
+};
+```
+
+- `end?: string`처럼 이름 뒤에 물음표(`?`)가 붙으면 **없어도 되는 값**(optional)이라는 뜻입니다.
+- 위 타입을 만들어두면 `Project` 값을 다루는 모든 코드에서 `project.title`이 항상 문자열이라는 것을 TypeScript가 보장해줍니다.
+
+### 함수의 매개변수와 반환 타입
+
+```ts
+function getProjects(options: { category?: string; query?: string }): Project[] {
+  // ...
+}
+```
+
+- `options: { ... }`는 함수가 어떤 모양의 인자를 받는지 설명합니다.
+- 함수 이름 뒤의 `: Project[]`는 이 함수가 항상 `Project` 배열을 반환한다는 뜻입니다.
+
+### 정해진 값만 허용하는 union 타입
+
+섹션 6에서 본 것처럼 여러 문자열 중 하나만 허용하고 싶을 때는 `|`(union)를 사용합니다.
+
+```ts
+type ProjectCategory = "web" | "app" | "game" | "experiment";
+```
+
+`"website"`처럼 목록에 없는 값을 넣으면 실행 전에 바로 오류로 표시됩니다. 이 오류가 바로 TypeScript가 버그를 미리 막아주는 순간입니다.
+
+### 처음에는 이 정도만 알면 충분합니다
+
+- 값 뒤에 `: 타입`이 붙어있으면 "이 값은 이런 모양이어야 한다"는 뜻이다.
+- `?`가 붙은 필드는 없어도 된다.
+- `|`로 연결된 값은 그중 하나만 가능하다.
+- 빨간 밑줄(타입 오류)이 보이면 값의 모양이 정의와 다르다는 신호다.
+
+---
+
+## 부록 B. Tailwind CSS와 이 프로젝트의 실제 스타일 방식
+
+`package.json`에는 `tailwindcss`가 포함되어 있지만, 이 프로젝트는 Tailwind를 흔히 알려진 방식(`className="flex items-center gap-4"`처럼 클래스를 여러 개 조합하는 유틸리티 우선 방식)으로 사용하지 않습니다. 처음 코드를 보면 "Tailwind라면서 왜 유틸리티 클래스가 안 보이지?"라고 혼란스러울 수 있어 정리합니다.
+
+### 이 프로젝트가 실제로 하는 일
+
+`src/styles/globals.css` 첫 줄에서 Tailwind를 불러오기만 합니다.
+
+```css
+@import "tailwindcss";
+```
+
+그 아래부터는 Tailwind 유틸리티 클래스 대신 직접 이름 지은 CSS 클래스와 CSS 변수를 사용합니다.
+
+```css
+:root {
+  --accent: #ff4d00;
+  --space-3: 24px;
+}
+
+.badge {
+  /* ... */
+}
+```
+
+컴포넌트에서는 이렇게 이름 붙인 클래스를 그대로 사용합니다.
+
+```tsx
+// src/components/ui/Badge.tsx
+<span className={`badge ${variant === "tag" ? "badge-tag" : ""}`}>{children}</span>
+```
+
+### 클래스 이름의 의미를 찾는 방법
+
+컴포넌트 코드에서 `className="badge"`처럼 처음 보는 클래스를 만나면, `src/styles/globals.css`에서 같은 이름(`.badge`)을 검색해 실제 스타일을 확인합니다.
+
+```text
+컴포넌트의 className="badge"
+    ↓ 검색
+globals.css의 .badge { ... }
+    ↓
+실제 색상, 크기, 여백 확인
+```
+
+### 왜 알아둬야 하나요?
+
+Tailwind 공식 문서나 예제 코드를 보면 `className="text-sm font-bold text-blue-600"`처럼 클래스가 많이 나열된 모습을 자주 보게 됩니다. 이 프로젝트 코드에서 그런 형태를 찾을 수 없는 것은 오류가 아니라, `globals.css`에 직접 클래스를 정의하는 방식을 선택했기 때문입니다. Tailwind 학습 자료를 볼 때와 이 프로젝트 코드를 읽을 때 서로 다른 스타일 작성 방식이라는 점을 구분해두면 혼란이 줄어듭니다.
+
+---
+
+## 부록 C. 짧은 용어집
+
+| 용어              | 뜻                                                                                  |
+| ----------------- | ----------------------------------------------------------------------------------- |
+| Component         | 화면의 일부를 만드는 재사용 가능한 함수                                             |
+| Props             | 부모가 자식 Component에 전달하는 값                                                 |
+| Server Component  | 서버에서 실행되고 결과 HTML만 브라우저로 전달되는 Component                         |
+| Client Component  | 브라우저에서 실행되며 클릭, 입력 같은 상호작용을 처리하는 Component                 |
+| Hydration         | 서버가 만든 HTML에 브라우저가 JavaScript 동작을 연결하는 과정                       |
+| Frontmatter       | MDX 파일 위쪽 `---` 사이에 있는 구조화된 정보                                       |
+| Slug              | URL에 쓰이는 글의 고유 식별자 (예: `/projects/build-and-learn`의 `build-and-learn`) |
+| Static Generation | 빌드 시점에 미리 페이지를 HTML로 만들어두는 방식                                    |
+| Union 타입        | `"web" \| "app"`처럼 정해진 값 중 하나만 허용하는 TypeScript 타입                   |
+
+이 문서는 계속 확장해나갈 예정이므로, 실제로 막혔던 개념이나 새로 알게 된 내용이 있으면 이 부록에 이어서 추가하는 것을 권장합니다.

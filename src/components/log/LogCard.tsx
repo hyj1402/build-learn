@@ -3,6 +3,17 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
 import type { Log } from "@/types/log";
 
+/** DB의 ISO 시간값을 목록에서 읽기 쉬운 한국 날짜 형식으로 바꿉니다. */
+function formatLogDate(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat("ko-KR", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(date);
+}
+
 /** 목록과 Home에서 재사용하는 Log 요약 카드입니다. 썸네일이 없어도 같은 컴포넌트가 동작합니다. */
 export function LogCard({
   log,
@@ -33,7 +44,7 @@ export function LogCard({
           />
         </div>
       )}
-      <time dateTime={log.createdAt}>{log.createdAt}</time>
+      <time dateTime={log.createdAt}>{formatLogDate(log.createdAt)}</time>
       <div>
         <Heading>{log.title}</Heading>
         <p className="muted">{log.summary}</p>

@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import { Noto_Sans_KR, Space_Grotesk } from "next/font/google";
-import { Footer } from "@/components/layout/Footer";
-import { Header } from "@/components/layout/Header";
 import { SITE_URL } from "@/lib/site";
 import "@/styles/globals.css";
 
@@ -49,7 +47,11 @@ export const metadata: Metadata = {
   },
 };
 
-/** App Router의 최상위 틀입니다. 모든 페이지가 Header와 Footer 사이의 children 위치에 들어옵니다. */
+/**
+ * 문서 전체의 최상위 틀입니다. html/body와 폰트·전역 CSS만 담당합니다.
+ * 공개 사이트의 Header/Footer는 여기가 아니라 `(site)` 그룹 레이아웃에 있습니다.
+ * 관리자 화면(/admin)은 그 그룹 밖에 있어서 공개 사이트 메뉴를 물려받지 않고 자체 레이아웃만 사용합니다.
+ */
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
@@ -57,15 +59,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${displayFont.variable} ${bodyFont.variable}`}
       data-scroll-behavior="smooth"
     >
-      <body>
-        {/* 키보드 사용자가 반복 메뉴를 건너뛰고 본문으로 바로 이동하는 접근성 링크입니다. */}
-        <a className="skip-link" href="#main-content">
-          본문으로 바로가기
-        </a>
-        <Header />
-        <main id="main-content">{children}</main>
-        <Footer />
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

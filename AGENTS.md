@@ -11,7 +11,8 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 ## 프로젝트 목적
 
 - BUILD & LEARN은 만든 결과와 학습 과정을 함께 기록하는 개인 개발 아카이브입니다.
-- 콘텐츠는 MDX 파일을 우선 사용하며, 실제 운영상 필요가 생기기 전에는 DB나 관리자 기능을 성급하게 추가하지 않습니다.
+- 현재 공개 사이트는 MDX 콘텐츠를 사용하지만, 브라우저 기반 콘텐츠 관리를 위해 Supabase DB·Auth·Storage와 관리자 기능을 단계적으로 도입합니다.
+- DB 전환과 운영 검증이 끝날 때까지 기존 MDX 파일과 공개 URL을 보존합니다.
 
 ## 프로젝트 하네스
 
@@ -24,6 +25,14 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - 주석 규칙: `docs/guides/CODE_COMMENT_GUIDE.md`
 - 배포 절차: `docs/deployment/DEPLOY.md`
 - 작업 로그 템플릿: `docs/templates/WORK_LOG_TEMPLATE.md`
+- Supabase·관리자 기획: `docs/planning/SUPABASE_ADMIN_PLAN.md`
+- Supabase 실행 계획: `docs/planning/SUPABASE_EXECUTION_PLAN.md`
+
+## 작업 문서 원칙
+
+- `AGENTS.md`는 상세 설명을 모두 담는 문서가 아니라 현재 작업에 필요한 기준 문서로 안내하는 목차로 유지합니다.
+- 코드와 문서가 어긋나면 실제 코드를 확인한 뒤 관련 상태·기획·학습 문서를 함께 갱신합니다.
+- 복잡한 작업은 실행 계획에서 단계와 검증 결과를 관리하고 완료 결과는 누적 개발 로그에 남깁니다.
 
 ## 프로젝트 주석 규칙
 

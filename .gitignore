@@ -32,9 +32,13 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel
+
+# Supabase CLI 로컬 캐시 (버전 정보 등, 팀원마다 달라질 수 있어 커밋하지 않음)
+supabase/.temp/
 
 # typescript
 *.tsbuildinfo

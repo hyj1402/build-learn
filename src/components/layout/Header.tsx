@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AdminNavLink } from "@/components/auth/AdminNavLink";
 
 // 메뉴를 데이터로 분리하면 링크를 추가할 때 JSX를 복사하지 않아도 됩니다.
 const links = [
@@ -22,6 +23,8 @@ export function Header() {
               {label}
             </Link>
           ))}
+          {/* 로그인한 사람에게만 보이는 관리자 진입 링크. 실제 관리자 검사는 /admin 레이아웃이 다시 합니다. */}
+          <AdminNavLink />
         </nav>
       </div>
     </header>

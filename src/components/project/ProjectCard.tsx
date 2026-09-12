@@ -19,14 +19,20 @@ export function ProjectCard({
   return (
     <Link className="project-card" href={`/projects/${project.slug}`}>
       <div className="project-image">
-        <Image
-          src={project.thumbnailImage}
-          alt={`${project.title} 대표 이미지`}
-          fill
-          // 첫 화면에 보이는 카드만 즉시 로드하고 나머지는 스크롤 근처에서 불러옵니다.
-          loading={priority ? "eager" : "lazy"}
-          sizes="(max-width: 800px) 100vw, 33vw"
-        />
+        {project.thumbnailImage ? (
+          <Image
+            src={project.thumbnailImage}
+            alt={`${project.title} 대표 이미지`}
+            fill
+            // 첫 화면에 보이는 카드만 즉시 로드하고 나머지는 스크롤 근처에서 불러옵니다.
+            loading={priority ? "eager" : "lazy"}
+            sizes="(max-width: 800px) 100vw, 33vw"
+          />
+        ) : (
+          <span className="project-image-placeholder" aria-hidden="true">
+            {project.title.slice(0, 1)}
+          </span>
+        )}
       </div>
       <div className="project-card-copy">
         <div className="card-meta">

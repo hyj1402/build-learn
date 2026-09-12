@@ -16,52 +16,52 @@
 
 ### 기본 정보
 
-- 작업 이름: 프로젝트 하네스 문서 구조 정리
-- 시작일: 2026-08-31
+- 작업 이름: Supabase 개발 전 최소 하네스 보강
+- 시작일: 2026-09-09
 - 상태: 완료
-- 참고 문서: `AGENTS.md`, `docs/harness/`
-- 작업 원칙: 자동 발견 파일은 루트에 유지하고 상세 문서는 역할별 폴더로 분리
+- 참고 문서: `docs/planning/SUPABASE_ADMIN_PLAN.md`
+- 작업 원칙: 현재 상태와 문서를 맞추고 반복 가능한 기본 검사만 추가
 
 ### 요청 배경
 
-프로젝트 루트에 개발 요청, 누적 로그, 학습 가이드, 배포 문서와 템플릿이 섞여 있어 각 문서의 역할과 하네스 범위를 빠르게 파악하기 어려웠습니다.
+Supabase와 관리자 기능처럼 여러 단계가 이어지는 개발을 새 채팅에서도 일관되게 진행하려면 최신 상태, 실행 순서, 완료 조건과 자동 검사가 필요합니다. 현재 프로젝트 규모에 필요한 최소 하네스부터 적용합니다.
 
 ### 추가할 것
 
-- [x] `docs/harness/PROJECT_STATUS.md`
-- [x] `docs/harness/WORKFLOW.md`
-- [x] `docs/harness/QUALITY_GATES.md`
-- [x] 줄바꿈을 통일하는 `.gitattributes`
+- [x] 단계와 검증 상태를 관리하는 `SUPABASE_EXECUTION_PLAN.md`
+- [x] GitHub에서 필수 검사를 실행하는 Actions 워크플로
 
 ### 수정할 것
 
-- [x] `AGENTS.md`를 하네스 목차로 보강
-- [x] 기존 Markdown 문서를 역할별 `docs/` 폴더로 이동
-- [x] 문서와 사이트 Log의 기존 파일 경로 참조 갱신
+- `AGENTS.md`에 Supabase 기획·실행 계획 연결
+- `PROJECT_STATUS.md`의 다음 작업을 스키마 조정부터 시작하도록 갱신
+- 누적 개발 로그에 하네스 변경 기록
 
 ### 삭제할 것
 
-- [x] 루트에 흩어져 있던 문서의 이전 위치
+- 없음
 
 ### 하지 않을 것
 
-- 애플리케이션 기능과 디자인 변경
-- DB, 관리자 화면, 외부 서비스 추가
-- GitHub push와 Vercel 재배포
+- DB 스키마와 RLS 변경
+- Google 로그인과 관리자 화면 구현
+- 기존 MDX 삭제 또는 DB 이전
+- GitHub push와 Vercel 배포
 
 ### 완료 조건
 
-- 루트에는 자동 발견 및 프로젝트 진입에 필요한 문서만 유지
-- 모든 문서 참조가 새 경로와 일치
-- 필수 검증 명령 통과
-- Git diff에 기능 변경이 없음
+- `AGENTS.md`에서 Supabase 기획과 실행 계획을 찾을 수 있음
+- 현재 상태와 다음 구현 단계가 서로 모순되지 않음
+- GitHub Actions가 설치, lint, 타입, 포맷, 빌드를 실행하도록 구성됨
+- 애플리케이션 기능과 공개 페이지는 변경되지 않음
 
 ### 작업 결과
 
-- `AGENTS.md`와 `README.md`는 루트에 유지하고 상세 문서를 역할별 `docs/` 폴더로 정리했습니다.
-- 현재 상태, 작업 절차, 완료 조건을 분리해 Codex와 사람이 같은 기준을 읽을 수 있게 했습니다.
-- `.gitattributes`와 Prettier로 Windows 줄바꿈 문제를 해결했습니다.
-- `npm run lint`, `npm run type-check`, `npm run format:check`, `npm run build`를 모두 통과했습니다.
+- `AGENTS.md`를 최신 Supabase 방향과 두 계획 문서의 목차로 갱신했습니다.
+- `SUPABASE_EXECUTION_PLAN.md`에 스키마 조정부터 배포까지 단계와 완료 조건을 추가했습니다.
+- 현재 DB와 기획의 차이를 해결하기 전에는 Auth 구현으로 넘어가지 않도록 순서를 명시했습니다.
+- pull request와 `main` push에서 네 가지 품질 검사를 실행하는 GitHub Actions를 추가했습니다.
+- 실제 원격 Actions 결과는 GitHub에 push한 뒤 확인해야 합니다.
 
 ---
 

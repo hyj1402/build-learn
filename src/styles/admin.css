@@ -1,0 +1,322 @@
+/*
+ * 관리자 화면 전용 스타일입니다. 공개 사이트와 같은 색 변수(globals.css)를 쓰되,
+ * 레이아웃은 "읽는 화면"이 아니라 "작업하는 화면"에 맞춰 사이드바 + 작업 영역 구조로 둡니다.
+ * 표·폼·버튼 등 세부 요소 스타일은 globals.css의 .admin-* 규칙을 그대로 재사용합니다.
+ */
+
+.admin-shell {
+  display: grid;
+  grid-template-columns: 248px minmax(0, 1fr);
+  min-height: 100vh;
+  background: #f0f0ea;
+}
+
+/* ── 사이드바 ───────────────────────────────────────────── */
+
+.admin-side {
+  position: sticky;
+  top: 0;
+  display: flex;
+  height: 100vh;
+  flex-direction: column;
+  gap: var(--space-5);
+  border-right: 1px solid var(--line);
+  background: var(--surface);
+  padding: var(--space-4) var(--space-3);
+}
+
+.admin-side-brand {
+  font-family: var(--font-display), sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+.admin-side-brand span {
+  margin-left: 6px;
+  padding: 3px 5px;
+  background: var(--accent);
+  color: white;
+  font:
+    800 10px/1 var(--font-display),
+    sans-serif;
+  letter-spacing: 0.08em;
+}
+
+.admin-side-nav {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-4);
+  overflow-y: auto;
+}
+.admin-side-group ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.admin-side-title {
+  margin: 0 0 9px;
+  color: var(--muted);
+  font:
+    700 10px/1 var(--font-display),
+    sans-serif;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.admin-side-nav a {
+  display: flex;
+  min-height: 38px;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-1);
+  padding: 0 10px;
+  border-left: 2px solid transparent;
+  color: var(--foreground);
+  font:
+    700 13px/1 var(--font-display),
+    sans-serif;
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast);
+}
+.admin-side-nav a:hover {
+  background: #f1f1ec;
+}
+/* 현재 보고 있는 메뉴는 색과 왼쪽 선으로 함께 표시합니다(색만으로 구분하지 않기 위해서입니다). */
+.admin-side-nav a.is-active {
+  border-left-color: var(--accent);
+  background: #f1f1ec;
+  color: var(--accent);
+}
+.admin-side-badge {
+  min-width: 18px;
+  padding: 2px 5px;
+  border-radius: 9px;
+  background: var(--accent);
+  color: white;
+  font:
+    700 10px/1.4 var(--font-display),
+    sans-serif;
+  font-style: normal;
+  text-align: center;
+}
+
+.admin-side-foot {
+  display: grid;
+  gap: 7px;
+  border-top: 1px solid var(--line);
+  padding-top: var(--space-3);
+}
+.admin-side-user {
+  margin: 0;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.admin-side-link {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: var(--muted);
+  font:
+    700 12px/1.6 var(--font-display),
+    sans-serif;
+  text-align: left;
+  cursor: pointer;
+}
+.admin-side-link:hover {
+  color: var(--accent);
+}
+
+/* ── 작업 영역 ──────────────────────────────────────────── */
+
+.admin-main {
+  min-width: 0;
+  padding: var(--space-6) var(--space-5) var(--space-10);
+}
+/* 대시보드 제목은 공개 사이트의 표제만큼 클 필요가 없어 정보 밀도에 맞게 줄입니다. */
+.admin-main .admin-page-heading h1 {
+  font-size: clamp(26px, 2.4vw, 34px);
+  letter-spacing: -0.04em;
+}
+.admin-main .admin-page-heading {
+  align-items: center;
+  margin-bottom: var(--space-5);
+}
+
+/* ── 대시보드 ───────────────────────────────────────────── */
+
+.admin-metrics {
+  display: grid;
+  gap: var(--space-2);
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  margin-bottom: var(--space-6);
+}
+.admin-metric {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  padding: var(--space-3);
+}
+.admin-metric dt {
+  color: var(--muted);
+  font:
+    700 11px/1 var(--font-display),
+    sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.admin-metric dd {
+  margin: 10px 0 0;
+  font-family: var(--font-display), sans-serif;
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+.admin-metric-accent {
+  border-color: var(--accent);
+}
+.admin-metric-accent dd {
+  color: var(--accent);
+}
+
+.admin-section-title {
+  margin: 0 0 var(--space-2);
+  font-size: 16px;
+  letter-spacing: -0.02em;
+}
+
+.admin-quick-grid {
+  display: grid;
+  gap: var(--space-2);
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+}
+.admin-quick-card {
+  display: block;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  padding: var(--space-3);
+  transition:
+    border-color var(--transition-fast),
+    transform var(--transition-fast);
+}
+.admin-quick-card:hover {
+  border-color: var(--foreground);
+  transform: translateY(-2px);
+}
+.admin-quick-card strong {
+  display: block;
+  font-family: var(--font-display), sans-serif;
+  font-size: 14px;
+  letter-spacing: -0.02em;
+}
+.admin-quick-card span {
+  display: block;
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* ── Storage 관리 ───────────────────────────────────────── */
+
+.admin-storage-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  margin: 0 0 var(--space-5);
+  border: 1px solid var(--line);
+  background: var(--line);
+}
+.admin-storage-summary > div {
+  padding: var(--space-3);
+  background: var(--surface);
+}
+.admin-storage-summary dt,
+.admin-storage-summary small {
+  color: var(--muted);
+  font-size: 12px;
+}
+.admin-storage-summary dd {
+  margin: 8px 0 4px;
+  font-family: var(--font-display), sans-serif;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+.admin-storage-summary.is-warning {
+  border-color: #ce7a31;
+  background: #ce7a31;
+}
+.admin-storage-warning {
+  margin: -12px 0 var(--space-5);
+  color: #a65316;
+  font-weight: 700;
+}
+.admin-storage-section {
+  margin-top: var(--space-6);
+}
+.admin-storage-section h2 {
+  margin: 0 0 var(--space-2);
+  font-size: 18px;
+}
+.admin-storage-empty {
+  margin: 0;
+  padding: var(--space-3);
+  border: 1px dashed var(--line);
+  color: var(--muted);
+}
+.admin-storage-connected {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* ── 모바일: 사이드바를 상단 가로 메뉴로 전환 ─────────────── */
+
+@media (max-width: 860px) {
+  .admin-shell {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .admin-side {
+    position: static;
+    height: auto;
+    flex-direction: column;
+    gap: var(--space-3);
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .admin-side-nav {
+    flex-direction: row;
+    gap: var(--space-3);
+    overflow-x: auto;
+  }
+  .admin-side-title {
+    display: none;
+  }
+  .admin-side-nav ul {
+    display: flex;
+    gap: var(--space-1);
+  }
+  .admin-side-nav a {
+    border-bottom: 2px solid transparent;
+    border-left: 0;
+    white-space: nowrap;
+  }
+  .admin-side-nav a.is-active {
+    border-bottom-color: var(--accent);
+    border-left-color: transparent;
+  }
+  .admin-side-foot {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+  .admin-main {
+    padding: var(--space-4) var(--space-3) var(--space-8);
+  }
+  .admin-storage-summary {
+    grid-template-columns: 1fr;
+  }
+}
