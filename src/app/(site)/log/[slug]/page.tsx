@@ -6,8 +6,12 @@ import { compileMDX } from "next-mdx-remote/rsc";
 import remarkGfm from "remark-gfm";
 import { mdxComponents } from "@/components/mdx/MdxComponents";
 import { Badge } from "@/components/ui/Badge";
+import { CommentSection } from "@/components/log/CommentSection";
 import { getSocialImage } from "@/lib/metadata";
 import { getPublishedLogBySlug } from "@/lib/logs-db";
+import { getLogComments } from "@/lib/comments-db";
+import { isAdminUser } from "@/lib/auth/admin";
+import { createClient } from "@/lib/supabase/server";
 
 /** DB의 ISO 시간을 방문자가 읽기 쉬운 한국 날짜 형식으로 바꿉니다. */
 function formatLogDate(value: string) {
@@ -55,6 +59,13 @@ export default async function LogDetail({ params }: PageProps<"/log/[slug]">) {
     components: mdxComponents,
     options: { mdxOptions: { remarkPlugins: [remarkGfm] } },
   });
+
+  // 댓글 목록과 함께, 지금 보는 사람이 로그인한 회원인지·관리자인지도 같이 확인합니다.
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const [comments, isAdmin] = await Promise.all([getLogComments(slug), isAdminUser(user)]);
   return (
     <article className="container detail log-detail">
       <header className="page-header log-detail-hero">
@@ -88,6 +99,12 @@ export default async function LogDetail({ params }: PageProps<"/log/[slug]">) {
         </div>
       </div>
       <div className="mdx-content">{content}</div>
+      <CommentSection
+        logSlug={slug}
+        initialComments={comments}
+        currentUserId={user?.id ?? null}
+        isAdmin={isAdmin}
+      />
     </article>
   );
 }

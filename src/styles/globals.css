@@ -575,6 +575,114 @@ a {
   overflow-wrap: anywhere;
 }
 
+/* Log 상세 페이지 하단의 댓글 목록·작성 폼입니다. */
+.comment-section {
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--line);
+}
+.comment-section > h2 {
+  margin: 0 0 var(--space-4);
+  font-size: var(--text-heading-md);
+  letter-spacing: -0.04em;
+}
+.comment-empty {
+  margin: 0 0 var(--space-5);
+  color: var(--muted);
+  font-size: 14px;
+}
+.comment-list {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-5);
+  padding: 0;
+  list-style: none;
+}
+.comment-item {
+  padding: var(--space-3);
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+.comment-item-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin-bottom: 6px;
+}
+.comment-item-head time {
+  color: var(--muted);
+  font-size: 12px;
+}
+.comment-item p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.65;
+  white-space: pre-wrap;
+}
+.comment-delete {
+  margin-top: 8px;
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--muted);
+  font-size: 12px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.comment-delete:hover {
+  color: var(--accent);
+}
+.comment-form {
+  display: grid;
+  gap: var(--space-2);
+}
+.comment-form textarea {
+  width: 100%;
+  min-height: 90px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  padding: 14px;
+  color: var(--foreground);
+  font: inherit;
+  resize: vertical;
+}
+.comment-form-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--muted);
+  font-size: 12px;
+}
+.comment-form-footer button {
+  border: 0;
+  background: var(--foreground);
+  color: white;
+  padding: 12px 18px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+}
+.comment-form-footer button:hover:not(:disabled) {
+  background: var(--accent);
+}
+.comment-form-footer button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.comment-login-prompt {
+  padding: var(--space-4);
+  border: 1px dashed var(--line);
+  color: var(--muted);
+  font-size: 14px;
+  text-align: center;
+}
+.comment-login-prompt a {
+  color: var(--foreground);
+  text-decoration: underline;
+}
+
 /* MDX 기본 요소: 제목, 목록, 체크박스, 인용, 코드, 표를 별도 컴포넌트 없이 꾸밉니다. */
 .mdx-content h2 {
   margin: var(--space-7) 0 var(--space-2);
@@ -890,6 +998,65 @@ a {
 .split-section h2 {
   font-size: var(--text-heading-md);
   letter-spacing: -0.04em;
+}
+
+/* About 페이지의 실제 프로젝트 이력을 보여주는 타임라인입니다. */
+.career-timeline {
+  margin-top: var(--space-5);
+}
+.career-item {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: var(--space-4);
+  padding-block: var(--space-3);
+  border-top: 1px solid var(--line);
+}
+.career-item:last-child {
+  border-bottom: 1px solid var(--line);
+}
+.career-period {
+  color: var(--muted);
+  font-size: 14px;
+  white-space: nowrap;
+}
+.career-item h3 {
+  margin: 0 0 6px;
+  font-size: 17px;
+  letter-spacing: -0.02em;
+}
+.career-item p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+.career-tech {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: var(--space-2);
+  padding: 0;
+  list-style: none;
+}
+.career-tech li {
+  padding: 2px 8px;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 12px;
+}
+.about-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+.about-links a {
+  color: var(--foreground);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.about-links a:hover {
+  color: var(--accent);
 }
 .contact-layout {
   display: grid;
@@ -2470,6 +2637,10 @@ a {
   .split-section,
   .contact-layout {
     grid-template-columns: 1fr;
+  }
+  .career-item {
+    grid-template-columns: 1fr;
+    gap: var(--space-1);
   }
   .project-card-copy {
     min-height: 250px;
