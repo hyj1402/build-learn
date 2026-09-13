@@ -1,6 +1,14 @@
 # BUILD & LEARN 배포 가이드
 
-이 문서는 BUILD & LEARN을 Vercel에 처음 배포할 때 따라가는 체크리스트입니다. 현재 실제 도메인은 확정되지 않았으므로 먼저 Vercel 임시 주소로 확인하고, 도메인이 준비되면 환경변수와 도메인을 연결합니다.
+이 문서는 BUILD & LEARN의 Vercel 재배포와 운영 검증 체크리스트입니다. GitHub 저장소·Vercel 프로젝트·운영 주소는 이미 연결되어 있으며, 최초 배포 절차는 역사 참고용으로만 유지합니다.
+
+## 운영 재배포 절차
+
+1. 작업 유형에 맞는 `docs/harness/QUALITY_GATES.md` 검증을 완료합니다.
+2. Git diff에서 비밀값·예상하지 않은 파일 변경을 확인하고 커밋합니다.
+3. Vercel Production 환경변수와 마이그레이션 적용 상태를 확인합니다.
+4. 배포 후 공개 사이트·로그인·관리자·공개/비공개 콘텐츠 흐름을 확인합니다.
+5. 결과와 남은 문제를 `PROJECT_STATUS.md`, `DEVELOPMENT_LOG.md`에 기록합니다.
 
 ## 배포 전 준비
 
@@ -14,6 +22,8 @@
 이 프로젝트는 로컬과 Vercel의 Node 메이저 버전을 맞추기 위해 `package.json`에 Node `24.x`를 지정합니다.
 
 ## 1. GitHub에 저장소 올리기
+
+> 최초 연결 당시의 참고 절차입니다. 현재 저장소와 Vercel 연결을 새로 만들 필요는 없습니다.
 
 1. GitHub에서 새 저장소를 만듭니다.
 2. 현재 프로젝트의 Git 원격 저장소를 연결합니다.
@@ -38,12 +48,27 @@
 사이트 주소의 우선순위는 다음과 같습니다.
 
 1. `NEXT_PUBLIC_SITE_URL`
-2. Vercel 자동 배포 주소인 `VERCEL_URL`
-3. 로컬 기본값 `http://localhost:3000`
+2. Vercel 프로덕션 주소인 `VERCEL_PROJECT_PRODUCTION_URL`
+3. Vercel 자동 배포 주소인 `VERCEL_URL`
+4. 로컬 기본값 `http://localhost:3000`
 
 ### 도메인이 아직 없을 때
 
 `NEXT_PUBLIC_SITE_URL`을 설정하지 않아도 됩니다. Vercel 배포에서는 자동 주소가 metadata, OG 이미지 기준 주소, robots, sitemap에 사용됩니다.
+
+## Supabase와 선택 기능 환경변수
+
+Vercel Production에는 최소한 다음 값을 등록합니다.
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+
+아래 값은 기능을 사용할 때만 추가합니다.
+
+- `RESEND_API_KEY`, `CONTACT_NOTIFY_TO`, `CONTACT_NOTIFY_FROM`: 새 문의 이메일 알림. 키가 없으면 문의는 DB에 저장되고 이메일만 생략됩니다.
+- `ANTHROPIC_API_KEY`: Tech Radar 일일 다이제스트. 키가 없으면 다이제스트 생성만 실패하고 수집함은 정상 동작합니다.
+
+`service_role` 또는 기타 비밀 키를 `NEXT_PUBLIC_*` 이름으로 등록하지 않습니다.
 
 ### 실제 도메인이 정해졌을 때
 
@@ -78,6 +103,9 @@ Value: https://실제도메인.com
 - [ ] Log 상세 열기
 - [ ] About 열기
 - [ ] Contact Form UI 확인
+- [ ] Contact 문의가 DB에 저장되고, Resend 설정 시 알림 메일도 도착하는지 확인
+- [ ] 관리자 로그인·로그아웃, Project·Log 작성/수정, draft/private 비공개 확인
+- [ ] Tech Radar 수동 수집과 Claude 키 설정 시 다이제스트 초안 생성 확인
 - [ ] 존재하지 않는 주소에서 404 확인
 - [ ] 모바일 실제 기기 또는 390px 화면 확인
 - [ ] 카드 이미지가 터치 기기에서 컬러로 보이는지 확인

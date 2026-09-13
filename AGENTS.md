@@ -11,8 +11,9 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 ## 프로젝트 목적
 
 - BUILD & LEARN은 만든 결과와 학습 과정을 함께 기록하는 개인 개발 아카이브입니다.
-- 현재 공개 사이트는 MDX 콘텐츠를 사용하지만, 브라우저 기반 콘텐츠 관리를 위해 Supabase DB·Auth·Storage와 관리자 기능을 단계적으로 도입합니다.
-- DB 전환과 운영 검증이 끝날 때까지 기존 MDX 파일과 공개 URL을 보존합니다.
+- 공개 사이트는 Supabase DB의 `published` Project·Log 데이터를 조회합니다. 브라우저 기반 관리에는 Supabase DB·Auth·Storage와 `/admin`을 사용합니다.
+- 기존 MDX 파일은 이전 원본·렌더링 호환성 확인을 위한 백업으로 보존합니다. 운영 검증이 끝난 뒤에도 삭제 여부는 별도 결정합니다.
+- 관리자 권한은 사용자 UUID를 코드에서 직접 비교하지 않고 `public.user_roles`와 `public.is_admin()`으로 판별합니다.
 
 ## 프로젝트 하네스
 
@@ -33,6 +34,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - `AGENTS.md`는 상세 설명을 모두 담는 문서가 아니라 현재 작업에 필요한 기준 문서로 안내하는 목차로 유지합니다.
 - 코드와 문서가 어긋나면 실제 코드를 확인한 뒤 관련 상태·기획·학습 문서를 함께 갱신합니다.
 - 복잡한 작업은 실행 계획에서 단계와 검증 결과를 관리하고 완료 결과는 누적 개발 로그에 남깁니다.
+- 문서 점검만 하는 작업도 현재 상태와 충돌을 발견하면 `PROJECT_STATUS.md`와 관련 계획 문서를 함께 갱신합니다.
 
 ## 프로젝트 주석 규칙
 
