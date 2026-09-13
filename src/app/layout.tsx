@@ -47,6 +47,21 @@ export const metadata: Metadata = {
   },
 };
 
+// 사람이 테마 버튼으로 라이트/다크를 직접 골랐다면, 그 값을 화면이 그려지기 전에 <html>에 반영합니다.
+// React가 켜지기 전에 실행되는 순수 스크립트라서, 이게 없으면 항상 라이트로 먼저 그려졌다가
+// 다크로 바뀌는 깜빡임(FOUC)이 생깁니다. 선택하지 않았다면(null) 아무것도 하지 않고
+// globals.css의 @media (prefers-color-scheme: dark)가 OS 설정을 그대로 따릅니다.
+const themeInitScript = `
+(function () {
+  try {
+    var theme = localStorage.getItem("theme");
+    if (theme === "light" || theme === "dark") {
+      document.documentElement.setAttribute("data-theme", theme);
+    }
+  } catch (e) {}
+})();
+`;
+
 /**
  * 문서 전체의 최상위 틀입니다. html/body와 폰트·전역 CSS만 담당합니다.
  * 공개 사이트의 Header/Footer는 여기가 아니라 `(site)` 그룹 레이아웃에 있습니다.
@@ -58,7 +73,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="ko"
       className={`${displayFont.variable} ${bodyFont.variable}`}
       data-scroll-behavior="smooth"
+      // 위 인라인 스크립트가 hydration 전에 data-theme을 붙이기 때문에 서버 HTML과 값이 달라집니다.
+      // 의도한 차이라서, React가 이 속성 하나에 대해 불필요한 경고를 띄우지 않게 합니다.
+      suppressHydrationWarning
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body>{children}</body>
     </html>
   );

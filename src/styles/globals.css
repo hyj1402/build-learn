@@ -2,6 +2,7 @@
 
 /* 디자인 전체에서 재사용하는 색상·크기·간격 변수입니다. 값을 한곳에서 바꾸면 관련 UI가 함께 바뀝니다. */
 :root {
+  color-scheme: light;
   --background: #f7f7f3;
   --surface: #fff;
   --foreground: #111;
@@ -16,6 +17,14 @@
   --editorial-violet-soft: #f3efff;
   --editorial-amber: #a55a08;
   --editorial-amber-soft: #fff4dc;
+  /* "채워진 버튼"처럼 본문 글자색/배경색을 서로 맞바꿔 강조하는 자리에 씁니다.
+     foreground·background를 그대로 참조하기 때문에, 다크모드에서 foreground/background가
+     뒤집히면 이 값도 별도 처리 없이 함께 뒤집힙니다. */
+  --emphasis-bg: var(--foreground);
+  --emphasis-text: var(--background);
+  --shadow-color: #e8e8e2;
+  --danger-soft: #fff3ed;
+  --danger-text: #9d2f00;
   --container: 1180px;
   --text-display: clamp(54px, 8vw, 112px);
   --text-page-title: clamp(52px, 7vw, 90px);
@@ -36,6 +45,53 @@
   --space-14: 112px;
   --space-16: 128px;
   --transition-fast: 0.2s ease;
+}
+
+/* 방문자의 OS/브라우저 설정이 다크모드일 때 자동으로 적용됩니다.
+   단, 아래쪽에서 사람이 버튼으로 "라이트"를 직접 골랐다면([data-theme="light"]) 이 블록은 건너뜁니다. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --background: #16161a;
+    --surface: #1e1e24;
+    --foreground: #f1f1ec;
+    --muted: #a3a39c;
+    --line: #38383f;
+    --accent: #ff6a3d;
+    --editorial-blue: #8ab0ff;
+    --editorial-blue-soft: #1d2740;
+    --editorial-green: #6bd9a8;
+    --editorial-green-soft: #16302a;
+    --editorial-violet: #bda8ff;
+    --editorial-violet-soft: #271f3d;
+    --editorial-amber: #ffbf6e;
+    --editorial-amber-soft: #3a2c14;
+    --shadow-color: #000;
+    --danger-soft: #3a1f16;
+    --danger-text: #ffb08f;
+  }
+}
+
+/* 사람이 버튼으로 "다크"를 직접 골랐을 때 적용됩니다. OS 설정과 무관하게 항상 우선합니다. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --background: #16161a;
+  --surface: #1e1e24;
+  --foreground: #f1f1ec;
+  --muted: #a3a39c;
+  --line: #38383f;
+  --accent: #ff6a3d;
+  --editorial-blue: #8ab0ff;
+  --editorial-blue-soft: #1d2740;
+  --editorial-green: #6bd9a8;
+  --editorial-green-soft: #16302a;
+  --editorial-violet: #bda8ff;
+  --editorial-violet-soft: #271f3d;
+  --editorial-amber: #ffbf6e;
+  --editorial-amber-soft: #3a2c14;
+  --shadow-color: #000;
+  --danger-soft: #3a1f16;
+  --danger-text: #ffb08f;
 }
 
 /* 브라우저마다 다른 기본 계산 방식을 통일하는 전역 기초 설정입니다. */
@@ -89,8 +145,8 @@ a {
   left: 12px;
   z-index: 100;
   padding: 12px 16px;
-  background: var(--foreground);
-  color: white;
+  background: var(--emphasis-bg);
+  color: var(--emphasis-text);
   font-weight: 800;
   transform: translateY(-150%);
   transition: transform var(--transition-fast);
@@ -133,6 +189,22 @@ a {
 .nav a:hover,
 .text-link:hover {
   color: var(--accent);
+}
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  padding: 6px 10px;
+  color: var(--foreground);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.theme-toggle:hover {
+  border-color: var(--foreground);
 }
 .hero {
   padding-block: var(--space-14) var(--space-16);
@@ -200,15 +272,15 @@ a {
     transform var(--transition-fast);
 }
 .project-card:hover {
-  background: var(--foreground);
-  color: white;
+  background: var(--emphasis-bg);
+  color: var(--emphasis-text);
   transform: translateY(-3px);
 }
 .project-image {
   position: relative;
   aspect-ratio: 16 / 9;
   overflow: hidden;
-  background: #e8e8e2;
+  background: var(--line);
 }
 
 /* 이미지 업로드 전에는 프로젝트 제목 첫 글자로 만든 대체 표지를 보여줍니다. */
@@ -236,7 +308,7 @@ a {
   margin-top: var(--space-5);
   border: 1px solid var(--line);
   border-radius: 16px;
-  background: #e8e8e2;
+  background: var(--line);
 }
 .project-detail-cover img {
   object-fit: contain;
@@ -307,7 +379,7 @@ a {
 .log-detail-image {
   position: relative;
   overflow: hidden;
-  background: #e8e8e2;
+  background: var(--line);
 }
 .log-card-image {
   aspect-ratio: 16 / 9;
@@ -647,6 +719,11 @@ a {
   font: inherit;
   resize: vertical;
 }
+/* 브라우저 기본 required 팝업 대신, 빈 채로 등록을 눌렀을 때만 테두리로 알려줍니다. */
+.comment-form textarea.is-invalid {
+  border-color: var(--danger-text);
+  background: var(--danger-soft);
+}
 .comment-form-footer {
   display: flex;
   justify-content: space-between;
@@ -657,8 +734,8 @@ a {
 }
 .comment-form-footer button {
   border: 0;
-  background: var(--foreground);
-  color: white;
+  background: var(--emphasis-bg);
+  color: var(--emphasis-text);
   padding: 12px 18px;
   font-weight: 700;
   font-size: 14px;
@@ -681,6 +758,71 @@ a {
 .comment-login-prompt a {
   color: var(--foreground);
   text-decoration: underline;
+}
+
+/* 댓글 삭제 확인창입니다. admin의 AdminDialog와 같은 <dialog> 기법을 공개 사이트 톤으로 다시 만든 것입니다. */
+.confirm-dialog {
+  max-width: min(420px, calc(100vw - 32px));
+  width: 100%;
+  margin: auto;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+}
+.confirm-dialog::backdrop {
+  background: rgb(0 0 0 / 45%);
+}
+.confirm-dialog-panel {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: 0 24px 60px rgb(0 0 0 / 18%);
+  padding: var(--space-4);
+}
+.confirm-dialog-panel h2 {
+  margin: 0 0 var(--space-2);
+  font-size: 19px;
+  letter-spacing: -0.03em;
+}
+.confirm-dialog-panel p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.confirm-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+.confirm-dialog-cancel {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--foreground);
+  padding: 10px 16px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+}
+.confirm-dialog-cancel:hover:not(:disabled) {
+  border-color: var(--foreground);
+}
+.confirm-dialog-confirm {
+  border: 0;
+  background: var(--danger-text);
+  color: #fff;
+  padding: 10px 16px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+}
+.confirm-dialog-confirm:hover:not(:disabled) {
+  opacity: 0.85;
+}
+.confirm-dialog-cancel:disabled,
+.confirm-dialog-confirm:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* MDX 기본 요소: 제목, 목록, 체크박스, 인용, 코드, 표를 별도 컴포넌트 없이 꾸밉니다. */
@@ -834,8 +976,8 @@ a {
   vertical-align: top;
 }
 .mdx-content th {
-  background: var(--foreground);
-  color: var(--background);
+  background: var(--emphasis-bg);
+  color: var(--emphasis-text);
 }
 .mdx-content tbody tr:nth-child(even) {
   background: var(--surface);
@@ -934,8 +1076,8 @@ a {
   display: inline-flex;
   margin-top: var(--space-5);
   padding: 14px 18px;
-  background: var(--foreground);
-  color: white;
+  background: var(--emphasis-bg);
+  color: var(--emphasis-text);
   font-weight: 700;
 }
 .project-action:hover {
@@ -1098,8 +1240,8 @@ a {
 .contact-form button {
   justify-self: start;
   border: 0;
-  background: var(--foreground);
-  color: white;
+  background: var(--emphasis-bg);
+  color: var(--emphasis-text);
   padding: 14px 20px;
   font-weight: 700;
   cursor: pointer;
@@ -1142,7 +1284,7 @@ a {
   padding: var(--space-5);
   border: 1px solid var(--line);
   background: var(--surface);
-  box-shadow: 10px 10px 0 #e8e8e2;
+  box-shadow: 10px 10px 0 var(--shadow-color);
 }
 .login-card-heading h2,
 .login-account h2 {
@@ -1182,8 +1324,8 @@ a {
   justify-content: center;
   border: 1px solid var(--foreground);
   border-radius: 0;
-  background: var(--foreground);
-  color: white;
+  background: var(--emphasis-bg);
+  color: var(--emphasis-text);
   font-weight: 700;
   cursor: pointer;
   transition:
@@ -1244,8 +1386,8 @@ a {
 }
 .login-message-error {
   border-left: 3px solid var(--accent);
-  background: #fff3ed;
-  color: #9d2f00;
+  background: var(--danger-soft);
+  color: var(--danger-text);
 }
 .login-account .eyebrow {
   margin-bottom: var(--space-2);
@@ -1355,9 +1497,9 @@ a {
   justify-content: center;
   border: 1px solid var(--foreground);
   border-radius: 10px;
-  background: var(--foreground);
+  background: var(--emphasis-bg);
   padding: 11px 16px;
-  color: white;
+  color: var(--emphasis-text);
   font:
     700 14px/1 var(--font-display),
     sans-serif;
@@ -1435,8 +1577,8 @@ a {
   color: var(--foreground);
 }
 .admin-action-outline:hover {
-  background: var(--foreground);
-  color: white;
+  background: var(--emphasis-bg);
+  color: var(--emphasis-text);
 }
 .admin-action-outline-blue {
   border-color: var(--editorial-blue);
@@ -1626,8 +1768,8 @@ a {
   margin: 0 0 var(--space-3);
   padding: 12px 14px;
   border-left: 3px solid var(--accent);
-  background: #fff3ed;
-  color: #9d2f00;
+  background: var(--danger-soft);
+  color: var(--danger-text);
 }
 .admin-form {
   max-width: 1080px;
@@ -2282,8 +2424,8 @@ a {
 }
 .log-pagination .log-pagination-number.is-current {
   border-color: var(--foreground);
-  background: var(--foreground);
-  color: white;
+  background: var(--emphasis-bg);
+  color: var(--emphasis-text);
 }
 .log-pagination .log-pagination-ellipsis {
   min-width: 20px;
@@ -2470,8 +2612,8 @@ a {
 }
 .admin-dialog-close:hover {
   border-color: var(--foreground);
-  background: var(--foreground);
-  color: white;
+  background: var(--emphasis-bg);
+  color: var(--emphasis-text);
 }
 .admin-dialog-description {
   margin: 0 0 var(--space-3);
@@ -2579,7 +2721,7 @@ a {
   }
   .login-card {
     padding: var(--space-4);
-    box-shadow: 7px 7px 0 #e8e8e2;
+    box-shadow: 7px 7px 0 var(--shadow-color);
   }
 }
 

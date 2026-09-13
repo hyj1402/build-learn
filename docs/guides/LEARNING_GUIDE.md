@@ -18,7 +18,9 @@ Next.js를 처음 접했다면 모든 코드를 한 번에 이해하려고 하�
 
 BUILD & LEARN은 프로젝트와 개발 기록을 저장하는 개인 개발 아카이브입니다.
 
-일반적인 게시판은 데이터베이스에서 글을 가져오지만, 이 프로젝트는 `.mdx` 파일을 글 저장소로 사용합니다.
+> **2026-09-13 갱신:** 이 섹션은 최초 MVP(파일 기반) 당시 기록입니다. 지금은 Supabase DB·로그인·관리자 화면·Log 댓글까지 추가된 상태입니다. 최신 요청 처리 흐름은 **부록 D**를 먼저 읽어보세요.
+
+처음 만들 때는 일반적인 게시판처럼 데이터베이스에서 글을 가져오는 대신, `.mdx` 파일을 글 저장소로 사용했습니다.
 
 ```text
 MDX 파일 작성
@@ -32,15 +34,15 @@ React 컴포넌트로 화면 생성
 브라우저에 HTML 전달
 ```
 
-현재 MVP에는 다음 기능을 넣지 않았습니다.
+최초 MVP에는 다음 기능을 넣지 않았습니다.
 
-- 회원가입과 로그인
-- 데이터베이스와 Prisma
-- 관리자 페이지
-- 다크모드와 다국어
-- 방문자 통계
+- ~~회원가입과 로그인~~ → Supabase Auth(Google, 이메일)로 추가됨
+- ~~데이터베이스~~ → Supabase(Postgres)로 추가됨. Project·Log는 이제 DB에서 조회하고, 기존 MDX 파일은 백업으로만 보존
+- ~~관리자 페이지~~ → `/admin`으로 추가됨 (콘텐츠 작성·문의 확인·Tech Radar 등)
+- 다크모드와 다국어: 아직 없음
+- 방문자 통계: 아직 없음
 
-필요하지 않은 기능을 미리 만들지 않고, 콘텐츠를 보여주는 핵심 기능부터 완성하기 위한 결정입니다.
+당시엔 필요하지 않은 기능을 미리 만들지 않고, 콘텐츠를 보여주는 핵심 기능부터 완성하는 순서를 택했습니다.
 
 ---
 
@@ -49,7 +51,7 @@ React 컴포넌트로 화면 생성
 터미널에서 프로젝트 폴더로 이동합니다.
 
 ```powershell
-cd C:\Users\tkznf\Desktop\my\next\build-n-learn
+cd C:\homeProject\build-learn
 ```
 
 개발 서버를 실행합니다.
@@ -900,5 +902,108 @@ Tailwind 공식 문서나 예제 코드를 보면 `className="text-sm font-bold 
 | Slug              | URL에 쓰이는 글의 고유 식별자 (예: `/projects/build-and-learn`의 `build-and-learn`) |
 | Static Generation | 빌드 시점에 미리 페이지를 HTML로 만들어두는 방식                                    |
 | Union 타입        | `"web" \| "app"`처럼 정해진 값 중 하나만 허용하는 TypeScript 타입                   |
+
+---
+
+## 부록 D. DB·로그인·Server Action이 추가된 뒤의 요청 흐름 (2026-09-13)
+
+이 부록은 Spring/MyBatis 경험이 있고 React·Vue는 처음인 사람 기준으로, "브라우저 주소창에 뭔가 치면 실제로 어떤 파일이 순서대로 실행되는지"를 이 프로젝트의 실제 코드로 따라갑니다.
+
+### 먼저, Spring과 비교한 큰 그림
+
+Spring MVC는 보통 이렇게 나뉘어 있습니다.
+
+```text
+DispatcherServlet → Controller → Service → Repository(MyBatis) → View(JSP/Thymeleaf)
+```
+
+Next.js의 App Router(이 프로젝트가 쓰는 방식)는 **폴더 구조 자체가 라우팅 설정**이고, Controller와 View가 한 함수 안에 합쳐져 있습니다.
+
+```text
+폴더 경로 = URL 매핑 (@RequestMapping을 안 써도 됨)
+page.tsx의 async 함수 = Controller + Service 호출 + View 렌더링을 한 번에
+src/lib/*-db.ts = Repository (MyBatis Mapper 역할)
+```
+
+### 시나리오 A — 방문자가 홈(`/`)에 접속
+
+```text
+1. 브라우저: GET /
+2. src/proxy.ts 실행 여부 확인
+   → config.matcher가 "/admin/:path*"뿐이라 "/"는 매치 안 됨 → 프록시를 그냥 통과
+3. Next.js가 "/" 에 맞는 라우트 파일을 src/app 안에서 찾음
+   → src/app/(site)/page.tsx 가 매치됨
+     ((site)처럼 괄호 폴더는 "라우트 그룹"이라 URL에는 안 나타남)
+4. 레이아웃이 바깥 → 안쪽 순서로 겹쳐서 실행됨
+   ① src/app/layout.tsx        (Root Layout: <html>/<body>, 폰트, 전역 CSS)
+   ② src/app/(site)/layout.tsx (Site Layout: Header + Footer)
+   ③ src/app/(site)/page.tsx   (Home 페이지 본문)
+5. Home() 함수 자체가 Server Component라서 서버 안에서 바로
+   getPublishedProjects(), getPublishedLogs() 를 호출 → Supabase(DB)를 조회
+6. 완성된 결과를 HTML로 바꿔 브라우저로 전송 (Controller에서 View까지 한 번에 끝)
+7. 브라우저는 이 HTML을 먼저 그대로 보여주고, 그다음 "Hydration"으로 JS를 붙여
+   클릭 등 상호작용이 되게 함 (실제로 JS가 필요한 부분은 "use client" 컴포넌트뿐)
+```
+
+### 시나리오 B — 방문자가 Log 상세(`/log/[slug]`)에 접속하고 댓글을 남길 때
+
+```text
+1. 브라우저: GET /log/round-9-supabase-auth-admin-foundation
+2. proxy.ts 매치 안 됨 → 그냥 통과
+3. src/app/(site)/log/[slug]/page.tsx 매치, [slug] 부분이 실제 값으로 채워짐
+4. LogDetail() 안에서 순서대로:
+   - getPublishedLogBySlug(slug)  → DB에서 글 조회
+   - compileMDX(...)              → 본문을 실제 화면 요소로 변환
+   - supabase.auth.getUser()      → 지금 보는 사람이 로그인했는지 확인
+   - getLogComments(slug)         → 댓글 목록 조회 (RLS가 "공개 글만" 자동 필터링)
+5. 이 모든 결과를 담아 HTML 응답. 화면 아래 댓글 폼까지 이미 채워진 상태로 도착
+
+── 여기서 "댓글 등록" 버튼을 누르면 ──
+
+6. src/components/log/CommentSection.tsx는 "use client" → 이 부분만 브라우저 JS가 담당
+7. 버튼 클릭 → addLogComment(slug, 댓글내용) 호출
+   → 이건 겉보기엔 그냥 함수 호출이지만, 실제로는 브라우저가 Next.js 서버로
+     몰래 요청을 보내는 것 (Spring의 @PostMapping 메서드 하나를 호출하는 것과 같은 효과)
+8. src/app/(site)/log/[slug]/actions.ts의 addLogComment가 서버에서 실행:
+   - 로그인 여부 다시 확인 (클라이언트를 못 믿으므로)
+   - 글자수 검사
+   - supabase.from("log_comments").insert(...) → DB에 저장 시도
+   - Supabase의 RLS 정책이 "로그인했는가 + 자기 계정으로 쓰는가 + 공개 글인가"를 한 번 더 검사
+   - revalidatePath(...) 로 "이 페이지 캐시는 이제 낡았다"고 표시
+9. 성공하면 브라우저 쪽 화면 상태에 새 댓글을 바로 얹어서 새로고침 없이 보여줌
+```
+
+### 시나리오 C — 관리자가 `/admin`에 접속
+
+```text
+1. 브라우저: GET /admin
+2. 이번엔 config.matcher("/admin/:path*")에 매치 → src/proxy.ts 실제로 실행
+   - updateSession()으로 로그인 세션 쿠키 확인/자동 갱신
+   - 로그인 안 되어 있으면 → /login으로 redirect, 여기서 끝
+   - 로그인 되어 있으면 → 통과
+3. src/app/admin/layout.tsx 실행
+   (이 레이아웃은 (site) 그룹 밖이라 공개 사이트 Header/Footer가 안 붙고, 완전히 다른
+    관리자 전용 레이아웃 + 사이드바를 씀)
+   - 여기서 로그인 여부와 isAdminUser()를 "또" 확인 (proxy 하나만 믿지 않는 이중 확인)
+   - 로그인은 했지만 관리자가 아니면 → "/"로 redirect (관리자 화면이 없는 것처럼 처리)
+   - 사이드바에 표시할 안 읽은 문의 수 등을 미리 조회
+4. src/app/admin/page.tsx (대시보드) 실행 → 콘텐츠 개수 등을 조회해 카드로 표시
+```
+
+### 정적(Static) vs 동적(Dynamic) 차이
+
+- 홈처럼 누가 보든 내용이 같은 페이지는 Next.js가 빌드 시점에 미리 만들어두고 캐싱합니다 (그래서 빠릅니다).
+- `/admin`은 로그인한 사람마다 다르고 실시간 데이터가 필요해서 매 요청마다 새로 그립니다.
+- Log 상세는 원래 정적에 가까웠지만, 댓글이 추가되면서 `revalidatePath`로 "댓글이 달리면 그 페이지만 다시 그린다"는 방식으로 관리됩니다.
+
+### 미니 용어집 추가분
+
+| 용어                           | 뜻                                                                                                                                                  |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 라우트 그룹 `(site)`           | 괄호로 감싼 폴더 이름은 URL에 나타나지 않고, 그 안의 페이지들에 공통 레이아웃만 씌우는 용도                                                         |
+| Server Action (`"use server"`) | 브라우저에서 함수처럼 호출하지만 실제로는 서버에서 실행되는 함수. Controller 메서드 하나를 만드는 것과 비슷하지만 URL·라우팅 설정을 직접 안 써도 됨 |
+| RLS (Row Level Security)       | DB 자체가 "누가 요청했는가"에 따라 행 단위로 접근을 허용/차단. Java의 `@PreAuthorize`와 비슷하지만 DB 레벨에서 걸림                                 |
+| revalidatePath                 | "이 URL의 캐시된 화면은 이제 낡았으니 다음 요청 때 새로 그려라"라고 Next.js에 알리는 함수                                                           |
+| proxy.ts (구 middleware)       | 지정한 경로(matcher)로 오는 요청이 실제 페이지에 닿기 전에 한 번 거치는 공통 검문소                                                                 |
 
 이 문서는 계속 확장해나갈 예정이므로, 실제로 막혔던 개념이나 새로 알게 된 내용이 있으면 이 부록에 이어서 추가하는 것을 권장합니다.

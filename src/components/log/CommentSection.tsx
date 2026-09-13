@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useTransition, type FormEvent } from "react";
 import type { LogComment } from "@/lib/comments-db";
+import { ConfirmButton } from "@/components/ui/ConfirmButton";
 import { addLogComment, deleteLogComment } from "@/app/(site)/log/[slug]/actions";
 
 const MAX_COMMENT_LENGTH = 1000;
@@ -38,45 +39,42 @@ export function CommentSection({
   const [comments, setComments] = useState(initialComments);
   const [draft, setDraft] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  // 브라우저 기본 required 팝업 대신, 우리 디자인에 맞는 안내 문구·테두리로 필수 입력을 알립니다.
+  const [isDraftInvalid, setIsDraftInvalid] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setErrorMessage(null);
-    const body = draft;
 
+    if (!draft.trim()) {
+      setIsDraftInvalid(true);
+      setErrorMessage("댓글 내용을 입력해주세요.");
+      return;
+    }
+    setIsDraftInvalid(false);
+
+    const body = draft;
     startTransition(async () => {
       try {
-        await addLogComment(logSlug, body);
+        // 서버가 실제로 저장한 행(진짜 id 포함)을 그대로 받아 화면에 추가합니다.
+        // 화면에서 임시 id를 지어내면, 등록 직후 바로 삭제할 때 존재하지 않는 id를 지우려다 에러가 났습니다.
+        const newComment = await addLogComment(logSlug, body);
         setDraft("");
-        // 서버에서 다시 목록을 받아오는 대신, 방금 쓴 내용을 그대로 화면에 즉시 추가합니다.
-        setComments((prev) => [
-          ...prev,
-          {
-            id: `temp-${Date.now()}`,
-            authorId: currentUserId ?? "",
-            authorName: "나",
-            body: body.trim(),
-            createdAt: new Date().toISOString(),
-          },
-        ]);
+        setComments((prev) => [...prev, newComment]);
       } catch (error) {
         setErrorMessage(error instanceof Error ? error.message : "댓글을 남기지 못했습니다.");
       }
     });
   }
 
-  function handleDelete(commentId: string) {
-    if (!window.confirm("댓글을 삭제할까요?")) return;
-
-    startTransition(async () => {
-      try {
-        await deleteLogComment(commentId, logSlug);
-        setComments((prev) => prev.filter((comment) => comment.id !== commentId));
-      } catch (error) {
-        setErrorMessage(error instanceof Error ? error.message : "댓글을 삭제하지 못했습니다.");
-      }
-    });
+  async function handleDelete(commentId: string) {
+    try {
+      await deleteLogComment(commentId, logSlug);
+      setComments((prev) => prev.filter((comment) => comment.id !== commentId));
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "댓글을 삭제하지 못했습니다.");
+    }
   }
 
   return (
@@ -95,14 +93,13 @@ export function CommentSection({
               </div>
               <p>{comment.body}</p>
               {(isAdmin || comment.authorId === currentUserId) && (
-                <button
-                  type="button"
-                  className="comment-delete"
-                  disabled={isPending}
-                  onClick={() => handleDelete(comment.id)}
-                >
-                  삭제
-                </button>
+                <ConfirmButton
+                  label="삭제"
+                  triggerClassName="comment-delete"
+                  confirmTitle="댓글을 삭제할까요?"
+                  confirmDescription="삭제한 댓글은 되돌릴 수 없습니다."
+                  onConfirm={() => handleDelete(comment.id)}
+                />
               )}
             </li>
           ))}
@@ -110,13 +107,17 @@ export function CommentSection({
       )}
 
       {currentUserId ? (
-        <form className="comment-form" onSubmit={handleSubmit}>
+        <form className="comment-form" onSubmit={handleSubmit} noValidate>
           <textarea
             value={draft}
-            onChange={(event) => setDraft(event.target.value)}
+            onChange={(event) => {
+              setDraft(event.target.value);
+              if (isDraftInvalid && event.target.value.trim()) setIsDraftInvalid(false);
+            }}
             placeholder="댓글을 남겨보세요."
             maxLength={MAX_COMMENT_LENGTH}
-            required
+            aria-invalid={isDraftInvalid}
+            className={isDraftInvalid ? "is-invalid" : undefined}
           />
           <div className="comment-form-footer">
             <span>
