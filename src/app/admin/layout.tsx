@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AdminSidebarNav } from "@/components/admin/AdminSidebarNav";
 import { LogoutButton } from "@/components/auth/LogoutButton";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { isAdminUser } from "@/lib/auth/admin";
 import { createClient } from "@/lib/supabase/server";
 import "@/styles/admin.css";
@@ -70,6 +71,7 @@ export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
           <p className="admin-side-user" title={user.email ?? undefined}>
             {user.email}
           </p>
+          <ThemeToggle />
           <Link className="admin-side-link" href="/" target="_blank" rel="noreferrer">
             공개 사이트 보기 ↗
           </Link>
