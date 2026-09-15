@@ -1,5 +1,103 @@
 # BUILD & LEARN 누적 개발 작업 로그
 
+## 2026-09-16 (17) — 현재 코드 기준 Next.js 요청 흐름 학습 문서
+
+### 시작 상태와 문제
+
+기존 `LEARNING_GUIDE.md`에는 최초 MDX 중심 구조와 이후 추가된 Supabase·인증·관리자·댓글 흐름이 한 문서에 이어져 있었습니다. 기능별 학습에는 유용했지만, React·Vue·Next.js가 처음인 사람이 “개발 서버를 켠 뒤 `/` 요청이 정확히 어느 파일을 어떤 순서로 지나가는가”를 현재 코드 기준으로 한 번에 따라가기에는 맥락이 섞여 있었습니다.
+
+### 판단
+
+오래된 MDX 학습 내용을 삭제하지 않고, 최신 운영 흐름을 위한 독립 문서를 만들었습니다. 이렇게 하면 기존 가이드는 기능별 참고 자료로 유지하면서도, 새 문서에서는 `page.tsx`, `layout.tsx`, `proxy.ts`, DB 함수, Client/Server Component, 로그인·관리자까지 하나의 요청 여정으로 읽을 수 있습니다.
+
+### 추가 및 수정
+
+- `docs/guides/NEXTJS_REQUEST_FLOW_GUIDE.md` 추가 — 홈·목록·상세·폼·로그인·관리자의 실제 파일 경로와 실행 순서, Mermaid 흐름도, Spring/JSP/Tiles 대응표, 추천 파일 읽기 순서, `layout.tsx` 첫 네 import와 폰트 설정의 초보자 해설 수록
+- `docs/guides/LEARNING_GUIDE.md` — 새 요청 흐름 지도를 먼저 읽을 수 있도록 연결 문구 추가
+- `AGENTS.md` — 학습 문서 목록에 새 요청 흐름 지도 추가
+
+### 삭제
+
+- 없음. 기존 `LEARNING_GUIDE.md`의 초기 구조 설명은 역사적 학습 자료로 보존했습니다.
+
+### 검증 결과
+
+- `git diff --check` 통과
+- 문서의 파일 경로와 주요 흐름은 `src/app/layout.tsx`, `src/app/(site)/layout.tsx`, `src/app/(site)/page.tsx`, `src/proxy.ts`, `src/lib/projects-db.ts`, Contact Action, 인증 콜백 코드에 맞춰 확인
+
+---
+
+## 2026-09-13 (16) — 다크 모드, 댓글 삭제 버그 수정, 댓글 UX 개선
+
+### 시작 상태와 문제
+
+댓글 기능을 붙이고 나서 두 가지 문제가 드러났습니다. 첫째, 댓글을 작성하면 화면에는 즉시 보여주려고 클라이언트에서 임시 id를 만들어 붙였는데, 그 직후 같은 댓글을 삭제하면 실제 DB에는 없는 id를 지우려 해서 오류가 났습니다. 둘째, 삭제 확인은 브라우저 기본 `window.confirm()`을 썼고, 빈 댓글 제출 검증도 `required` 속성의 기본 툴팁에 의존해 사이트 디자인과 어울리지 않았습니다. 다크 모드는 아직 없었습니다.
+
+### 판단
+
+임시 id로 낙관적 업데이트를 하는 대신, `addLogComment`가 **DB에 실제로 삽입된 행(진짜 id 포함)을 그대로 반환**하도록 바꿔 화면과 DB의 id가 항상 일치하게 했습니다. 삭제 확인은 새로 만들지 않고 관리자 화면에서 이미 검증된 `<dialog>` 기반 확인 패턴을 `ConfirmButton` 컴포넌트로 공개 사이트 디자인 토큰에 맞춰 그대로 옮겼습니다. 다크 모드는 대부분의 색상 규칙이 이미 CSS 변수를 참조하고 있어서, 루트 토큰을 다크용으로 다시 정의하는 것만으로 사이트 대부분을 커버할 수 있다고 판단했습니다. 값이 하드코딩돼 있던 일부(그림자, 위험 버튼 배경/텍스트)만 별도 변수를 추가했습니다. 첫 렌더 전에 저장된 테마를 적용하는 인라인 스크립트를 루트 레이아웃에 넣어 라이트/다크 전환 시 깜빡임(FOUC)을 막았습니다.
+
+### 추가 및 수정
+
+- `src/app/layout.tsx` — 첫 페인트 전에 저장된 테마를 적용하는 블로킹 인라인 스크립트 추가
+- `src/components/ui/ThemeToggle.tsx` 추가 — 자동(시스템 감지)/라이트/다크 3단 토글, 선택값 `localStorage` 저장
+- `src/components/layout/Header.tsx` — 헤더에 `ThemeToggle` 배치
+- `src/styles/globals.css` — 다크 모드 루트 토큰 재정의, `--emphasis-bg`/`--emphasis-text`(채워진 버튼 반전용), `--shadow-color`, `--danger-soft`/`--danger-text` 변수 추가
+- `src/app/(site)/log/[slug]/actions.ts` — `addLogComment`가 클라이언트 임시 id 대신 실제 삽입된 행을 반환하도록 수정
+- `src/components/log/CommentSection.tsx` — 삭제 확인을 `window.confirm()`에서 `ConfirmButton`으로 교체, 빈 댓글 제출 시 `required` 기본 툴팁 대신 사이트 스타일의 인라인 안내 문구 표시
+- `src/components/ui/ConfirmButton.tsx` 추가 — 관리자 화면의 `<dialog>` 확인 패턴을 공개 사이트용으로 이식
+- `docs/guides/LEARNING_GUIDE.md` — DB/Auth/댓글이 생긴 뒤의 실제 요청 흐름(proxy → layout → page → Server Action)을 추적하는 부록 추가, 1절의 오래된 사실 일부 정정
+
+### 삭제
+
+- 없음
+
+### 초보자 설명
+
+화면에 즉시 반영되도록 임시 id를 붙이는 것을 "낙관적 업데이트(optimistic update)"라고 합니다. 편리하지만 그 임시 id를 실제 DB id처럼 취급하면, 방금 이 예시처럼 "화면에는 있는데 DB에는 없는" 상태가 됩니다. 서버가 실제로 만든 행을 그대로 돌려받아 화면 상태를 덮어쓰면 이런 불일치를 피할 수 있습니다. 다크 모드처럼 사이트 전체 색상을 바꿔야 할 때, 색을 코드 곳곳에 직접 적어두면(하드코딩) 나중에 전부 찾아 고쳐야 합니다. 처음부터 CSS 변수로 색을 관리해두면 루트에서 변수 값만 바꿔 전체 테마를 한 번에 전환할 수 있습니다.
+
+### 검증 결과
+
+- `npm run format:check` 통과 (2026-09-16 하네스 점검 시 재확인)
+- 별도 자동 검증 로그가 남아 있지 않아 lint/type-check/build 결과는 이번 기록에 포함하지 못했습니다.
+
+---
+
+## 2026-09-13 (15) — About 페이지 커리어 타임라인, Log 게시글 회원 댓글
+
+### 시작 상태와 문제
+
+About 페이지의 경력 소개가 실제 이력이 아닌 자리표시자(placeholder) 텍스트였습니다. Log 게시글에는 방문자가 의견을 남길 방법이 없었고, 댓글을 달려면 별도 회원가입 화면부터 만들어야 하는지도 정해지지 않았습니다.
+
+### 판단
+
+경력 정보를 별도로 다시 입력하는 대신, 이미 공개된 Projects 데이터(제목·기간·기술 스택)를 그대로 재사용해 About 타임라인을 구성하기로 했습니다. 댓글은 별도 회원가입 화면 없이, 기존 Google/이메일 로그인 흐름으로 로그인하면 `user_roles`에 'member' 행이 자동 생성되는 구조를 그대로 활용했습니다. `log_comments` 테이블에는 "누구나 공개 글 댓글은 읽을 수 있지만, 로그인한 회원만 자신의 댓글을 쓸 수 있고, 작성자 본인 또는 관리자만 삭제할 수 있다"는 규칙을 RLS로 강제했습니다.
+
+### 추가 및 수정
+
+- `supabase/migrations/20260913100000_create_log_comments.sql` — `log_comments` 테이블과 RLS 정책(공개 글 댓글 조회 전체 허용, 본인 댓글 작성, 작성자·관리자 삭제) 추가
+- `src/lib/comments-db.ts` 추가 — 댓글 조회용 DB 접근 함수
+- `src/app/(site)/log/[slug]/actions.ts` — 댓글 작성/삭제 Server Action 추가
+- `src/components/log/CommentSection.tsx` 추가 — Log 상세 페이지에서 댓글 목록/작성 폼 렌더링, 로그아웃 상태에서는 로그인 유도, 이메일 대신 스냅샷된 표시 이름 사용
+- `src/app/(site)/log/[slug]/page.tsx` — 상세 페이지에 `CommentSection` 배치
+- `src/app/(site)/about/page.tsx` — 자리표시자 경력 텍스트를 공개 Projects 데이터 기반 타임라인으로 교체, Contact의 이메일·GitHub 링크 재사용
+- `src/styles/globals.css` — 타임라인·댓글 UI 스타일 추가
+
+### 삭제
+
+- 없음
+
+### 초보자 설명
+
+댓글처럼 "로그인한 사람만 쓸 수 있고, 본인 것만 지울 수 있는" 규칙은 프런트엔드 코드에서 `if`로 막아도 사용자가 개발자 도구로 요청을 직접 보내면 우회할 수 있습니다. Supabase의 RLS(Row Level Security)는 이 규칙을 데이터베이스 단에 걸어두는 방식이라, 어떤 경로로 요청이 오든 DB가 스스로 허용/거부를 판단합니다. 그래서 새 기능을 추가할 때는 화면 쪽 제약만이 아니라 DB 쪽 규칙도 함께 설계해야 합니다.
+
+### 검증 결과
+
+- `npm run format:check` 통과 (2026-09-16 하네스 점검 시 재확인)
+- 별도 자동 검증 로그가 남아 있지 않아 lint/type-check/build 결과와 RLS 허용/거부 실제 테스트 기록은 이번 기록에 포함하지 못했습니다.
+
+---
+
 ## 2026-09-13 — 하네스 문서 현행화와 운영 백로그 정리
 
 ### 시작 상태와 문제

@@ -23,6 +23,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - 현재 요청: `docs/development/DEVELOPMENT_REQUEST.md`
 - 누적 작업 기록: `docs/development/DEVELOPMENT_LOG.md`
 - 학습 가이드: `docs/guides/LEARNING_GUIDE.md`
+- 현재 코드 요청 흐름 지도: `docs/guides/NEXTJS_REQUEST_FLOW_GUIDE.md`
 - 주석 규칙: `docs/guides/CODE_COMMENT_GUIDE.md`
 - 배포 절차: `docs/deployment/DEPLOY.md`
 - 작업 로그 템플릿: `docs/templates/WORK_LOG_TEMPLATE.md`

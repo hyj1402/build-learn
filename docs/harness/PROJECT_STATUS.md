@@ -12,6 +12,7 @@ BUILD & LEARN은 만든 결과와 개발 과정에서 배운 내용을 함께 �
 - 프로젝트 데모의 링크, 임베드, 다운로드 표시
 - metadata, robots.txt, sitemap.xml 구성
 - GitHub 품질 검사와 Vercel 배포 연결
+- 다크 모드: 시스템 설정 자동 감지 + 헤더 토글(자동/라이트/다크), 선택값 localStorage 저장, 첫 렌더 전 적용해 깜빡임 방지
 - 배포 주소: https://build-learn-five.vercel.app/
 
 ## Supabase·관리자 기능
@@ -27,7 +28,9 @@ BUILD & LEARN은 만든 결과와 개발 과정에서 배운 내용을 함께 �
 - 완료: Contact 폼의 DB 저장·스팸 방지·관리자 수신함·읽음/일괄 처리·삭제·Excel 다운로드
 - 완료: Resend 새 문의 알림 코드. 환경변수가 비어 있으면 알림만 건너뜁니다.
 - 완료: Tech Radar RSS 수동 수집, 목록 페이지네이션, Claude 기반 일일 다이제스트 초안 생성
-- 아직 없음: 카테고리 관리 UI, Tech Radar 자동 수집/다이제스트 실행, 방문 통계·댓글·좋아요·조회수
+- 완료: About 페이지 커리어 타임라인을 공개 Projects 데이터(제목·기간·기술 스택)로 자동 구성, Contact의 이메일·GitHub 링크 재사용
+- 완료: Log 게시글 회원 댓글(`log_comments` 테이블·RLS) — 누구나 공개 글 댓글 조회, 로그인한 회원(Google/이메일 로그인 시 자동 생성되는 `user_roles` 'member' 행)만 자신의 댓글 작성, 작성자 또는 관리자만 삭제
+- 아직 없음: 카테고리 관리 UI, Tech Radar 자동 수집/다이제스트 실행, 방문 통계·좋아요·조회수
 
 ## 현재 제약
 
@@ -37,7 +40,7 @@ BUILD & LEARN은 만든 결과와 개발 과정에서 배운 내용을 함께 �
 
 ## 다음 작업 후보
 
-1. Vercel에서 로그인·관리자·공개/비공개·sitemap·모바일 흐름을 운영 검증하고 MDX 보관 정책 결정
+1. Vercel에서 로그인·관리자·공개/비공개·댓글 작성/삭제·다크 모드·sitemap·모바일 흐름을 운영 검증하고 MDX 보관 정책 결정
 2. Resend·Claude 환경변수를 설정한 뒤 실제 이메일 알림과 일일 다이제스트를 검증
 3. 카테고리 관리 UI와 콘텐츠 미리보기/이탈 경고의 필요 범위를 결정
 4. Tech Radar 자동 수집/다이제스트 실행(Cron 또는 GitHub Actions)을 설계
