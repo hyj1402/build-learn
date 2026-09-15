@@ -121,13 +121,29 @@
   padding: 0;
   color: var(--muted);
   font:
-    700 12px/1.6 var(--font-display),
+    700 14px/1.6 var(--font-display),
     sans-serif;
   text-align: left;
   cursor: pointer;
 }
 .admin-side-link:hover {
   color: var(--accent);
+}
+
+/* 사이드바 안에서는 헤더의 알약(pill) 버튼 대신, 다른 하단 링크들과 같은 가로 폭·톤으로 맞춥니다. */
+.admin-side-foot .theme-toggle {
+  justify-content: flex-start;
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: transparent;
+  padding: 8px 10px;
+  color: var(--foreground);
+  font-size: 14px;
+}
+.admin-side-foot .theme-toggle:hover {
+  border-color: var(--accent);
+  background: var(--editorial-amber-soft);
 }
 
 /* ── 작업 영역 ──────────────────────────────────────────── */
