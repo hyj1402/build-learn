@@ -16,6 +16,7 @@ export function AdminConfirmButton({
   confirmLabel = "삭제하기",
   confirmClassName = "admin-action-button admin-action-outline-danger",
   onConfirm,
+  disabled = false,
 }: {
   label?: string;
   triggerClassName?: string;
@@ -24,6 +25,7 @@ export function AdminConfirmButton({
   confirmLabel?: string;
   confirmClassName?: string;
   onConfirm: () => void | Promise<void>;
+  disabled?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -31,7 +33,12 @@ export function AdminConfirmButton({
 
   return (
     <>
-      <button type="button" className={triggerClassName} onClick={() => setOpen(true)}>
+      <button
+        type="button"
+        className={triggerClassName}
+        disabled={disabled}
+        onClick={() => setOpen(true)}
+      >
         {label}
       </button>
       <AdminDialog

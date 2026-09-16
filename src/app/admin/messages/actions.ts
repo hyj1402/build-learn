@@ -32,12 +32,17 @@ export async function markMessagesRead(ids: string[]) {
   revalidatePath("/admin", "layout");
 }
 
-/** 스팸이나 처리 완료된 문의를 삭제합니다. */
-export async function deleteMessage(id: string) {
+/**
+ * 하나 이상 선택한 문의를 삭제합니다.
+ * id 배열을 받는 이유는 개별 삭제와 체크박스 일괄 삭제가 같은 권한 검사·DB 갱신 규칙을 쓰게 하기 위해서입니다.
+ */
+export async function deleteMessages(ids: string[]) {
+  if (ids.length === 0) return;
   const supabase = await requireAdmin();
-  const { error } = await supabase.from("contact_messages").delete().eq("id", id);
+  const { error } = await supabase.from("contact_messages").delete().in("id", ids);
   if (error) {
     throw new Error(`삭제하지 못했습니다: ${error.message}`);
   }
   revalidatePath("/admin/messages");
+  revalidatePath("/admin", "layout");
 }

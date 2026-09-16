@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useMemo, useState, useTransition } from "react";
-import { deleteMessage, markMessagesRead } from "@/app/admin/messages/actions";
+import { deleteMessages, markMessagesRead } from "@/app/admin/messages/actions";
 import { AdminConfirmButton } from "@/components/admin/AdminConfirmButton";
 import { AdminDialog } from "@/components/admin/AdminDialog";
 
@@ -41,6 +41,15 @@ export function MessagesTable({ initialMessages }: { initialMessages: Message[] 
           ids.includes(message.id) ? { ...message, is_read: true } : message,
         ),
       );
+      setSelectedIds((current) => current.filter((id) => !ids.includes(id)));
+    });
+  }
+
+  /** 선택한 문의 id를 삭제하고, 성공 시 화면의 목록·선택 상태에서도 바로 뺍니다. */
+  function removeMessages(ids: string[]) {
+    if (ids.length === 0) return;
+    return deleteMessages(ids).then(() => {
+      setMessages((current) => current.filter((message) => !ids.includes(message.id)));
       setSelectedIds((current) => current.filter((id) => !ids.includes(id)));
     });
   }
@@ -176,6 +185,14 @@ export function MessagesTable({ initialMessages }: { initialMessages: Message[] 
           >
             {isPending ? "처리 중..." : "선택 항목 읽음 처리"}
           </button>
+          <AdminConfirmButton
+            label="선택 항목 삭제"
+            triggerClassName="admin-action-button admin-action-outline-danger admin-list-action-button"
+            confirmTitle="선택한 문의를 삭제할까요?"
+            confirmDescription={`선택한 ${selectedIds.length}건이 완전히 삭제되며, 되돌릴 수 없습니다.`}
+            onConfirm={() => removeMessages(selectedIds)}
+            disabled={selectedIds.length === 0}
+          />
           <button
             type="button"
             className="admin-action-button admin-action-outline admin-list-action-button"
@@ -266,7 +283,7 @@ export function MessagesTable({ initialMessages }: { initialMessages: Message[] 
                     <AdminConfirmButton
                       confirmDescription={`${message.name}님이 보낸 문의가 완전히 삭제되며, 되돌릴 수 없습니다.`}
                       confirmTitle="이 문의를 삭제할까요?"
-                      onConfirm={deleteMessage.bind(null, message.id)}
+                      onConfirm={() => removeMessages([message.id])}
                       triggerClassName="admin-action-button admin-action-outline-danger admin-row-action-button"
                     />
                   </div>
