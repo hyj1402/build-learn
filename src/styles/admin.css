@@ -204,6 +204,46 @@
   letter-spacing: -0.02em;
 }
 
+.admin-trend-grid {
+  display: grid;
+  gap: var(--space-2);
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  margin-bottom: var(--space-6);
+}
+.admin-trend-card {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  padding: var(--space-3);
+}
+.admin-trend-card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font:
+    700 12px/1 var(--font-display),
+    sans-serif;
+}
+.admin-trend-card-head span {
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+.admin-trend-card-head strong {
+  color: var(--accent);
+  font-size: 13px;
+}
+.admin-trend-chart {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.admin-trend-bar {
+  fill: var(--line);
+}
+.admin-trend-bar.is-current {
+  fill: var(--accent);
+}
+
 .admin-quick-grid {
   display: grid;
   gap: var(--space-2);
