@@ -24,6 +24,24 @@ function formatLogDate(value: string) {
   }).format(date);
 }
 
+/** Markdown 기호를 제외한 한글 글자와 영문 단어 수로 방문자에게 보여줄 예상 읽기 시간을 계산합니다. */
+function estimateReadingMinutes(source: string) {
+  const plainText = source
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/`[^`]*`/g, " ")
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, " ")
+    .replace(/\[[^\]]*\]\([^)]*\)/g, " ")
+    .replace(/[#>*_~-]/g, " ");
+  const koreanCharacters = plainText.match(/[가-힣]/g)?.length ?? 0;
+  const otherWords = plainText
+    .replace(/[가-힣]/g, " ")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean).length;
+
+  return Math.max(1, Math.ceil(koreanCharacters / 500 + otherWords / 220));
+}
+
 /** 현재 Log의 제목·요약·안전한 공유 이미지를 metadata로 만듭니다. */
 export async function generateMetadata({ params }: PageProps<"/log/[slug]">): Promise<Metadata> {
   const { slug } = await params;
@@ -66,12 +84,20 @@ export default async function LogDetail({ params }: PageProps<"/log/[slug]">) {
     data: { user },
   } = await supabase.auth.getUser();
   const [comments, isAdmin] = await Promise.all([getLogComments(slug), isAdminUser(user)]);
+  const readingMinutes = estimateReadingMinutes(log.content);
   return (
     <article className="container detail log-detail">
       <header className="page-header log-detail-hero">
         <Badge>{log.category}</Badge>
         <h1>{log.title}</h1>
         <p>{log.summary}</p>
+        <div className="log-detail-byline" aria-label="글 정보">
+          <strong>BUILD &amp; LEARN</strong>
+          <span aria-hidden="true">·</span>
+          <time dateTime={log.createdAt}>{formatLogDate(log.createdAt)}</time>
+          <span aria-hidden="true">·</span>
+          <span>{readingMinutes}분 읽기</span>
+        </div>
       </header>
       {/* 본문 썸네일은 SVG도 표시할 수 있지만 SNS용 OG 이미지는 별도 함수에서 PNG로 교체합니다. */}
       {log.thumbnailImage && (
@@ -85,22 +111,21 @@ export default async function LogDetail({ params }: PageProps<"/log/[slug]">) {
           />
         </div>
       )}
-      <div className="detail-meta log-detail-meta">
-        <time dateTime={log.createdAt}>
-          <span>발행일</span>
-          <strong>{formatLogDate(log.createdAt)}</strong>
-        </time>
-        <div className="tag-row" aria-label="로그 태그">
-          {log.tags.map((tag) => (
-            <Link key={tag} href={`/log?tag=${encodeURIComponent(tag)}`}>
-              <Badge variant="tag">#{tag}</Badge>
-            </Link>
-          ))}
-        </div>
-      </div>
+      {log.tags.length > 0 && (
+        <nav className="detail-meta log-detail-meta" aria-label="로그 태그">
+          <div className="tag-row">
+            {log.tags.map((tag) => (
+              <Link key={tag} href={`/log?tag=${encodeURIComponent(tag)}`}>
+                <Badge variant="tag">#{tag}</Badge>
+              </Link>
+            ))}
+          </div>
+        </nav>
+      )}
       <div className="mdx-content">{content}</div>
       <CommentSection
-        logSlug={slug}
+        contentType="log"
+        contentSlug={slug}
         initialComments={comments}
         currentUserId={user?.id ?? null}
         isAdmin={isAdmin}

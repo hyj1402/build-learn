@@ -4,7 +4,7 @@
 
 > **2026-09-13 현재 기준:** 아래의 단계별 체크리스트는 최초 도입 당시의 실행 기록입니다. 완료 여부와 다음 작업은 이 문서 맨 앞의 **현재 운영 백로그**를 우선하며, 과거의 미체크 항목을 그대로 다시 구현하지 않습니다.
 
-## 현재 운영 백로그 (2026-09-13)
+## 현재 운영 백로그 (2026-09-18)
 
 ### 이미 완료된 범위
 
@@ -12,6 +12,7 @@
 - 관리자 Project·Log CRUD, TipTap Markdown 호환 에디터, 대표·본문 이미지 업로드와 Storage 관리
 - Contact DB 저장·스팸 방지·수신함·Excel 다운로드, Resend 알림 코드
 - Tech Radar RSS 수동 수집·페이지네이션·Claude 다이제스트 초안 생성
+- Project 댓글 테이블·명시적 Data API 권한·RLS·변경 보호 트리거, 공개 상세 댓글 UI와 관리자 Project 댓글 관리
 
 ### 다음 작업
 
@@ -143,6 +144,8 @@ Auth, RLS, Storage 변경은 성공 사례뿐 아니라 반드시 거부되어�
 - 2026-09-10: Next.js 16에서 `middleware.ts`가 `proxy.ts`로 이름이 바뀐 것을 `node_modules/next/dist/docs`에서 확인하고 `src/proxy.ts`로 작성했습니다 (AGENTS.md의 "학습된 지식과 다를 수 있으니 문서를 먼저 읽으라"는 지침이 실제로 필요했던 사례).
 - 2026-09-10: 관리자 판별은 이메일이나 `user_metadata`가 아니라 서버 전용 `ADMIN_USER_ID` 환경변수와 로그인한 사용자의 UUID를 비교하는 방식으로 구현했습니다. 실제 값은 사용자가 첫 로그인 후 UUID를 확인해 직접 채워야 합니다.
 - 2026-09-12: 권한 체계를 `public.user_roles`(`admin`/`member`)로 전환했습니다. 새 Auth 사용자는 트리거로 기본 `member` 역할을 받고, 관리자 권한은 서버 코드와 RLS 모두 `public.is_admin()`으로 확인합니다.
+- 2026-09-17: Log 댓글 DELETE RLS를 원격 DB에서 실제 검증했습니다. 다른 회원 신원은 0건, 작성자 신원은 1건 삭제되며 테스트는 롤백해 원본을 보존했습니다. 관리자 Log별 댓글 수와 `/admin/comments` 조회·삭제 화면을 추가하고, 댓글 RLS의 `auth.uid()` 초기화 경고와 `author_id` 미인덱스 경고를 새 마이그레이션으로 해소했습니다.
+- 2026-09-17: 댓글을 물리 DELETE가 아닌 소프트 삭제로 전환했습니다. 일반 회원은 자신의 활성 댓글만 UPDATE할 수 있고 삭제 댓글은 조회할 수 없으며, 관리자는 삭제 원문을 포함해 수정·삭제·복구합니다. `updated_at`/`deleted_at`, 변경 불가 열 트리거, 공개·관리자 UI를 추가했고 타인 수정·물리 삭제 거부와 삭제 댓글 일반 조회 차단·관리자 복구를 원격 RLS로 검증했습니다.
 - 2026-09-10: 관리자 UUID에 categories/projects/logs 전체 권한을 주는 RLS 정책을 마이그레이션으로 추가했고, 학습 기록 CRUD를 구현했습니다. Server Action에서도 관리자 UUID를 다시 검사합니다.
 - 2026-09-11: Codex가 이력서 기반 프로젝트 8건을 시드하고 Projects 공개 페이지를 DB 조회로 전환했습니다 (`src/lib/projects-db.ts`).
 - 2026-09-11: Log MDX 11개를 DB로 이전하고 공개 페이지를 DB 조회로 전환했습니다 (`src/lib/logs-db.ts`). 이 과정에서 `categories` 조인 결과를 배열로 잘못 가정한 버그(PostgREST는 다대일 관계를 객체로 반환)를 발견해 `logs-db.ts`와 `projects-db.ts` 양쪽 모두 수정했습니다.

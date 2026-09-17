@@ -6,7 +6,11 @@ import remarkGfm from "remark-gfm";
 import { mdxComponents } from "@/components/mdx/MdxComponents";
 import { ProjectDemo } from "@/components/project/ProjectDemo";
 import { Badge } from "@/components/ui/Badge";
+import { CommentSection } from "@/components/log/CommentSection";
 import { getPublishedProjectBySlug } from "@/lib/projects-db";
+import { getProjectComments } from "@/lib/comments-db";
+import { isAdminUser } from "@/lib/auth/admin";
+import { createClient } from "@/lib/supabase/server";
 
 /** 각 프로젝트 내용에 맞는 검색·SNS 공유 metadata를 생성합니다. */
 export async function generateMetadata({
@@ -36,6 +40,12 @@ export default async function ProjectDetail({ params }: PageProps<"/projects/[sl
   const { slug } = await params;
   const project = await getPublishedProjectBySlug(slug);
   if (!project) notFound();
+  // 댓글 목록과 현재 로그인·관리자 상태를 함께 읽어 공용 댓글 UI에 전달합니다.
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const [comments, isAdmin] = await Promise.all([getProjectComments(slug), isAdminUser(user)]);
   // 관리자 리치 에디터가 저장한 Markdown을 기존 Log와 같은 읽기 UI로 변환합니다.
   const { content } = await compileMDX({
     source: project.content,
@@ -43,7 +53,7 @@ export default async function ProjectDetail({ params }: PageProps<"/projects/[sl
     options: { mdxOptions: { remarkPlugins: [remarkGfm] } },
   });
   return (
-    <article className="container detail">
+    <article className="container detail project-detail">
       {project.thumbnailImage && (
         <div className="project-detail-cover">
           <Image
@@ -71,6 +81,13 @@ export default async function ProjectDetail({ params }: PageProps<"/projects/[sl
       </div>
       <ProjectDemo project={project} />
       <div className="mdx-content">{content}</div>
+      <CommentSection
+        contentType="project"
+        contentSlug={slug}
+        initialComments={comments}
+        currentUserId={user?.id ?? null}
+        isAdmin={isAdmin}
+      />
     </article>
   );
 }

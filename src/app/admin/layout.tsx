@@ -45,7 +45,11 @@ export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
     },
     {
       title: "소통",
-      items: [{ href: "/admin/messages", label: "문의", badge: unreadMessages ?? 0 }],
+      items: [
+        { href: "/admin/comments", label: "Log 댓글" },
+        { href: "/admin/project-comments", label: "Project 댓글" },
+        { href: "/admin/messages", label: "문의", badge: unreadMessages ?? 0 },
+      ],
     },
     {
       title: "리서치",

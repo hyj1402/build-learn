@@ -27,7 +27,9 @@ export default async function AdminLogsPage({ searchParams }: PageProps<"/admin/
     count,
   } = await supabase
     .from("logs")
-    .select("id, title, summary, tags, publication_status, created_at", { count: "exact" })
+    .select("id, slug, title, summary, tags, publication_status, created_at, log_comments(count)", {
+      count: "exact",
+    })
     .order("created_at", { ascending: false })
     .range(from, from + pageSize - 1);
   const totalPages = Math.max(1, Math.ceil((count ?? 0) / pageSize));
@@ -54,6 +56,7 @@ export default async function AdminLogsPage({ searchParams }: PageProps<"/admin/
               <th>제목</th>
               <th>태그</th>
               <th>상태</th>
+              <th>댓글(삭제 포함)</th>
               <th>등록일</th>
               <th>
                 <span className="sr-only">작업</span>
@@ -82,6 +85,15 @@ export default async function AdminLogsPage({ searchParams }: PageProps<"/admin/
                     {STATUS_LABEL[log.publication_status] ?? log.publication_status}
                   </span>
                 </td>
+                <td>
+                  {/* 관리자 운영용 숫자라 소프트 삭제된 댓글까지 함께 셉니다. 실제 공개 댓글 수는 상세 화면에서 확인합니다. */}
+                  <Link
+                    className="admin-inline-link"
+                    href={`/admin/comments?log=${encodeURIComponent(log.slug)}`}
+                  >
+                    {log.log_comments[0]?.count ?? 0}개
+                  </Link>
+                </td>
                 <td className="admin-date">
                   {new Date(log.created_at).toLocaleDateString("ko-KR")}
                 </td>
@@ -99,7 +111,7 @@ export default async function AdminLogsPage({ searchParams }: PageProps<"/admin/
             ))}
             {(logs ?? []).length === 0 && (
               <tr>
-                <td className="admin-empty-cell" colSpan={5}>
+                <td className="admin-empty-cell" colSpan={6}>
                   아직 작성된 학습 기록이 없습니다.
                 </td>
               </tr>

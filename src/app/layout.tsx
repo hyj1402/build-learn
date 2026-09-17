@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Noto_Sans_KR, Space_Grotesk } from "next/font/google";
+import { Noto_Sans_KR, Noto_Serif_KR, Space_Grotesk } from "next/font/google";
 import { SITE_URL } from "@/lib/site";
 import "@/styles/globals.css";
 
@@ -15,6 +15,14 @@ const bodyFont = Noto_Sans_KR({
   subsets: ["latin"],
   weight: ["400", "500", "700"],
   variable: "--font-body",
+  display: "swap",
+});
+
+// 긴 Log 본문에만 명조 계열을 적용해 제목·메뉴와 구분되는 편안한 읽기 리듬을 만듭니다.
+const readingFont = Noto_Serif_KR({
+  subsets: ["latin"],
+  weight: "variable",
+  variable: "--font-reading",
   display: "swap",
 });
 
@@ -71,7 +79,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="ko"
-      className={`${displayFont.variable} ${bodyFont.variable}`}
+      className={`${displayFont.variable} ${bodyFont.variable} ${readingFont.variable}`}
       data-scroll-behavior="smooth"
       // 위 인라인 스크립트가 hydration 전에 data-theme을 붙이기 때문에 서버 HTML과 값이 달라집니다.
       // 의도한 차이라서, React가 이 속성 하나에 대해 불필요한 경고를 띄우지 않게 합니다.

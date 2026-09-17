@@ -26,9 +26,12 @@ export default async function AdminProjectsPage({ searchParams }: PageProps<"/ad
     count,
   } = await supabase
     .from("projects")
-    .select("id, title, summary, publication_status, project_status, tech_stack, created_at", {
-      count: "exact",
-    })
+    .select(
+      "id, slug, title, summary, publication_status, project_status, tech_stack, created_at, project_comments(count)",
+      {
+        count: "exact",
+      },
+    )
     .order("created_at", { ascending: false })
     .range(from, from + pageSize - 1);
   const totalPages = Math.max(1, Math.ceil((count ?? 0) / pageSize));
@@ -53,6 +56,7 @@ export default async function AdminProjectsPage({ searchParams }: PageProps<"/ad
               <th>기술 스택</th>
               <th>공개</th>
               <th>진행</th>
+              <th>댓글(삭제 포함)</th>
               <th>등록일</th>
               <th>
                 <span className="sr-only">작업</span>
@@ -82,6 +86,14 @@ export default async function AdminProjectsPage({ searchParams }: PageProps<"/ad
                   </span>
                 </td>
                 <td>{projectStatusLabels[p.project_status] ?? p.project_status}</td>
+                <td>
+                  <Link
+                    className="admin-inline-link"
+                    href={`/admin/project-comments?project=${encodeURIComponent(p.slug)}`}
+                  >
+                    {p.project_comments[0]?.count ?? 0}개
+                  </Link>
+                </td>
                 <td className="admin-date">{new Date(p.created_at).toLocaleDateString("ko-KR")}</td>
                 <td className="admin-row-actions-cell">
                   <div className="admin-row-actions">
@@ -97,7 +109,7 @@ export default async function AdminProjectsPage({ searchParams }: PageProps<"/ad
             ))}
             {!(projects ?? []).length && (
               <tr>
-                <td colSpan={6} className="admin-empty-cell">
+                <td colSpan={7} className="admin-empty-cell">
                   아직 프로젝트가 없습니다.
                 </td>
               </tr>
