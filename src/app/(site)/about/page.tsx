@@ -111,7 +111,9 @@ export default async function AboutPage() {
                 {project.period.end ? ` – ${project.period.end}` : " – 진행 중"}
               </span>
               <div>
-                <h3>{project.title}</h3>
+                <h3>
+                  <Link href={`/projects/${project.slug}`}>{project.title}</Link>
+                </h3>
                 <p>{project.summary}</p>
                 <ul className="career-tech">
                   {project.techStack.map((tech) => (
