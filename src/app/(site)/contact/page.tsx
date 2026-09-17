@@ -22,6 +22,12 @@ export default function ContactPage() {
           <a href="https://github.com/hyj1402/build-learn" target="_blank" rel="noreferrer">
             GitHub — hyj1402/build-learn
           </a>
+          {/* 정보통신망법 제50조의8에 따라, 공개된 이메일 주소를 자동수집 프로그램으로 무단 수집하는
+              행위를 금지한다는 사실을 알립니다. */}
+          <p className="legal-notice">
+            이 페이지의 이메일 주소는 전자우편 수집 프로그램이나 그 밖의 기술적 장치를 이용하여
+            무단으로 수집할 수 없으며, 이를 위반 시 정보통신망법에 따라 처벌될 수 있습니다.
+          </p>
         </aside>
         <ContactForm />
       </section>
