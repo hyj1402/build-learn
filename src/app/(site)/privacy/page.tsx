@@ -69,10 +69,14 @@ export default function PrivacyPage() {
           연락해 주시면 지체 없이 조치합니다.
         </p>
 
-        <h2>8. 문의처</h2>
-        <p>
-          <a href="mailto:tkznfk1402@gmail.com">tkznfk1402@gmail.com</a>
-        </p>
+        <h2>8. 개인정보 보호책임자 및 문의처</h2>
+        <p>개인정보 관련 문의, 열람·정정·삭제 요청은 아래로 연락해 주세요.</p>
+        <ul>
+          <li>개인정보 보호책임자: 운영자</li>
+          <li>
+            이메일: <a href="mailto:tkznfk1402@gmail.com">tkznfk1402@gmail.com</a>
+          </li>
+        </ul>
       </div>
     </div>
   );
