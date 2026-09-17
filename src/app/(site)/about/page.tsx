@@ -11,6 +11,42 @@ const stacks = [
   { title: "Exploring", items: ["AI-assisted development", "Web performance", "PostgreSQL"] },
 ];
 
+// 이력서 기준의 정적 정보(회사 이력, 자격증, 교육)입니다. DB 대신 여기서 직접 관리합니다 —
+// 자주 바뀌지 않는 데이터이고, Projects의 상세 프로젝트 목록과 성격이 달라 분리했습니다.
+const workHistory = [
+  {
+    company: "미래아이엔텍",
+    period: "2025.03 ~ 재직중",
+    position: "프리랜서",
+    duty: "재단 시스템 SM / 프론트·백 개발",
+  },
+  {
+    company: "(주)더리얼",
+    period: "2024.01 ~ 2025.02",
+    position: "대리",
+    duty: "결제 데이터 처리 및 B2B 개발",
+  },
+  {
+    company: "휴노링크",
+    period: "2023.05 ~ 2023.12",
+    position: "사원",
+    duty: "재단 시스템 SM / 프론트·백 개발",
+  },
+  {
+    company: "이노시스컴퍼니",
+    period: "2020.09 ~ 2022.10",
+    position: "사원",
+    duty: "웹 개발 및 유지보수",
+  },
+];
+const certifications = [
+  { name: "정보처리기사", date: "2024.12", issuer: "한국산업인력공단" },
+  { name: "SQLD", date: "2022.06", issuer: null },
+];
+const training = [
+  { name: "JAVA 기반 UI/UX 프로그래밍 교육", period: "2019.10 ~ 2020.05", issuer: "KH정보교육원" },
+];
+
 /**
  * About 페이지는 실제 이력 정보가 없는 문구 대신, DB에 등록된 실제 프로젝트 데이터로
  * 경력 타임라인을 만듭니다. Server Component라서 이 함수 자체가 요청마다 서버에서
@@ -40,16 +76,32 @@ export default async function AboutPage() {
         </p>
       </header>
       <section className="section about-section">
-        <p className="eyebrow">CAREER</p>
+        <p className="eyebrow">WORK HISTORY</p>
         <h2>
           문제를 오래 다루는 힘을
           <br />
           제품으로 연결합니다.
         </h2>
+        <ol className="career-timeline">
+          {workHistory.map((job) => (
+            <li key={job.company} className="career-item">
+              <span className="career-period">{job.period}</span>
+              <div>
+                <h3>
+                  {job.company} · {job.position}
+                </h3>
+                <p>{job.duty}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </section>
+      <section className="section about-section">
+        <p className="eyebrow">CAREER</p>
+        <h2>참여한 프로젝트</h2>
         <p className="muted">
-          {timeline.length}개 프로젝트 · {earliestYear ?? "-"} —{" "}
-          {isCurrentlyActive ? "현재" : "완료"}. 아래 목록은 <Link href="/projects">Projects</Link>
-          에 등록된 실제 이력입니다.
+          {earliestYear ?? "-"} — {isCurrentlyActive ? "현재" : "완료"}까지의 실무 프로젝트를{" "}
+          <Link href="/projects">Projects</Link>에 정리했습니다.
         </p>
         <ol className="career-timeline">
           {timeline.map((project) => (
@@ -70,6 +122,32 @@ export default async function AboutPage() {
             </li>
           ))}
         </ol>
+      </section>
+      <section className="section">
+        <p className="eyebrow">CERTIFICATIONS &amp; TRAINING</p>
+        <div className="stack-grid">
+          <div>
+            <h2>자격증</h2>
+            <ul>
+              {certifications.map((cert) => (
+                <li key={cert.name}>
+                  {cert.name} · {cert.date}
+                  {cert.issuer ? ` · ${cert.issuer}` : ""}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h2>교육</h2>
+            <ul>
+              {training.map((item) => (
+                <li key={item.name}>
+                  {item.name} · {item.period} · {item.issuer}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
       </section>
       <section className="section">
         <p className="eyebrow">TECH STACK</p>
