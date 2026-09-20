@@ -19,6 +19,7 @@ export default async function NewLogPage({ searchParams }: PageProps<"/admin/log
         summary: summary || null,
         body_text: sourceUrl ? `> 원문: [${title}](${sourceUrl})\n\n` : "",
         tags: [],
+        category_slug: "dev",
         publication_status: "draft",
       }
     : undefined;

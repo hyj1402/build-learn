@@ -11,6 +11,7 @@ type LogRow = {
   tags: string[];
   publication_status: "draft" | "private" | "published";
   display_order: number | null;
+  view_count: number;
   created_at: string;
   updated_at: string;
   // Supabase 관계 조회는 현재 SDK 설정에서 객체로 오지만, 타입 생성 방식에 따라 배열일 수도 있어 둘 다 안전하게 처리합니다.
@@ -32,6 +33,7 @@ function toLog(row: LogRow): Log {
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     order: row.display_order ?? undefined,
+    viewCount: row.view_count,
     content: row.body_text,
   };
 }
@@ -45,7 +47,7 @@ export const getPublishedLogs = cache(async (filter: LogFilter = {}): Promise<Lo
   const { data, error } = await supabase
     .from("logs")
     .select(
-      "slug, title, summary, body_text, thumbnail_path, tags, publication_status, display_order, created_at, updated_at, categories(name, slug)",
+      "slug, title, summary, body_text, thumbnail_path, tags, publication_status, display_order, view_count, created_at, updated_at, categories(name, slug)",
     )
     .eq("publication_status", "published");
 
@@ -73,3 +75,14 @@ export const getPublishedLogBySlug = cache(async (slug: string): Promise<Log | u
   const logs = await getPublishedLogs();
   return logs.find((log) => log.slug === slug);
 });
+
+/**
+ * 상세 페이지가 렌더될 때마다 조회수를 1 늘립니다.
+ * DB의 SECURITY DEFINER 함수가 공개된 글의 view_count만 건드리도록 제한하므로,
+ * 로그인하지 않은 방문자도 안전하게 호출할 수 있습니다. 실패해도 페이지 렌더링을 막지 않습니다.
+ */
+export async function incrementLogView(slug: string): Promise<void> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("increment_log_view", { p_slug: slug });
+  if (error) console.error(`Log 조회수 증가 실패 (${slug}):`, error.message);
+}

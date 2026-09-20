@@ -8,7 +8,7 @@ import { mdxComponents } from "@/components/mdx/MdxComponents";
 import { Badge } from "@/components/ui/Badge";
 import { CommentSection } from "@/components/log/CommentSection";
 import { getSocialImage } from "@/lib/metadata";
-import { getPublishedLogBySlug } from "@/lib/logs-db";
+import { getPublishedLogBySlug, incrementLogView } from "@/lib/logs-db";
 import { getLogComments } from "@/lib/comments-db";
 import { isAdminUser } from "@/lib/auth/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -83,7 +83,11 @@ export default async function LogDetail({ params }: PageProps<"/log/[slug]">) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  const [comments, isAdmin] = await Promise.all([getLogComments(slug), isAdminUser(user)]);
+  const [comments, isAdmin] = await Promise.all([
+    getLogComments(slug),
+    isAdminUser(user),
+    incrementLogView(slug),
+  ]);
   const readingMinutes = estimateReadingMinutes(log.content);
   return (
     <article className="container detail log-detail">
@@ -97,6 +101,8 @@ export default async function LogDetail({ params }: PageProps<"/log/[slug]">) {
           <time dateTime={log.createdAt}>{formatLogDate(log.createdAt)}</time>
           <span aria-hidden="true">·</span>
           <span>{readingMinutes}분 읽기</span>
+          <span aria-hidden="true">·</span>
+          <span>조회 {log.viewCount.toLocaleString("ko-KR")}</span>
         </div>
       </header>
       {/* 본문 썸네일은 SVG도 표시할 수 있지만 SNS용 OG 이미지는 별도 함수에서 PNG로 교체합니다. */}

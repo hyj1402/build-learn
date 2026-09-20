@@ -28,15 +28,25 @@ export function AdminPagination({
   currentPage,
   totalPages,
   label,
+  searchParams,
 }: {
   basePath: string;
   currentPage: number;
   totalPages: number;
   label: string;
+  // 목록 필터를 유지한 채 다음 페이지로 이동하기 위한 현재 URL 조건입니다.
+  searchParams?: Record<string, string | undefined>;
 }) {
   if (totalPages <= 1) return null;
 
-  const href = (page: number) => (page === 1 ? basePath : `${basePath}?page=${page}`);
+  const href = (page: number) => {
+    const params = new URLSearchParams(
+      Object.entries(searchParams ?? {}).filter(([, value]) => value) as [string, string][],
+    );
+    if (page > 1) params.set("page", String(page));
+    const query = params.toString();
+    return query ? `${basePath}?${query}` : basePath;
+  };
   const items = getPaginationItems(currentPage, totalPages);
 
   return (

@@ -58,7 +58,10 @@ export async function addProjectComment(
     })
     .select("id, project_slug, author_id, author_name, body, created_at, updated_at")
     .single();
-  if (error) throw new Error(`댓글을 저장하지 못했습니다: ${error.message}`);
+  if (error) {
+    console.error(`Project 댓글 저장 실패 (${projectSlug}):`, error.message);
+    throw new Error("댓글을 저장하지 못했습니다. 잠시 후 다시 시도해주세요.");
+  }
 
   revalidatePath(`/projects/${projectSlug}`);
   revalidatePath("/admin/projects");
@@ -81,7 +84,10 @@ export async function deleteProjectComment(commentId: string) {
     .is("deleted_at", null)
     .select("id, project_slug")
     .maybeSingle();
-  if (error) throw new Error(`댓글을 삭제하지 못했습니다: ${error.message}`);
+  if (error) {
+    console.error(`Project 댓글 삭제 실패 (${commentId}):`, error.message);
+    throw new Error("댓글을 삭제하지 못했습니다. 잠시 후 다시 시도해주세요.");
+  }
   if (!data) throw new Error("삭제 권한이 없거나 이미 삭제된 댓글입니다.");
 
   revalidatePath(`/projects/${data.project_slug}`);
@@ -112,7 +118,10 @@ export async function updateProjectComment(
     .eq("id", commentId)
     .select("id, project_slug, author_id, author_name, body, created_at, updated_at")
     .maybeSingle();
-  if (error) throw new Error(`댓글을 수정하지 못했습니다: ${error.message}`);
+  if (error) {
+    console.error(`Project 댓글 수정 실패 (${commentId}):`, error.message);
+    throw new Error("댓글을 수정하지 못했습니다. 잠시 후 다시 시도해주세요.");
+  }
   if (!data) throw new Error("수정 권한이 없거나 삭제된 댓글입니다.");
 
   revalidatePath(`/projects/${data.project_slug}`);

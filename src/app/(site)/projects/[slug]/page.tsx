@@ -7,7 +7,7 @@ import { mdxComponents } from "@/components/mdx/MdxComponents";
 import { ProjectDemo } from "@/components/project/ProjectDemo";
 import { Badge } from "@/components/ui/Badge";
 import { CommentSection } from "@/components/log/CommentSection";
-import { getPublishedProjectBySlug } from "@/lib/projects-db";
+import { getPublishedProjectBySlug, incrementProjectView } from "@/lib/projects-db";
 import { getProjectComments } from "@/lib/comments-db";
 import { isAdminUser } from "@/lib/auth/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -41,11 +41,16 @@ export default async function ProjectDetail({ params }: PageProps<"/projects/[sl
   const project = await getPublishedProjectBySlug(slug);
   if (!project) notFound();
   // 댓글 목록과 현재 로그인·관리자 상태를 함께 읽어 공용 댓글 UI에 전달합니다.
+  // 조회수 증가는 화면에 보여줄 값이 아니라 실행만 하면 되므로 같은 Promise.all로 묶습니다.
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  const [comments, isAdmin] = await Promise.all([getProjectComments(slug), isAdminUser(user)]);
+  const [comments, isAdmin] = await Promise.all([
+    getProjectComments(slug),
+    isAdminUser(user),
+    incrementProjectView(slug),
+  ]);
   // 관리자 리치 에디터가 저장한 Markdown을 기존 Log와 같은 읽기 UI로 변환합니다.
   const { content } = await compileMDX({
     source: project.content,
@@ -78,6 +83,7 @@ export default async function ProjectDetail({ params }: PageProps<"/projects/[sl
           {project.period.start} — {project.period.end ?? "진행 중"}
         </span>
         <span>{project.techStack.join(" · ")}</span>
+        <span>조회 {project.viewCount.toLocaleString("ko-KR")}</span>
       </div>
       <ProjectDemo project={project} />
       <div className="mdx-content">{content}</div>

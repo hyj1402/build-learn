@@ -19,6 +19,8 @@ export type Project = {
   isPublished: boolean;
   // Home의 Featured Projects에 포함할지를 결정합니다.
   isFeatured: boolean;
+  // 상세 페이지가 조회될 때마다 DB 함수로 늘어나는 누적 조회수입니다.
+  viewCount: number;
   createdAt: string;
   updatedAt?: string;
   content: string;

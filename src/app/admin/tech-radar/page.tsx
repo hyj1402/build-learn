@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { AdminPagination } from "@/components/admin/AdminPagination";
+import { LogDateRangePicker } from "@/components/admin/LogDateRangePicker";
 import { createClient } from "@/lib/supabase/server";
 import { CollectButton } from "./CollectButton";
 import { DigestButton } from "./DigestButton";
@@ -19,6 +21,13 @@ const STATUS_TONE: Record<string, string> = {
   drafted: "published",
   dismissed: "private",
 };
+const SORT_OPTIONS = ["newest", "oldest", "title", "source"] as const;
+function stringParam(value: string | string[] | undefined) {
+  return typeof value === "string" ? value.trim() : "";
+}
+function dateParam(value: string | string[] | undefined) {
+  return typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : undefined;
+}
 
 type ArticleRow = {
   id: string;
@@ -42,28 +51,55 @@ function sourceName(row: ArticleRow): string {
  */
 export default async function TechRadarPage({ searchParams }: PageProps<"/admin/tech-radar">) {
   const values = await searchParams;
-  const pageValue = typeof values.page === "string" ? Number(values.page) : 1;
-  const page = Number.isInteger(pageValue) && pageValue > 0 ? pageValue : 1;
+  const pageValue = Number(stringParam(values.page));
+  const requestedPage = Number.isInteger(pageValue) && pageValue > 0 ? pageValue : 1;
+  const query = stringParam(values.q).toLocaleLowerCase("ko-KR");
+  const selectedStatus = stringParam(values.status);
+  const status = Object.hasOwn(STATUS_LABEL, selectedStatus) ? selectedStatus : "";
+  const sourceId = stringParam(values.source);
+  const dateFrom = dateParam(values.from);
+  const dateTo = dateParam(values.to);
+  const selectedSort = stringParam(values.sort);
+  const sort = SORT_OPTIONS.includes(selectedSort as (typeof SORT_OPTIONS)[number])
+    ? selectedSort
+    : "newest";
   const pageSize = 20;
-  const from = (page - 1) * pageSize;
 
   const supabase = await createClient();
-  const [{ data: sources }, { count: newCount }, { data: articles, error, count }] =
-    await Promise.all([
-      supabase.from("tech_sources").select("id, name").order("name"),
-      supabase
-        .from("tech_articles")
-        .select("*", { count: "exact", head: true })
-        .eq("status", "new"),
-      supabase
-        .from("tech_articles")
-        .select("id, title, url, summary, published_at, status, tech_sources(name)", {
-          count: "exact",
-        })
-        .order("published_at", { ascending: false, nullsFirst: false })
-        .range(from, from + pageSize - 1),
-    ]);
-  const totalPages = Math.max(1, Math.ceil((count ?? 0) / pageSize));
+  const [{ data: sources }, { count: newCount }, { data: articles, error }] = await Promise.all([
+    supabase.from("tech_sources").select("id, name").order("name"),
+    supabase.from("tech_articles").select("*", { count: "exact", head: true }).eq("status", "new"),
+    supabase
+      .from("tech_articles")
+      .select("id, title, url, summary, published_at, status, tech_sources(name)", {
+        count: "exact",
+      })
+      .order("published_at", { ascending: false, nullsFirst: false }),
+  ]);
+  const sourceByName = new Map((sources ?? []).map((source) => [source.name, source.id]));
+  const filteredArticles = (articles ?? []).filter((article) => {
+    const source = sourceName(article);
+    const searchable = `${article.title}\n${article.summary ?? ""}\n${source}`.toLocaleLowerCase(
+      "ko-KR",
+    );
+    const publishedDate = article.published_at?.slice(0, 10);
+    return (
+      (!query || searchable.includes(query)) &&
+      (!status || article.status === status) &&
+      (!sourceId || sourceByName.get(source) === sourceId) &&
+      (!dateFrom || (publishedDate && publishedDate >= dateFrom)) &&
+      (!dateTo || (publishedDate && publishedDate <= dateTo))
+    );
+  });
+  const sortedArticles = [...filteredArticles].sort((left, right) => {
+    if (sort === "oldest") return (left.published_at ?? "").localeCompare(right.published_at ?? "");
+    if (sort === "title") return left.title.localeCompare(right.title, "ko-KR");
+    if (sort === "source") return sourceName(left).localeCompare(sourceName(right), "ko-KR");
+    return (right.published_at ?? "").localeCompare(left.published_at ?? "");
+  });
+  const totalPages = Math.max(1, Math.ceil(sortedArticles.length / pageSize));
+  const page = Math.min(requestedPage, totalPages);
+  const paginatedArticles = sortedArticles.slice((page - 1) * pageSize, page * pageSize);
 
   return (
     <div className="admin-list-page">
@@ -103,6 +139,59 @@ export default async function TechRadarPage({ searchParams }: PageProps<"/admin/
 
       {error && <p className="admin-error-message">목록을 불러오지 못했습니다: {error.message}</p>}
 
+      <form action="/admin/tech-radar" className="admin-list-filter">
+        <label className="admin-list-filter-query">
+          <span>통합 검색</span>
+          <input defaultValue={query} name="q" placeholder="제목, 요약, 출처 검색" type="search" />
+        </label>
+        <label>
+          <span>수집 상태</span>
+          <select defaultValue={status} name="status">
+            <option value="">전체</option>
+            {Object.entries(STATUS_LABEL).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          <span>출처</span>
+          <select defaultValue={sourceId} name="source">
+            <option value="">전체</option>
+            {(sources ?? []).map((source) => (
+              <option key={source.id} value={source.id}>
+                {source.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="admin-list-filter-date">
+          <span>발행일</span>
+          <LogDateRangePicker from={dateFrom} to={dateTo} />
+        </label>
+        <label>
+          <span>정렬</span>
+          <select defaultValue={sort} name="sort">
+            <option value="newest">발행일 최신순</option>
+            <option value="oldest">발행일 오래된순</option>
+            <option value="title">제목 가나다순</option>
+            <option value="source">출처 가나다순</option>
+          </select>
+        </label>
+        <div className="admin-list-filter-actions">
+          <button className="admin-action-button" type="submit">
+            검색
+          </button>
+          <Link className="admin-action-button admin-action-outline" href="/admin/tech-radar">
+            초기화
+          </Link>
+        </div>
+      </form>
+      <p className="admin-list-filter-result" aria-live="polite">
+        조건에 맞는 수집 글 <strong>{filteredArticles.length}개</strong>
+      </p>
+
       <div
         className="admin-table-wrap admin-table-wrap-soft"
         style={{ marginTop: "var(--space-5)" }}
@@ -120,7 +209,7 @@ export default async function TechRadarPage({ searchParams }: PageProps<"/admin/
             </tr>
           </thead>
           <tbody>
-            {(articles ?? []).map((article) => {
+            {paginatedArticles.map((article) => {
               const draftHref = `/admin/logs/new?${new URLSearchParams({
                 title: article.title,
                 summary: article.summary ?? "",
@@ -159,10 +248,12 @@ export default async function TechRadarPage({ searchParams }: PageProps<"/admin/
                 </tr>
               );
             })}
-            {(articles ?? []).length === 0 && (
+            {paginatedArticles.length === 0 && (
               <tr>
                 <td colSpan={5} className="admin-empty-cell">
-                  아직 수집한 글이 없습니다. 위 버튼으로 수집해보세요.
+                  {articles?.length
+                    ? "조건에 맞는 수집 글이 없습니다."
+                    : "아직 수집한 글이 없습니다. 위 버튼으로 수집해보세요."}
                 </td>
               </tr>
             )}
@@ -173,6 +264,7 @@ export default async function TechRadarPage({ searchParams }: PageProps<"/admin/
         basePath="/admin/tech-radar"
         currentPage={page}
         label="Tech Radar 목록 페이지"
+        searchParams={{ q: query, status, source: sourceId, from: dateFrom, to: dateTo, sort }}
         totalPages={totalPages}
       />
     </div>

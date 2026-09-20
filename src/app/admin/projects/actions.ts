@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { isAdminUser } from "@/lib/auth/admin";
 import { createUniqueSlug } from "@/lib/content-slug";
 import { createClient } from "@/lib/supabase/server";
+import type { AdminContentFormState } from "../form-state";
 
 const publicationStatuses = ["draft", "private", "published"];
 const projectStatuses = ["planned", "in_progress", "completed", "archived"];
@@ -60,9 +61,27 @@ function revalidate(slug?: string) {
   revalidatePath("/admin/projects");
   if (slug) revalidatePath(`/projects/${slug}`);
 }
-export async function createProject(formData: FormData) {
+/**
+ * useActionState용 시그니처(prevState, formData)입니다. 검증·DB 실패는 던지지 않고
+ * 에러 상태를 돌려줘 ProjectForm이 화면 안에서 바로 보여줄 수 있게 합니다.
+ * redirect()는 내부적으로 특수한 예외를 던지는 방식으로 동작하므로, 반드시 try/catch 밖에서 호출합니다.
+ */
+export async function createProject(
+  _prevState: AdminContentFormState,
+  formData: FormData,
+): Promise<AdminContentFormState> {
   const { supabase, user } = await requireAdmin();
-  const project = projectValues(formData);
+
+  let project: ReturnType<typeof projectValues>;
+  try {
+    project = projectValues(formData);
+  } catch (err) {
+    return {
+      status: "error",
+      message: err instanceof Error ? err.message : "입력값을 확인해주세요.",
+    };
+  }
+
   const slug = await createUniqueSlug(supabase, "projects", project.slug, project.title, "project");
   const { error } = await supabase.from("projects").insert({
     ...project,
@@ -70,19 +89,36 @@ export async function createProject(formData: FormData) {
     author_id: user.id,
     published_at: project.publication_status === "published" ? new Date().toISOString() : null,
   });
-  if (error) throw new Error(`저장에 실패했습니다: ${error.message}`);
+  if (error) {
+    console.error(`프로젝트 저장 실패 (slug=${slug}):`, error.message);
+    return { status: "error", message: "저장에 실패했습니다. 잠시 후 다시 시도해주세요." };
+  }
   revalidate();
-  redirect("/admin/projects");
+  redirect("/admin/projects?notice=project-saved");
 }
-export async function updateProject(id: string, formData: FormData) {
+export async function updateProject(
+  id: string,
+  _prevState: AdminContentFormState,
+  formData: FormData,
+): Promise<AdminContentFormState> {
   const { supabase, user } = await requireAdmin();
-  const project = projectValues(formData);
+
+  let project: ReturnType<typeof projectValues>;
+  try {
+    project = projectValues(formData);
+  } catch (err) {
+    return {
+      status: "error",
+      message: err instanceof Error ? err.message : "입력값을 확인해주세요.",
+    };
+  }
+
   const { data: current } = await supabase
     .from("projects")
     .select("author_id, published_at, thumbnail_path, slug")
     .eq("id", id)
     .maybeSingle();
-  if (!current) throw new Error("수정할 프로젝트를 찾을 수 없습니다.");
+  if (!current) return { status: "error", message: "수정할 프로젝트를 찾을 수 없습니다." };
   const slug = await createUniqueSlug(
     supabase,
     "projects",
@@ -104,14 +140,17 @@ export async function updateProject(id: string, formData: FormData) {
       updated_at: new Date().toISOString(),
     })
     .eq("id", id);
-  if (error) throw new Error(`수정에 실패했습니다: ${error.message}`);
+  if (error) {
+    console.error(`프로젝트 수정 실패 (id=${id}):`, error.message);
+    return { status: "error", message: "수정에 실패했습니다. 잠시 후 다시 시도해주세요." };
+  }
   // 새 경로가 정상적으로 DB에 저장된 뒤에만 이전 파일을 지워, 교체 중 이미지를 잃지 않게 합니다.
   if (current.thumbnail_path !== project.thumbnail_path) {
     const oldPath = contentImagePath(current.thumbnail_path);
     if (oldPath) await supabase.storage.from("content-images").remove([oldPath]);
   }
   revalidate(project.slug);
-  redirect("/admin/projects");
+  redirect("/admin/projects?notice=project-saved");
 }
 export async function deleteProject(id: string) {
   const { supabase } = await requireAdmin();

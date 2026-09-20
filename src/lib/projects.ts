@@ -18,6 +18,8 @@ function toProject(item: ReturnType<typeof readContentFiles>[number]): Project {
     downloadUrl: item.data.downloadUrl,
     isPublished: Boolean(item.data.isPublished),
     isFeatured: Boolean(item.data.isFeatured),
+    // MDX 기반 레거시 경로는 조회수를 추적하지 않으므로 0으로 둡니다.
+    viewCount: 0,
     createdAt: String(item.data.createdAt),
     updatedAt: item.data.updatedAt,
     content: item.content,

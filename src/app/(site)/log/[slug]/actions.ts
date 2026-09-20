@@ -67,7 +67,10 @@ export async function addLogComment(logSlug: string, body: string): Promise<LogC
     .select("id, log_slug, author_id, author_name, body, created_at, updated_at")
     .single();
 
-  if (error) throw new Error(`댓글을 저장하지 못했습니다: ${error.message}`);
+  if (error) {
+    console.error(`Log 댓글 저장 실패 (${logSlug}):`, error.message);
+    throw new Error("댓글을 저장하지 못했습니다. 잠시 후 다시 시도해주세요.");
+  }
 
   revalidatePath(`/log/${logSlug}`);
 
@@ -94,7 +97,10 @@ export async function deleteLogComment(commentId: string) {
     .select("id, log_slug")
     .maybeSingle();
 
-  if (error) throw new Error(`댓글을 삭제하지 못했습니다: ${error.message}`);
+  if (error) {
+    console.error(`Log 댓글 삭제 실패 (${commentId}):`, error.message);
+    throw new Error("댓글을 삭제하지 못했습니다. 잠시 후 다시 시도해주세요.");
+  }
   if (!data) throw new Error("삭제 권한이 없거나 이미 삭제된 댓글입니다.");
 
   // 브라우저가 보내 준 주소가 아니라 실제 삭제된 행의 slug를 사용해 정확한 글만 갱신합니다.
@@ -123,7 +129,10 @@ export async function updateLogComment(commentId: string, body: string): Promise
     .eq("id", commentId)
     .select("id, log_slug, author_id, author_name, body, created_at, updated_at")
     .maybeSingle();
-  if (error) throw new Error(`댓글을 수정하지 못했습니다: ${error.message}`);
+  if (error) {
+    console.error(`Log 댓글 수정 실패 (${commentId}):`, error.message);
+    throw new Error("댓글을 수정하지 못했습니다. 잠시 후 다시 시도해주세요.");
+  }
   if (!data) throw new Error("수정 권한이 없거나 삭제된 댓글입니다.");
 
   revalidatePath(`/log/${data.log_slug}`);

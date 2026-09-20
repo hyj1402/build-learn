@@ -376,3 +376,103 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ── 본문 편집기: 편집/미리보기 전환 ───────────────────── */
+
+.rich-text-editor-modes {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  padding: 3px;
+}
+.rich-text-editor-modes button {
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  padding: 6px 14px;
+  color: var(--muted);
+  font:
+    700 13px/1 var(--font-display),
+    sans-serif;
+  cursor: pointer;
+}
+.rich-text-editor-modes button.is-active {
+  background: var(--emphasis-bg);
+  color: var(--emphasis-text);
+}
+.rich-text-editor-preview {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--background);
+  padding: var(--space-3);
+}
+.rich-text-editor-preview-note {
+  margin: 0 0 var(--space-2);
+  color: var(--muted);
+  font-size: 12px;
+}
+.rich-text-editor-preview-empty {
+  color: var(--muted);
+  text-align: center;
+}
+.rich-text-editor-pane[hidden] {
+  display: none;
+}
+
+/* ── AI 글쓰기 피드백 패널 ─────────────────────────────── */
+
+.ai-feedback {
+  margin-top: var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+  padding: var(--space-3);
+}
+.ai-feedback-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.ai-feedback-head h3 {
+  margin: 0 0 4px;
+  font-size: 15px;
+}
+.ai-feedback-head p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+.ai-feedback-body {
+  margin-top: var(--space-3);
+  border-top: 1px solid var(--line);
+  padding-top: var(--space-2);
+  font-size: 14px;
+  line-height: 1.7;
+}
+.ai-feedback-summary {
+  margin: 0 0 var(--space-2);
+  font-weight: 700;
+}
+.ai-feedback-body h4 {
+  margin: var(--space-2) 0 6px;
+  color: var(--accent);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+}
+.ai-feedback-body ul {
+  margin: 0;
+  padding-left: 18px;
+}
+.ai-feedback-body li strong {
+  display: block;
+}
+.ai-feedback-body li span {
+  color: var(--muted);
+}
+.ai-feedback-note {
+  margin: var(--space-2) 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}

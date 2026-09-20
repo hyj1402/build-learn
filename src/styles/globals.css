@@ -697,6 +697,234 @@ a {
   margin-inline: auto;
 }
 
+/* Project 상세는 한 번 읽고 끝나는 Log보다 오래 갱신하는 운영 문서에 가깝습니다.
+   본문 폭을 줄이고 구역의 시작을 선명하게 해 현재 상태·진행 기록을 빠르게 훑을 수 있게 합니다. */
+.project-detail .mdx-content {
+  width: min(100%, 760px);
+  margin-inline: auto;
+  padding-top: var(--space-7);
+  font-size: 18px;
+  line-height: 1.85;
+  letter-spacing: -0.012em;
+  word-break: keep-all;
+}
+.project-detail .mdx-content h2 {
+  margin: var(--space-10) 0 var(--space-3);
+  border-top: 1px solid var(--line);
+  padding-top: var(--space-5);
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(26px, 3.5vw, 32px);
+  line-height: 1.25;
+}
+.project-detail .mdx-content h2:first-child {
+  margin-top: 0;
+  border-top: 0;
+  padding-top: 0;
+}
+.project-detail .mdx-content h3 {
+  margin-top: var(--space-6);
+  color: var(--muted);
+  font-family: var(--font-display), sans-serif;
+  font-size: 15px;
+  letter-spacing: 0.08em;
+}
+.project-detail .mdx-content p {
+  margin-bottom: 1.45em;
+}
+.project-detail .mdx-content ul,
+.project-detail .mdx-content ol {
+  display: grid;
+  gap: 8px;
+  margin-block: var(--space-4);
+  padding: var(--space-3) var(--space-4) var(--space-3) 2.7em;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--foreground) 4%, transparent);
+}
+.project-detail .mdx-content li {
+  margin: 0;
+}
+
+/* ── 공통 로딩·완료 알림 ───────────────────────────────────
+   실제 데이터의 형태를 닮은 뼈대를 먼저 보여주면, 빈 화면보다 현재 요청이 진행 중임을 쉽게 알 수 있습니다. */
+.loading-page,
+.admin-loading-page {
+  padding-block: var(--space-8);
+}
+.loading-skeleton-message {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.loading-skeleton-block {
+  display: block;
+  min-height: 1em;
+  border-radius: 7px;
+  background: linear-gradient(90deg, var(--line) 20%, var(--surface) 45%, var(--line) 70%);
+  background-size: 220% 100%;
+  animation: loading-skeleton-shimmer 1.3s ease-in-out infinite;
+}
+.loading-page-heading {
+  display: grid;
+  gap: var(--space-3);
+  max-width: 680px;
+  margin-bottom: var(--space-7);
+}
+.loading-skeleton-eyebrow {
+  width: 92px;
+  min-height: 12px;
+}
+.loading-skeleton-title {
+  width: min(100%, 410px);
+  min-height: clamp(38px, 5vw, 56px);
+}
+.loading-skeleton-summary {
+  width: min(100%, 580px);
+  min-height: 20px;
+}
+.loading-card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+.loading-content-card {
+  display: grid;
+  gap: var(--space-2);
+  min-height: 300px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  padding: var(--space-3);
+}
+.loading-skeleton-image {
+  min-height: 138px;
+  margin: calc(var(--space-3) * -1);
+  margin-bottom: var(--space-2);
+  border-radius: 0;
+}
+.loading-skeleton-label {
+  width: 64px;
+  min-height: 12px;
+}
+.loading-skeleton-card-title {
+  width: 78%;
+  min-height: 25px;
+}
+.loading-skeleton-copy {
+  min-height: 14px;
+}
+.loading-skeleton-copy-short {
+  width: 62%;
+}
+.admin-loading-page {
+  display: grid;
+  gap: var(--space-4);
+}
+.admin-loading-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.loading-skeleton-admin-title {
+  width: 170px;
+  min-height: 36px;
+}
+.loading-skeleton-admin-action {
+  width: 108px;
+  min-height: 42px;
+}
+.admin-loading-filter {
+  display: grid;
+  grid-template-columns: 1.6fr repeat(2, minmax(100px, 0.6fr));
+  gap: var(--space-2);
+}
+.admin-loading-filter .loading-skeleton-block {
+  min-height: 42px;
+}
+.admin-loading-table {
+  display: grid;
+  gap: 1px;
+  border: 1px solid var(--line);
+  background: var(--line);
+}
+.admin-loading-row {
+  display: grid;
+  grid-template-columns: minmax(160px, 1.8fr) minmax(90px, 0.6fr) minmax(80px, 0.5fr) 90px;
+  gap: var(--space-3);
+  min-height: 60px;
+  align-items: center;
+  background: var(--surface);
+  padding: var(--space-2) var(--space-3);
+}
+.admin-loading-row .loading-skeleton-block {
+  min-height: 14px;
+}
+.admin-loading-row .loading-skeleton-block:nth-child(2) {
+  width: 70%;
+}
+.admin-loading-row .loading-skeleton-block:nth-child(3) {
+  width: 58%;
+}
+.admin-loading-row .loading-skeleton-block:last-child {
+  width: 65%;
+  justify-self: end;
+}
+.action-notice {
+  position: fixed;
+  z-index: 20;
+  right: max(20px, env(safe-area-inset-right));
+  bottom: max(20px, env(safe-area-inset-bottom));
+  display: flex;
+  max-width: min(400px, calc(100vw - 40px));
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--foreground);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: 8px 8px 0 var(--shadow-color);
+  padding: 12px 14px;
+  color: var(--foreground);
+}
+.action-notice > span {
+  display: grid;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--accent);
+  color: white;
+  font-size: 13px;
+  font-weight: 800;
+}
+.action-notice p {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+}
+.action-notice button {
+  border: 0;
+  background: transparent;
+  padding: 4px;
+  color: var(--muted);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.action-notice button:hover {
+  color: var(--foreground);
+  text-decoration: underline;
+}
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes loading-skeleton-shimmer {
+    to {
+      background-position: -220% 0;
+    }
+  }
+}
+
 /* Log 상세 페이지 하단의 댓글 목록·작성 폼입니다. */
 .comment-section {
   padding-top: var(--space-6);
@@ -720,9 +948,16 @@ a {
   list-style: none;
 }
 .comment-item {
+  /* 관리자 목록의 해시 링크가 긴 글 아래 댓글까지 정확히 이동하고, 선택된 대상을 눈에 띄게 표시합니다. */
+  scroll-margin-top: calc(var(--space-6) + 72px);
   padding: var(--space-3);
   border: 1px solid var(--line);
   background: var(--surface);
+}
+.comment-item:target,
+.comment-item:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
 }
 .comment-item-head {
   display: flex;
@@ -2119,6 +2354,297 @@ a {
   background: #fffefa;
   box-shadow: 0 8px 20px rgb(37 35 31 / 4%);
 }
+.admin-list-filter {
+  display: grid;
+  grid-template-columns: minmax(220px, 2fr) repeat(4, minmax(130px, 1fr)) auto;
+  gap: 12px;
+  align-items: end;
+  margin: 0 0 12px;
+  padding: 16px;
+  border: 1px solid #e3e0d8;
+  border-radius: 14px;
+  background: #fffefa;
+}
+.admin-list-filter label {
+  display: grid;
+  gap: 6px;
+  color: #77726a;
+  font-size: 12px;
+  font-weight: 700;
+}
+.admin-list-filter input,
+.admin-list-filter select {
+  width: 100%;
+  min-height: 38px;
+  border: 1px solid #d8d3ca;
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  padding: 7px 9px;
+  font: inherit;
+}
+.admin-list-filter-actions {
+  display: flex;
+  gap: 6px;
+}
+.admin-list-filter-actions .admin-action-button {
+  min-height: 38px;
+  white-space: nowrap;
+}
+.admin-list-filter-date {
+  min-width: 205px;
+}
+.admin-date-range-picker {
+  position: relative;
+}
+.admin-date-range-trigger {
+  display: flex;
+  width: 100%;
+  min-height: 38px;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #d8d3ca;
+  border-radius: 8px;
+  background: #fff;
+  padding: 7px 9px;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.admin-date-range-trigger:hover,
+.admin-date-range-trigger[aria-expanded="true"] {
+  border-color: #d27652;
+  box-shadow: 0 0 0 3px rgb(210 118 82 / 10%);
+}
+.admin-date-range-trigger svg {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 auto;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+.admin-date-range-trigger > span:nth-child(2) {
+  overflow: hidden;
+  color: #5f5a52;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.admin-date-range-chevron {
+  width: 7px;
+  height: 7px;
+  margin-left: auto;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg) translateY(-2px);
+}
+.admin-date-range-popover {
+  position: absolute;
+  z-index: 12;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 318px;
+  border: 1px solid #ded8ce;
+  border-radius: 14px;
+  background: #fffefa;
+  box-shadow: 0 18px 38px rgb(37 35 31 / 16%);
+  padding: 14px;
+}
+.admin-date-range-popover .rdp-root {
+  --rdp-accent-color: #a94d2b;
+  --rdp-accent-background-color: #fff0e9;
+  margin: 0;
+}
+.admin-date-range-popover .rdp-month {
+  width: 100%;
+}
+.admin-date-range-popover .rdp-month_caption {
+  display: flex;
+  height: 34px;
+  align-items: center;
+  justify-content: center;
+}
+/* dropdown 캡션에서는 접근성용 기본 제목이 함께 렌더링되므로, 보이는 연·월 선택 메뉴와 중복되지 않게 숨깁니다. */
+.admin-date-range-popover .rdp-caption_label {
+  display: none;
+}
+.admin-date-range-popover .rdp-dropdowns {
+  display: flex;
+  gap: 2px;
+  font-family: var(--font-display), sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+}
+.admin-date-range-popover .rdp-dropdown_root {
+  position: relative;
+}
+.admin-date-range-popover .rdp-dropdown {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 4px 18px 4px 4px;
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+}
+.admin-date-range-popover .rdp-dropdown_root::after {
+  position: absolute;
+  top: 50%;
+  right: 5px;
+  width: 5px;
+  height: 5px;
+  border-right: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+  content: "";
+  pointer-events: none;
+  transform: translateY(-65%) rotate(45deg);
+}
+.admin-date-range-popover .rdp-nav {
+  position: absolute;
+  top: 13px;
+  right: 13px;
+  display: flex;
+  gap: 4px;
+}
+.admin-date-range-popover .rdp-button_previous,
+.admin-date-range-popover .rdp-button_next {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border: 1px solid #e1dcd4;
+  border-radius: 7px;
+  background: transparent;
+  color: #625b54;
+  cursor: pointer;
+}
+.admin-date-range-popover .rdp-button_previous:hover,
+.admin-date-range-popover .rdp-button_next:hover {
+  border-color: #d27652;
+  background: #fff0e9;
+  color: #a94d2b;
+}
+.admin-date-range-popover .rdp-chevron {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+}
+.admin-date-range-popover .rdp-month_grid {
+  width: 100%;
+  border-collapse: collapse;
+}
+.admin-date-range-popover .rdp-weekday {
+  height: 32px;
+  color: #938d83;
+  font-size: 11px;
+  font-weight: 800;
+  text-align: center;
+}
+.admin-date-range-popover .rdp-day {
+  width: 14.285%;
+  height: 37px;
+  padding: 0;
+  text-align: center;
+}
+.admin-date-range-popover .rdp-day_button {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #37332e;
+  font:
+    600 13px/1 var(--font-sans),
+    sans-serif;
+  cursor: pointer;
+}
+.admin-date-range-popover .rdp-day_button:hover {
+  background: #f6eee6;
+  color: #8f3e21;
+}
+.admin-date-range-popover .rdp-outside .rdp-day_button {
+  color: #c0bbb3;
+}
+.admin-date-range-popover .rdp-today .rdp-day_button {
+  box-shadow: inset 0 0 0 1px #d27652;
+  color: #a94d2b;
+}
+.admin-date-range-popover .rdp-range_middle {
+  background: #fff0e9;
+}
+.admin-date-range-popover .rdp-range_middle .rdp-day_button {
+  border-radius: 0;
+}
+.admin-date-range-popover .rdp-range_start,
+.admin-date-range-popover .rdp-range_end {
+  background: #fff0e9;
+}
+.admin-date-range-popover .rdp-range_start .rdp-day_button,
+.admin-date-range-popover .rdp-range_end .rdp-day_button,
+.admin-date-range-popover .rdp-selected:not(.rdp-range_middle) .rdp-day_button {
+  background: #a94d2b;
+  color: #fff;
+}
+.admin-date-range-popover .rdp-focused .rdp-day_button:focus-visible,
+.admin-date-range-popover .rdp-day_button:focus-visible,
+.admin-date-range-popover .rdp-button_previous:focus-visible,
+.admin-date-range-popover .rdp-button_next:focus-visible {
+  outline: 3px solid rgb(210 118 82 / 35%);
+  outline-offset: 2px;
+}
+.admin-date-range-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  border-top: 1px solid #ece7df;
+  margin-top: 9px;
+  padding-top: 11px;
+}
+.admin-date-range-presets button {
+  border: 1px solid #e1dcd4;
+  border-radius: 999px;
+  background: #faf7f0;
+  padding: 5px 9px;
+  color: #625b54;
+  font:
+    700 11px/1 var(--font-sans),
+    sans-serif;
+  cursor: pointer;
+}
+.admin-date-range-presets button:hover {
+  border-color: #d27652;
+  background: #fff0e9;
+  color: #a94d2b;
+}
+.admin-date-range-help {
+  margin: 10px 0 0;
+  color: #77726a;
+  font-size: 11px;
+  text-align: center;
+}
+.admin-list-filter-result {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.admin-list-filter-result strong,
+.admin-number-value {
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.admin-category-label {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+.admin-muted-value {
+  color: var(--muted);
+  font-size: 13px;
+}
 .admin-table-soft {
   min-width: 760px;
 }
@@ -2987,6 +3513,15 @@ a {
   .admin-list-toolbar-actions {
     flex-wrap: wrap;
   }
+  .admin-list-filter {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .admin-list-filter-query {
+    grid-column: 1 / -1;
+  }
+  .admin-list-filter-actions {
+    grid-column: 1 / -1;
+  }
   .admin-pagination {
     justify-content: center;
     overflow-x: auto;
@@ -3034,5 +3569,8 @@ a {
   }
   .log-detail .mdx-content blockquote {
     font-size: 18px;
+  }
+  .admin-list-filter {
+    grid-template-columns: 1fr;
   }
 }

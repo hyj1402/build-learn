@@ -13,6 +13,8 @@ function toLog(item: ReturnType<typeof readContentFiles>[number]): Log {
     isPublished: Boolean(item.data.isPublished),
     createdAt: String(item.data.createdAt),
     updatedAt: item.data.updatedAt,
+    // MDX 기반 레거시 경로는 조회수를 추적하지 않으므로 0으로 둡니다.
+    viewCount: 0,
     order: typeof item.data.order === "number" ? item.data.order : undefined,
     content: item.content,
   };

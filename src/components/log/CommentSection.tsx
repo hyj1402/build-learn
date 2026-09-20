@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useTransition, type FormEvent } from "react";
+import { useEffect, useState, useTransition, type FormEvent } from "react";
 import type { ContentComment } from "@/lib/comments-db";
 import { ConfirmButton } from "@/components/ui/ConfirmButton";
 import { addLogComment, deleteLogComment, updateLogComment } from "@/app/(site)/log/[slug]/actions";
@@ -53,6 +53,14 @@ export function CommentSection({
   // 브라우저 기본 required 팝업 대신, 우리 디자인에 맞는 안내 문구·테두리로 필수 입력을 알립니다.
   const [isDraftInvalid, setIsDraftInvalid] = useState(false);
   const [isPending, startTransition] = useTransition();
+
+  // 관리자 목록에서 `#comment-댓글ID` 주소로 오면 브라우저의 기본 스크롤 뒤 해당 댓글에 키보드 포커스도 둡니다.
+  // 긴 글에서 현재 관리 중인 댓글을 화면·보조기기 모두 즉시 알 수 있게 하는 클라이언트 전용 동작입니다.
+  useEffect(() => {
+    const targetId = decodeURIComponent(window.location.hash.slice(1));
+    if (!targetId.startsWith("comment-")) return;
+    document.getElementById(targetId)?.focus({ preventScroll: true });
+  }, []);
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -134,7 +142,12 @@ export function CommentSection({
       ) : (
         <ul className="comment-list">
           {comments.map((comment) => (
-            <li key={comment.id} className="comment-item">
+            <li
+              key={comment.id}
+              id={`comment-${comment.id}`}
+              className="comment-item"
+              tabIndex={-1}
+            >
               <div className="comment-item-head">
                 <strong>{comment.authorName}</strong>
                 <div className="comment-item-dates">

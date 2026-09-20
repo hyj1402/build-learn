@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
+import { AdminActionNotice } from "@/components/admin/AdminActionNotice";
 import { AdminSidebarNav } from "@/components/admin/AdminSidebarNav";
 import { LogoutButton } from "@/components/auth/LogoutButton";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
@@ -84,6 +86,10 @@ export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
       </aside>
 
       <main className="admin-main" id="main-content">
+        {/* URL 검색값을 읽는 Client Component는 Suspense로 감싸 정적 레이아웃을 막지 않습니다. */}
+        <Suspense fallback={null}>
+          <AdminActionNotice />
+        </Suspense>
         {children}
       </main>
     </div>

@@ -1,7 +1,12 @@
+"use client";
+
+// 저장 실패를 폼 안에서 바로 보여줘야 하므로(useActionState) Client Component로 둡니다.
+import { useActionState } from "react";
 import { AdminSelect } from "@/components/admin/AdminSelect";
 import { AutoSlugField } from "@/components/admin/AutoSlugField";
 import { ProjectImageUpload } from "@/components/project/ProjectImageUpload";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
+import { IDLE_STATE, type AdminContentFormState } from "../form-state";
 
 type Values = {
   slug: string;
@@ -24,13 +29,14 @@ export function ProjectForm({
   defaultValues,
   submitLabel,
 }: {
-  action: (formData: FormData) => void;
+  action: (prevState: AdminContentFormState, formData: FormData) => Promise<AdminContentFormState>;
   categories: { id: string; name: string }[];
   defaultValues?: Values;
   submitLabel: string;
 }) {
+  const [state, formAction, isPending] = useActionState(action, IDLE_STATE);
   return (
-    <form action={action} className="admin-form">
+    <form action={formAction} className="admin-form">
       <div className="admin-form-row">
         <Field label="제목 *">
           <input id="title" name="title" required defaultValue={defaultValues?.title} />
@@ -108,9 +114,14 @@ export function ProjectForm({
         <ProjectImageUpload defaultValue={defaultValues?.thumbnail_path ?? ""} />
       </div>
       <RichTextEditor defaultValue={defaultValues?.body_text} folder="projects/inline" />
-      <button type="submit" className="admin-primary-action">
-        {submitLabel}
+      <button type="submit" className="admin-primary-action" disabled={isPending}>
+        {isPending ? "저장 중..." : submitLabel}
       </button>
+      {state.status === "error" && (
+        <p className="login-message login-message-error" role="alert">
+          {state.message}
+        </p>
+      )}
     </form>
   );
 }

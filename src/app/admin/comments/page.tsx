@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AdminCommentActions } from "@/components/admin/AdminCommentActions";
+import { LogDateRangePicker } from "@/components/admin/LogDateRangePicker";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = { title: "댓글 관리" };
@@ -10,11 +11,27 @@ const STATUS_LABEL: Record<string, string> = {
   private: "비공개",
   published: "공개",
 };
+const SORT_OPTIONS = ["newest", "oldest", "author"] as const;
+function stringParam(value: string | string[] | undefined) {
+  return typeof value === "string" ? value.trim() : "";
+}
+function dateParam(value: string | string[] | undefined) {
+  return typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : undefined;
+}
 
 /** 모든 Log 댓글을 최신순으로 보여 주고, `?log=slug`가 있으면 해당 글의 댓글만 좁혀 봅니다. */
 export default async function AdminCommentsPage({ searchParams }: PageProps<"/admin/comments">) {
   const values = await searchParams;
-  const selectedLog = typeof values.log === "string" ? values.log : "";
+  const selectedLog = stringParam(values.log);
+  const query = stringParam(values.q).toLocaleLowerCase("ko-KR");
+  const selectedVisibility = stringParam(values.visibility);
+  const visibility = ["active", "deleted"].includes(selectedVisibility) ? selectedVisibility : "";
+  const dateFrom = dateParam(values.from);
+  const dateTo = dateParam(values.to);
+  const selectedSort = stringParam(values.sort);
+  const sort = SORT_OPTIONS.includes(selectedSort as (typeof SORT_OPTIONS)[number])
+    ? selectedSort
+    : "newest";
   const supabase = await createClient();
 
   let commentsQuery = supabase
@@ -30,6 +47,26 @@ export default async function AdminCommentsPage({ searchParams }: PageProps<"/ad
     : { data: [] };
   const logsBySlug = new Map((logs ?? []).map((log) => [log.slug, log]));
   const selectedTitle = selectedLog ? logsBySlug.get(selectedLog)?.title : null;
+  const filteredComments = (comments ?? []).filter((comment) => {
+    const log = logsBySlug.get(comment.log_slug);
+    const searchable =
+      `${log?.title ?? comment.log_slug}\n${comment.author_name}\n${comment.body}`.toLocaleLowerCase(
+        "ko-KR",
+      );
+    const createdDate = comment.created_at.slice(0, 10);
+    return (
+      (!query || searchable.includes(query)) &&
+      (!visibility ||
+        (visibility === "deleted" ? Boolean(comment.deleted_at) : !comment.deleted_at)) &&
+      (!dateFrom || createdDate >= dateFrom) &&
+      (!dateTo || createdDate <= dateTo)
+    );
+  });
+  const sortedComments = [...filteredComments].sort((left, right) => {
+    if (sort === "oldest") return left.created_at.localeCompare(right.created_at);
+    if (sort === "author") return left.author_name.localeCompare(right.author_name, "ko-KR");
+    return right.created_at.localeCompare(left.created_at);
+  });
 
   return (
     <div className="admin-list-page">
@@ -39,8 +76,8 @@ export default async function AdminCommentsPage({ searchParams }: PageProps<"/ad
           <h1>댓글 관리</h1>
           <p>
             {selectedLog
-              ? `“${selectedTitle ?? selectedLog}” 글의 댓글 ${(comments ?? []).length}건입니다.`
-              : `삭제된 댓글을 포함해 모든 학습 기록의 댓글 ${(comments ?? []).length}건입니다.`}
+              ? `“${selectedTitle ?? selectedLog}” 글의 댓글 ${filteredComments.length}건입니다.`
+              : `삭제된 댓글을 포함해 모든 학습 기록의 댓글 ${filteredComments.length}건입니다.`}
           </p>
         </div>
         {selectedLog && (
@@ -51,6 +88,54 @@ export default async function AdminCommentsPage({ searchParams }: PageProps<"/ad
       </header>
 
       {error && <p className="admin-error-message">댓글을 불러오지 못했습니다: {error.message}</p>}
+
+      <form action="/admin/comments" className="admin-list-filter">
+        {selectedLog && <input name="log" type="hidden" value={selectedLog} />}
+        <label className="admin-list-filter-query">
+          <span>통합 검색</span>
+          <input
+            defaultValue={query}
+            name="q"
+            placeholder="글 제목, 작성자, 댓글 내용 검색"
+            type="search"
+          />
+        </label>
+        <label>
+          <span>댓글 상태</span>
+          <select defaultValue={visibility} name="visibility">
+            <option value="">전체</option>
+            <option value="active">정상</option>
+            <option value="deleted">삭제됨</option>
+          </select>
+        </label>
+        <label className="admin-list-filter-date">
+          <span>작성일</span>
+          <LogDateRangePicker from={dateFrom} to={dateTo} />
+        </label>
+        <label>
+          <span>정렬</span>
+          <select defaultValue={sort} name="sort">
+            <option value="newest">작성일 최신순</option>
+            <option value="oldest">작성일 오래된순</option>
+            <option value="author">작성자 가나다순</option>
+          </select>
+        </label>
+        <div className="admin-list-filter-actions">
+          <button className="admin-action-button" type="submit">
+            검색
+          </button>
+          <Link
+            className="admin-action-button admin-action-outline"
+            href={
+              selectedLog
+                ? `/admin/comments?log=${encodeURIComponent(selectedLog)}`
+                : "/admin/comments"
+            }
+          >
+            초기화
+          </Link>
+        </div>
+      </form>
 
       <div className="admin-table-wrap admin-table-wrap-soft">
         <table className="admin-table admin-table-soft admin-comments-table">
@@ -66,13 +151,16 @@ export default async function AdminCommentsPage({ searchParams }: PageProps<"/ad
             </tr>
           </thead>
           <tbody>
-            {(comments ?? []).map((comment) => {
+            {sortedComments.map((comment) => {
               const log = logsBySlug.get(comment.log_slug);
               return (
                 <tr key={comment.id} className={comment.deleted_at ? "is-deleted" : undefined}>
                   <td>
                     {log ? (
-                      <Link className="admin-row-title" href={`/admin/logs/${log.id}/edit`}>
+                      <Link
+                        className="admin-row-title"
+                        href={`/log/${log.slug}#comment-${comment.id}`}
+                      >
                         {log.title}
                       </Link>
                     ) : (
@@ -117,12 +205,14 @@ export default async function AdminCommentsPage({ searchParams }: PageProps<"/ad
                 </tr>
               );
             })}
-            {(comments ?? []).length === 0 && (
+            {filteredComments.length === 0 && (
               <tr>
                 <td className="admin-empty-cell" colSpan={5}>
                   {selectedLog
                     ? "이 학습 기록에는 댓글이 없습니다."
-                    : "아직 등록된 댓글이 없습니다."}
+                    : comments?.length
+                      ? "조건에 맞는 댓글이 없습니다."
+                      : "아직 등록된 댓글이 없습니다."}
                 </td>
               </tr>
             )}

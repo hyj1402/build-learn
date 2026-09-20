@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { AdminPagination } from "@/components/admin/AdminPagination";
 import { AdminConfirmButton } from "@/components/admin/AdminConfirmButton";
+import { LogDateRangePicker } from "@/components/admin/LogDateRangePicker";
 import { createClient } from "@/lib/supabase/server";
 import { deleteProject } from "./actions";
 export const metadata: Metadata = { title: "프로젝트 관리" };
@@ -12,19 +13,40 @@ const projectStatusLabels: Record<string, string> = {
   completed: "완료",
   archived: "보관",
 };
+const VALID_PUBLICATION_STATUS = Object.keys(labels);
+const VALID_PROJECT_STATUS = Object.keys(projectStatusLabels);
+const SORT_OPTIONS = ["newest", "oldest", "title", "comments"] as const;
+
+/** 목록 URL에서 문자열 하나와 YYYY-MM-DD 날짜만 꺼내 검색 조건으로 사용합니다. */
+function stringParam(value: string | string[] | undefined) {
+  return typeof value === "string" ? value.trim() : "";
+}
+function dateParam(value: string | string[] | undefined) {
+  return typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : undefined;
+}
 /** 관리자 전용 프로젝트 목록입니다. 공개 전 데이터도 모두 확인할 수 있습니다. */
 export default async function AdminProjectsPage({ searchParams }: PageProps<"/admin/projects">) {
   const values = await searchParams;
-  const pageValue = typeof values.page === "string" ? Number(values.page) : 1;
-  const page = Number.isInteger(pageValue) && pageValue > 0 ? pageValue : 1;
+  const pageValue = Number(stringParam(values.page));
+  const requestedPage = Number.isInteger(pageValue) && pageValue > 0 ? pageValue : 1;
+  const query = stringParam(values.q).toLocaleLowerCase("ko-KR");
+  const selectedPublicationStatus = stringParam(values.status);
+  const status = VALID_PUBLICATION_STATUS.includes(selectedPublicationStatus)
+    ? selectedPublicationStatus
+    : "";
+  const selectedProjectStatus = stringParam(values.progress);
+  const progress = VALID_PROJECT_STATUS.includes(selectedProjectStatus)
+    ? selectedProjectStatus
+    : "";
+  const dateFrom = dateParam(values.from);
+  const dateTo = dateParam(values.to);
+  const selectedSort = stringParam(values.sort);
+  const sort = SORT_OPTIONS.includes(selectedSort as (typeof SORT_OPTIONS)[number])
+    ? selectedSort
+    : "newest";
   const pageSize = 10;
-  const from = (page - 1) * pageSize;
   const supabase = await createClient();
-  const {
-    data: projects,
-    error,
-    count,
-  } = await supabase
+  const { data: projects, error } = await supabase
     .from("projects")
     .select(
       "id, slug, title, summary, publication_status, project_status, tech_stack, created_at, project_comments(count)",
@@ -32,9 +54,32 @@ export default async function AdminProjectsPage({ searchParams }: PageProps<"/ad
         count: "exact",
       },
     )
-    .order("created_at", { ascending: false })
-    .range(from, from + pageSize - 1);
-  const totalPages = Math.max(1, Math.ceil((count ?? 0) / pageSize));
+    .order("created_at", { ascending: false });
+  // 제목·설명·기술 스택은 한 검색어로 함께 찾되, 관리자 개인 목록 규모에서는 서버에서 안전하게 비교합니다.
+  const filteredProjects = (projects ?? []).filter((project) => {
+    const searchable =
+      `${project.title}\n${project.summary}\n${project.tech_stack.join(" ")}`.toLocaleLowerCase(
+        "ko-KR",
+      );
+    const createdDate = project.created_at.slice(0, 10);
+    return (
+      (!query || searchable.includes(query)) &&
+      (!status || project.publication_status === status) &&
+      (!progress || project.project_status === progress) &&
+      (!dateFrom || createdDate >= dateFrom) &&
+      (!dateTo || createdDate <= dateTo)
+    );
+  });
+  const sortedProjects = [...filteredProjects].sort((left, right) => {
+    if (sort === "oldest") return left.created_at.localeCompare(right.created_at);
+    if (sort === "title") return left.title.localeCompare(right.title, "ko-KR");
+    if (sort === "comments")
+      return (right.project_comments[0]?.count ?? 0) - (left.project_comments[0]?.count ?? 0);
+    return right.created_at.localeCompare(left.created_at);
+  });
+  const totalPages = Math.max(1, Math.ceil(sortedProjects.length / pageSize));
+  const page = Math.min(requestedPage, totalPages);
+  const paginatedProjects = sortedProjects.slice((page - 1) * pageSize, page * pageSize);
   return (
     <div className="admin-list-page">
       <header className="admin-page-heading">
@@ -48,6 +93,64 @@ export default async function AdminProjectsPage({ searchParams }: PageProps<"/ad
         </Link>
       </header>
       {error && <p className="admin-error-message">목록을 불러오지 못했습니다: {error.message}</p>}
+
+      <form action="/admin/projects" className="admin-list-filter">
+        <label className="admin-list-filter-query">
+          <span>통합 검색</span>
+          <input
+            defaultValue={query}
+            name="q"
+            placeholder="제목, 설명, 기술 스택 검색"
+            type="search"
+          />
+        </label>
+        <label>
+          <span>공개 상태</span>
+          <select defaultValue={status} name="status">
+            <option value="">전체</option>
+            {Object.entries(labels).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          <span>진행 상태</span>
+          <select defaultValue={progress} name="progress">
+            <option value="">전체</option>
+            {Object.entries(projectStatusLabels).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="admin-list-filter-date">
+          <span>등록일</span>
+          <LogDateRangePicker from={dateFrom} to={dateTo} />
+        </label>
+        <label>
+          <span>정렬</span>
+          <select defaultValue={sort} name="sort">
+            <option value="newest">등록일 최신순</option>
+            <option value="oldest">등록일 오래된순</option>
+            <option value="title">제목 가나다순</option>
+            <option value="comments">댓글 많은순</option>
+          </select>
+        </label>
+        <div className="admin-list-filter-actions">
+          <button className="admin-action-button" type="submit">
+            검색
+          </button>
+          <Link className="admin-action-button admin-action-outline" href="/admin/projects">
+            초기화
+          </Link>
+        </div>
+      </form>
+      <p className="admin-list-filter-result" aria-live="polite">
+        조건에 맞는 프로젝트 <strong>{filteredProjects.length}개</strong>
+      </p>
       <div className="admin-table-wrap admin-table-wrap-soft">
         <table className="admin-table admin-table-soft">
           <thead>
@@ -64,7 +167,7 @@ export default async function AdminProjectsPage({ searchParams }: PageProps<"/ad
             </tr>
           </thead>
           <tbody>
-            {(projects ?? []).map((p) => (
+            {paginatedProjects.map((p) => (
               <tr key={p.id}>
                 <td>
                   <Link className="admin-row-title" href={`/admin/projects/${p.id}/edit`}>
@@ -110,7 +213,9 @@ export default async function AdminProjectsPage({ searchParams }: PageProps<"/ad
             {!(projects ?? []).length && (
               <tr>
                 <td colSpan={7} className="admin-empty-cell">
-                  아직 프로젝트가 없습니다.
+                  {projects?.length
+                    ? "조건에 맞는 프로젝트가 없습니다."
+                    : "아직 프로젝트가 없습니다."}
                 </td>
               </tr>
             )}
@@ -121,6 +226,7 @@ export default async function AdminProjectsPage({ searchParams }: PageProps<"/ad
         basePath="/admin/projects"
         currentPage={page}
         label="프로젝트 목록 페이지"
+        searchParams={{ q: query, status, progress, from: dateFrom, to: dateTo, sort }}
         totalPages={totalPages}
       />
     </div>
