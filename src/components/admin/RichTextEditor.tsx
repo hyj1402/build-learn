@@ -6,6 +6,7 @@ import { Markdown } from "@tiptap/markdown";
 import { EditorContent, useEditor, type Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { useState } from "react";
+import { AiFeedbackPanel } from "@/components/admin/AiFeedbackPanel";
 import { ContentImageUpload, uploadContentImage } from "@/components/admin/ContentImageUpload";
 
 type ImageFolder = "projects/inline" | "logs/inline";
@@ -25,6 +26,9 @@ export function RichTextEditor({
   const [isImageDragging, setIsImageDragging] = useState(false);
   const [uploadMessage, setUploadMessage] = useState("");
   const [isInlineUploading, setIsInlineUploading] = useState(false);
+  // 편집 화면과 실제 공개 화면 모양을 오가며 확인하는 미리보기 상태입니다.
+  const [mode, setMode] = useState<"edit" | "preview">("edit");
+  const [previewHtml, setPreviewHtml] = useState("");
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -107,6 +111,15 @@ export function RichTextEditor({
     editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
   }
 
+  /** 현재 편집 내용을 HTML로 바꿔 미리보기에 씁니다. 편집기는 언마운트하지 않고 숨겨서 커서·되돌리기 기록을 유지합니다. */
+  function switchMode(next: "edit" | "preview") {
+    if (next === "preview" && editor) setPreviewHtml(editor.getHTML());
+    setMode(next);
+  }
+
+  // 공개 화면과 같은 글꼴·폭이 적용되도록, Log는 상세 페이지와 같은 래퍼 클래스를 씁니다.
+  const previewWrapperClass = folder.startsWith("logs") ? "log-detail" : "project-detail";
+
   return (
     <div
       className={`admin-field rich-text-editor${isImageDragging ? " is-image-dragging" : ""}`}
@@ -119,24 +132,64 @@ export function RichTextEditor({
     >
       <div className="rich-text-editor-heading">
         <label htmlFor="body_text">상세 내용</label>
+        <div className="rich-text-editor-modes" role="tablist" aria-label="편집 방식">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={mode === "edit"}
+            className={mode === "edit" ? "is-active" : ""}
+            onClick={() => switchMode("edit")}
+          >
+            편집
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={mode === "preview"}
+            className={mode === "preview" ? "is-active" : ""}
+            onClick={() => switchMode("preview")}
+          >
+            미리보기
+          </button>
+        </div>
         <span>작성 내용은 Markdown으로 저장됩니다.</span>
       </div>
       {/* Server Action은 FormData만 받으므로, 에디터의 Markdown 값을 기존 body_text 필드에 숨겨서 함께 제출합니다. */}
       <input id="body_text" name="body_text" type="hidden" value={markdown} />
-      <EditorToolbar editor={editor} onLink={toggleLink} />
-      <EditorContent editor={editor} />
-      {isImageDragging ? (
-        <div className="rich-text-editor-drop-guide">여기에 이미지를 놓으세요</div>
-      ) : null}
-      <div className="rich-text-editor-upload">
-        <strong>본문 이미지</strong>
-        <ContentImageUpload folder={folder} onUploaded={insertImage} variant="inline" />
-        <p>
-          버튼으로 선택하거나, 편집기 안에 이미지를 끌어놓고 캡처 이미지를 붙여넣을 수 있습니다.
-          이미지는 가로 1,920px 이하·최종 1MB 이하로 최적화됩니다.
-        </p>
-        {isInlineUploading || uploadMessage ? <p role="status">{uploadMessage}</p> : null}
+      {mode === "preview" && (
+        <div className="rich-text-editor-preview">
+          <p className="rich-text-editor-preview-note">
+            공개 화면과 같은 글꼴·간격으로 보여줍니다. (제목, 태그, 댓글은 제외)
+          </p>
+          <div className={previewWrapperClass}>
+            {previewHtml && previewHtml !== "<p></p>" ? (
+              <div className="mdx-content" dangerouslySetInnerHTML={{ __html: previewHtml }} />
+            ) : (
+              <p className="rich-text-editor-preview-empty">아직 작성한 내용이 없습니다.</p>
+            )}
+          </div>
+        </div>
+      )}
+      <div className="rich-text-editor-pane" hidden={mode === "preview"}>
+        <EditorToolbar editor={editor} onLink={toggleLink} />
+        <EditorContent editor={editor} />
+        {isImageDragging ? (
+          <div className="rich-text-editor-drop-guide">여기에 이미지를 놓으세요</div>
+        ) : null}
+        <div className="rich-text-editor-upload">
+          <strong>본문 이미지</strong>
+          <ContentImageUpload folder={folder} onUploaded={insertImage} variant="inline" />
+          <p>
+            버튼으로 선택하거나, 편집기 안에 이미지를 끌어놓고 캡처 이미지를 붙여넣을 수 있습니다.
+            이미지는 가로 1,920px 이하·최종 1MB 이하로 최적화됩니다.
+          </p>
+          {isInlineUploading || uploadMessage ? <p role="status">{uploadMessage}</p> : null}
+        </div>
       </div>
+      <AiFeedbackPanel
+        getMarkdown={() => editor?.getMarkdown() ?? markdown}
+        kind={folder.startsWith("logs") ? "log" : "project"}
+      />
     </div>
   );
 }
