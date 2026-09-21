@@ -7,6 +7,7 @@ import remarkGfm from "remark-gfm";
 import { mdxComponents } from "@/components/mdx/MdxComponents";
 import { Badge } from "@/components/ui/Badge";
 import { CommentSection } from "@/components/log/CommentSection";
+import "@/styles/log-detail.css";
 import { getSocialImage } from "@/lib/metadata";
 import { getPublishedLogBySlug, incrementLogView } from "@/lib/logs-db";
 import { getLogComments } from "@/lib/comments-db";
@@ -92,7 +93,10 @@ export default async function LogDetail({ params }: PageProps<"/log/[slug]">) {
   return (
     <article className="container detail log-detail">
       <header className="page-header log-detail-hero">
-        <Badge>{log.category}</Badge>
+        {/* 분류를 메인 화면의 eyebrow와 같은 주황 라벨로 보여 주고, 누르면 같은 분류의 Log 목록으로 이동합니다. */}
+        <Link className="log-detail-eyebrow" href={`/log?category=${log.category}`}>
+          {log.category.toUpperCase()} / LOG
+        </Link>
         <h1>{log.title}</h1>
         <p>{log.summary}</p>
         <div className="log-detail-byline" aria-label="글 정보">
