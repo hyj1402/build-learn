@@ -46,6 +46,9 @@ const VALID_STATUS = ["draft", "private", "published"];
  */
 async function getLogCategoryId(supabase: Awaited<ReturnType<typeof createClient>>, raw: string) {
   const categorySlug = raw.trim() as LogCategory;
+  if (!categorySlug) {
+    throw new Error("분류를 선택해주세요.");
+  }
   if (!LOG_CATEGORIES.includes(categorySlug)) {
     throw new Error("잘못된 학습 기록 분류입니다.");
   }

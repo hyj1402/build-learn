@@ -53,7 +53,12 @@ export function LogForm({
             ariaLabel="학습 기록 분류"
             name="category_slug"
             defaultValue={defaultValues?.category_slug ?? "dev"}
-            options={[...LOG_CATEGORY_OPTIONS]}
+            options={
+              // 미분류 글(빈 값)은 선택 안내 항목을 함께 보여 주고, 고르기 전에는 서버가 저장을 거절합니다.
+              defaultValues?.category_slug === ""
+                ? [{ value: "", label: "분류를 선택하세요" }, ...LOG_CATEGORY_OPTIONS]
+                : [...LOG_CATEGORY_OPTIONS]
+            }
           />
         </div>
         <div className="admin-field">

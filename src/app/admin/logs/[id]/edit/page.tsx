@@ -21,9 +21,9 @@ export default async function EditLogPage({ params }: PageProps<"/admin/logs/[id
     notFound();
   }
 
-  // 이전에 분류 없이 저장된 글도 수정 화면을 열 수 있게 etc를 기본값으로 보여 줍니다.
+  // 분류 없이 저장된 글은 빈 값으로 넘겨, 임의 분류로 조용히 저장되지 않고 직접 고르게 합니다.
   const category = Array.isArray(log.categories) ? log.categories[0] : log.categories;
-  const defaultValues = { ...log, category_slug: category?.slug ?? "etc" };
+  const defaultValues = { ...log, category_slug: category?.slug ?? "" };
 
   return (
     <div className="admin-editor-page">
