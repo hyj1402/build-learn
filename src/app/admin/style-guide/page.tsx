@@ -143,45 +143,51 @@ export default function AdminStyleGuidePage() {
               </thead>
               <tbody>
                 <tr>
-                  <td>
+                  <td data-label="">
                     <strong className="admin-table-title">BUILD &amp; LEARN</strong>
                     <span className="admin-table-description">개인 개발 아카이브</span>
                   </td>
-                  <td>
+                  <td data-label="URL">
                     <code>build-learn</code>
                   </td>
-                  <td className="admin-date">2026. 09. 12.</td>
-                  <td className="admin-row-actions">
+                  <td className="admin-date" data-label="수정일">
+                    2026. 09. 12.
+                  </td>
+                  <td className="admin-row-actions" data-label="">
                     <button className="admin-table-action" type="button">
                       수정 <span aria-hidden="true">→</span>
                     </button>
                   </td>
                 </tr>
                 <tr>
-                  <td>
+                  <td data-label="">
                     <strong className="admin-table-title">삼성꿈장학재단 시스템 개발</strong>
                     <span className="admin-table-description">장학사업 운영 지원 시스템</span>
                   </td>
-                  <td>
+                  <td data-label="URL">
                     <code>samsung-dream-scholarship</code>
                   </td>
-                  <td className="admin-date">2026. 09. 11.</td>
-                  <td className="admin-row-actions">
+                  <td className="admin-date" data-label="수정일">
+                    2026. 09. 11.
+                  </td>
+                  <td className="admin-row-actions" data-label="">
                     <button className="admin-table-action" type="button">
                       수정 <span aria-hidden="true">→</span>
                     </button>
                   </td>
                 </tr>
                 <tr>
-                  <td>
+                  <td data-label="">
                     <strong className="admin-table-title">학습 기록 관리</strong>
                     <span className="admin-table-description">Supabase와 관리자 화면 구축</span>
                   </td>
-                  <td>
+                  <td data-label="URL">
                     <code>supabase-admin-log</code>
                   </td>
-                  <td className="admin-date">2026. 09. 10.</td>
-                  <td className="admin-row-actions">
+                  <td className="admin-date" data-label="수정일">
+                    2026. 09. 10.
+                  </td>
+                  <td className="admin-row-actions" data-label="">
                     <button className="admin-table-action" type="button">
                       수정 <span aria-hidden="true">→</span>
                     </button>

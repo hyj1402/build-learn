@@ -169,12 +169,12 @@ function StorageTable({
             <tbody>
               {files.map((file) => (
                 <tr key={file.path}>
-                  <td>
+                  <td data-label="">
                     <code>{file.path}</code>
                   </td>
-                  <td>{formatBytes(file.size)}</td>
-                  <td>{file.isUsed ? "사용 중" : "미사용"}</td>
-                  <td>
+                  <td data-label="용량">{formatBytes(file.size)}</td>
+                  <td data-label="사용 여부">{file.isUsed ? "사용 중" : "미사용"}</td>
+                  <td data-label="">
                     {file.isUsed ? (
                       <span className="admin-storage-connected">연결됨</span>
                     ) : (

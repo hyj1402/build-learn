@@ -175,13 +175,13 @@ export default async function AdminLogsPage({ searchParams }: PageProps<"/admin/
           <tbody>
             {(logs ?? []).map((log) => (
               <tr key={log.id}>
-                <td>
+                <td data-label="">
                   <Link className="admin-row-title" href={`/admin/logs/${log.id}/edit`}>
                     {log.title}
                   </Link>
                   {log.summary && <span className="admin-table-description">{log.summary}</span>}
                 </td>
-                <td>
+                <td data-label="분류">
                   {(() => {
                     const logCategory = Array.isArray(log.categories)
                       ? log.categories[0]
@@ -193,7 +193,7 @@ export default async function AdminLogsPage({ searchParams }: PageProps<"/admin/
                     );
                   })()}
                 </td>
-                <td>
+                <td data-label="태그">
                   <div className="admin-list-chips" aria-label={`${log.title} 태그`}>
                     {log.tags.slice(0, 3).map((tag: string) => (
                       <span key={tag}>#{tag}</span>
@@ -201,13 +201,15 @@ export default async function AdminLogsPage({ searchParams }: PageProps<"/admin/
                     {log.tags.length > 3 && <span>+{log.tags.length - 3}</span>}
                   </div>
                 </td>
-                <td>
+                <td data-label="상태">
                   <span className={`admin-status admin-status-${log.publication_status}`}>
                     {STATUS_LABEL[log.publication_status] ?? log.publication_status}
                   </span>
                 </td>
-                <td className="admin-number-value">{log.view_count.toLocaleString("ko-KR")}</td>
-                <td>
+                <td className="admin-number-value" data-label="조회">
+                  {log.view_count.toLocaleString("ko-KR")}
+                </td>
+                <td data-label="댓글">
                   {/* 관리자 운영용 숫자라 소프트 삭제된 댓글까지 함께 셉니다. 실제 공개 댓글 수는 상세 화면에서 확인합니다. */}
                   <Link
                     className="admin-inline-link"
@@ -216,10 +218,10 @@ export default async function AdminLogsPage({ searchParams }: PageProps<"/admin/
                     {log.log_comments[0]?.count ?? 0}개
                   </Link>
                 </td>
-                <td className="admin-date">
+                <td className="admin-date" data-label="등록일">
                   {new Date(log.created_at).toLocaleDateString("ko-KR")}
                 </td>
-                <td className="admin-row-actions-cell">
+                <td className="admin-row-actions-cell" data-label="">
                   <div className="admin-row-actions">
                     <AdminConfirmButton
                       confirmTitle="이 학습 기록을 삭제할까요?"

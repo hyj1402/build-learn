@@ -169,13 +169,13 @@ export default async function AdminProjectsPage({ searchParams }: PageProps<"/ad
           <tbody>
             {paginatedProjects.map((p) => (
               <tr key={p.id}>
-                <td>
+                <td data-label="">
                   <Link className="admin-row-title" href={`/admin/projects/${p.id}/edit`}>
                     {p.title}
                   </Link>
                   <span className="admin-table-description">{p.summary}</span>
                 </td>
-                <td>
+                <td data-label="기술 스택">
                   <div className="admin-list-chips" aria-label={`${p.title} 기술 스택`}>
                     {p.tech_stack.slice(0, 3).map((tech: string) => (
                       <span key={tech}>{tech}</span>
@@ -183,13 +183,15 @@ export default async function AdminProjectsPage({ searchParams }: PageProps<"/ad
                     {p.tech_stack.length > 3 && <span>+{p.tech_stack.length - 3}</span>}
                   </div>
                 </td>
-                <td>
+                <td data-label="공개">
                   <span className={`admin-status admin-status-${p.publication_status}`}>
                     {labels[p.publication_status] ?? p.publication_status}
                   </span>
                 </td>
-                <td>{projectStatusLabels[p.project_status] ?? p.project_status}</td>
-                <td>
+                <td data-label="진행">
+                  {projectStatusLabels[p.project_status] ?? p.project_status}
+                </td>
+                <td data-label="댓글">
                   <Link
                     className="admin-inline-link"
                     href={`/admin/project-comments?project=${encodeURIComponent(p.slug)}`}
@@ -197,8 +199,10 @@ export default async function AdminProjectsPage({ searchParams }: PageProps<"/ad
                     {p.project_comments[0]?.count ?? 0}개
                   </Link>
                 </td>
-                <td className="admin-date">{new Date(p.created_at).toLocaleDateString("ko-KR")}</td>
-                <td className="admin-row-actions-cell">
+                <td className="admin-date" data-label="등록일">
+                  {new Date(p.created_at).toLocaleDateString("ko-KR")}
+                </td>
+                <td className="admin-row-actions-cell" data-label="">
                   <div className="admin-row-actions">
                     <AdminConfirmButton
                       confirmTitle="이 프로젝트를 삭제할까요?"

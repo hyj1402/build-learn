@@ -235,7 +235,7 @@ export function MessagesTable({ initialMessages }: { initialMessages: Message[] 
           <tbody>
             {messages.map((message) => (
               <tr className={message.is_read ? "" : "is-unread"} key={message.id}>
-                <td className="admin-select-cell">
+                <td className="admin-select-cell" data-label="">
                   <input
                     aria-label={`${message.name}님의 문의 선택`}
                     checked={selectedSet.has(message.id)}
@@ -243,13 +243,13 @@ export function MessagesTable({ initialMessages }: { initialMessages: Message[] 
                     type="checkbox"
                   />
                 </td>
-                <td>
+                <td data-label="보낸 사람">
                   <strong className="admin-table-title">{message.name}</strong>
                   <a className="admin-table-description" href={`mailto:${message.email}`}>
                     {message.email}
                   </a>
                 </td>
-                <td>
+                <td data-label="메시지">
                   <button
                     className="admin-message-preview"
                     onClick={() => showMessage(message)}
@@ -260,17 +260,17 @@ export function MessagesTable({ initialMessages }: { initialMessages: Message[] 
                       : message.message}
                   </button>
                 </td>
-                <td className="admin-date">
+                <td className="admin-date" data-label="받은 날짜">
                   {new Date(message.created_at).toLocaleDateString("ko-KR")}
                 </td>
-                <td>
+                <td data-label="상태">
                   <span
                     className={`admin-status ${message.is_read ? "admin-status-read" : "admin-status-unread"}`}
                   >
                     {message.is_read ? "읽음" : "새 문의"}
                   </span>
                 </td>
-                <td className="admin-row-actions-cell">
+                <td className="admin-row-actions-cell" data-label="">
                   <div className="admin-row-actions">
                     <button
                       className="admin-action-button admin-action-outline-blue admin-row-action-button"

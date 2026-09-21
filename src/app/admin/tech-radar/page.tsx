@@ -217,7 +217,7 @@ export default async function TechRadarPage({ searchParams }: PageProps<"/admin/
               }).toString()}`;
               return (
                 <tr key={article.id}>
-                  <td>
+                  <td data-label="">
                     <a
                       href={article.url}
                       target="_blank"
@@ -230,18 +230,18 @@ export default async function TechRadarPage({ searchParams }: PageProps<"/admin/
                       <span className="admin-table-description">{article.summary}</span>
                     )}
                   </td>
-                  <td>{sourceName(article)}</td>
-                  <td className="admin-date">
+                  <td data-label="출처">{sourceName(article)}</td>
+                  <td className="admin-date" data-label="발행일">
                     {article.published_at
                       ? new Date(article.published_at).toLocaleDateString("ko-KR")
                       : "-"}
                   </td>
-                  <td>
+                  <td data-label="상태">
                     <span className={`admin-status admin-status-${STATUS_TONE[article.status]}`}>
                       {STATUS_LABEL[article.status] ?? article.status}
                     </span>
                   </td>
-                  <td className="admin-row-actions">
+                  <td className="admin-row-actions" data-label="">
                     <DraftLink articleId={article.id} href={draftHref} />
                     {article.status !== "dismissed" && <DismissButton articleId={article.id} />}
                   </td>

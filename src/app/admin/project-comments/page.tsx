@@ -159,7 +159,7 @@ export default async function AdminProjectCommentsPage({
               const project = projectsBySlug.get(comment.project_slug);
               return (
                 <tr key={comment.id} className={comment.deleted_at ? "is-deleted" : undefined}>
-                  <td>
+                  <td data-label="프로젝트">
                     {project ? (
                       <Link
                         className="admin-row-title"
@@ -176,14 +176,14 @@ export default async function AdminProjectCommentsPage({
                       </span>
                     )}
                   </td>
-                  <td>{comment.author_name}</td>
-                  <td className="admin-comment-body">
+                  <td data-label="작성자">{comment.author_name}</td>
+                  <td className="admin-comment-body" data-label="댓글 내용">
                     {comment.deleted_at && (
                       <span className="admin-comment-deleted-label">삭제됨 · 관리자 전용</span>
                     )}
                     {comment.body}
                   </td>
-                  <td className="admin-date">
+                  <td className="admin-date" data-label="상태·기록">
                     <time dateTime={comment.created_at}>
                       작성 {new Date(comment.created_at).toLocaleString("ko-KR")}
                     </time>
@@ -198,7 +198,7 @@ export default async function AdminProjectCommentsPage({
                       </time>
                     )}
                   </td>
-                  <td className="admin-row-actions-cell">
+                  <td className="admin-row-actions-cell" data-label="">
                     <AdminCommentActions
                       commentId={comment.id}
                       initialBody={comment.body}
