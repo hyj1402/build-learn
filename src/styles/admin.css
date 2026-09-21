@@ -8,7 +8,7 @@
   display: grid;
   grid-template-columns: 248px minmax(0, 1fr);
   min-height: 100vh;
-  background: #f0f0ea;
+  background: color-mix(in srgb, var(--foreground) 3%, var(--background));
 }
 
 /* ── 사이드바 ───────────────────────────────────────────── */
@@ -80,12 +80,12 @@
     color var(--transition-fast);
 }
 .admin-side-nav a:hover {
-  background: #f1f1ec;
+  background: color-mix(in srgb, var(--foreground) 5%, var(--surface));
 }
 /* 현재 보고 있는 메뉴는 색과 왼쪽 선으로 함께 표시합니다(색만으로 구분하지 않기 위해서입니다). */
 .admin-side-nav a.is-active {
   border-left-color: var(--accent);
-  background: #f1f1ec;
+  background: color-mix(in srgb, var(--foreground) 5%, var(--surface));
   color: var(--accent);
 }
 .admin-side-badge {
@@ -334,6 +334,8 @@
 @media (max-width: 860px) {
   .admin-shell {
     grid-template-columns: minmax(0, 1fr);
+    /* 메뉴 영역은 내용 높이만 차지하고 남는 높이는 본문이 가져가, 메뉴 아래가 비어 보이지 않게 합니다. */
+    grid-template-rows: auto 1fr;
   }
   .admin-side {
     position: static;
@@ -343,10 +345,18 @@
     border-right: 0;
     border-bottom: 1px solid var(--line);
   }
+  /* 메뉴 그룹을 한 줄로 이어 가로 스크롤하고, 스크롤바는 숨겨 깔끔하게 보이게 합니다. */
   .admin-side-nav {
+    flex: none;
     flex-direction: row;
-    gap: var(--space-3);
+    gap: var(--space-1);
     overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+  }
+  .admin-side-nav::-webkit-scrollbar {
+    display: none;
   }
   .admin-side-title {
     display: none;
@@ -364,10 +374,33 @@
     border-bottom-color: var(--accent);
     border-left-color: transparent;
   }
+  /* 하단 영역: 이메일 한 줄, 그 아래에 테마·공개 사이트·로그아웃을 같은 크기의 버튼 3개로 나란히 둡니다. */
   .admin-side-foot {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-1);
+    padding-top: var(--space-2);
+  }
+  .admin-side-user {
+    grid-column: 1 / -1;
+  }
+  .admin-side-foot .theme-toggle,
+  .admin-side-foot .admin-side-link {
     display: flex;
+    width: 100%;
+    min-height: 40px;
     align-items: center;
-    gap: var(--space-3);
+    justify-content: center;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 0 4px;
+    font-size: 12px;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+  }
+  .admin-side-foot form {
+    display: contents;
   }
   .admin-main {
     padding: var(--space-4) var(--space-3) var(--space-8);
