@@ -499,7 +499,7 @@
   }
   .admin-messages-table tbody tr.is-unread {
     border-color: var(--accent);
-    background: var(--danger-soft);
+    background: color-mix(in srgb, var(--accent) 8%, var(--surface));
   }
   .admin-messages-table tbody tr.is-unread > td,
   .admin-messages-table tbody tr:not(.is-unread) > td {
@@ -539,6 +539,46 @@
   .admin-trend-grid,
   .admin-quick-grid {
     grid-template-columns: minmax(0, 1fr);
+  }
+  /* 긴 글(댓글 본문·문의 미리보기)이 든 칸은 이름표를 위에 두고 본문을 전체 폭으로 보여 줍니다. */
+  .admin-table td.admin-comment-body,
+  .admin-table td[data-label="메시지"],
+  .admin-table td[data-label="보낸 사람"] {
+    display: block;
+    min-width: 0;
+    max-width: none;
+    text-align: left;
+  }
+  .admin-table td.admin-comment-body::before,
+  .admin-table td[data-label="메시지"]::before,
+  .admin-table td[data-label="보낸 사람"]::before {
+    display: block;
+    margin-bottom: 4px;
+  }
+  .admin-comments-table .admin-date {
+    display: flex;
+    min-width: 0;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+  .admin-comment-actions,
+  .admin-comment-edit-form {
+    min-width: 0;
+  }
+  .admin-message-preview,
+  .admin-list-chips {
+    max-width: none;
+  }
+  .admin-table td .admin-list-chips {
+    justify-content: flex-end;
+  }
+  /* 날짜 범위 선택 팝업이 좁은 화면 밖으로 잘리지 않게 폭을 화면에 맞춥니다. */
+  .admin-date-range-popover {
+    width: min(318px, calc(100vw - 64px));
+  }
+  /* 문의 선택 체크박스 칸은 카드 안에서 한 줄을 차지하지 않도록 작게 둡니다. */
+  .admin-table td.admin-select-cell {
+    justify-content: flex-start;
   }
   .admin-main {
     padding: var(--space-4) var(--space-3) var(--space-8);
@@ -670,4 +710,116 @@
 }
 .ai-comment-actions .login-message {
   margin: 0;
+}
+
+/* ── 다크모드: 관리자 화면의 밝은 고정색을 테마 색상 변수로 덮어씁니다 ─────────────── */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .admin-list-filter,
+  :root:not([data-theme="light"]) .admin-table-wrap-soft,
+  :root:not([data-theme="light"]) .admin-form,
+  :root:not([data-theme="light"]) .admin-dialog-panel,
+  :root:not([data-theme="light"]) .admin-date-range-popover,
+  :root:not([data-theme="light"]) .ai-feedback {
+    border-color: var(--line);
+    background: var(--surface);
+    color: var(--foreground);
+  }
+  :root:not([data-theme="light"]) .admin-list-filter label {
+    color: var(--muted);
+  }
+  :root:not([data-theme="light"]) .admin-list-filter input,
+  :root:not([data-theme="light"]) .admin-list-filter select,
+  :root:not([data-theme="light"]) .admin-field input,
+  :root:not([data-theme="light"]) .admin-field select,
+  :root:not([data-theme="light"]) .admin-field textarea {
+    border-color: var(--line);
+    background: var(--background);
+    color: var(--foreground);
+  }
+  :root:not([data-theme="light"]) .admin-table th,
+  :root:not([data-theme="light"]) .admin-table-soft th,
+  :root:not([data-theme="light"]) .rich-text-editor-toolbar {
+    border-color: var(--line);
+    background: color-mix(in srgb, var(--foreground) 6%, var(--surface));
+    color: var(--muted);
+  }
+  :root:not([data-theme="light"]) .admin-table-soft th,
+  :root:not([data-theme="light"]) .admin-table-soft td {
+    border-color: var(--line);
+  }
+  :root:not([data-theme="light"]) .admin-table tbody tr:hover,
+  :root:not([data-theme="light"]) .admin-table-soft tbody tr:hover {
+    background: color-mix(in srgb, var(--foreground) 5%, var(--surface));
+  }
+  :root:not([data-theme="light"]) .admin-comments-table tbody tr.is-deleted > td {
+    background: color-mix(in srgb, var(--foreground) 6%, var(--surface));
+  }
+  :root:not([data-theme="light"]) .admin-list-chips span {
+    border-color: var(--line);
+    background: color-mix(in srgb, var(--foreground) 6%, var(--surface));
+    color: var(--muted);
+  }
+}
+:root[data-theme="dark"] .admin-list-filter,
+:root[data-theme="dark"] .admin-table-wrap-soft,
+:root[data-theme="dark"] .admin-form,
+:root[data-theme="dark"] .admin-dialog-panel,
+:root[data-theme="dark"] .admin-date-range-popover,
+:root[data-theme="dark"] .ai-feedback {
+  border-color: var(--line);
+  background: var(--surface);
+  color: var(--foreground);
+}
+:root[data-theme="dark"] .admin-list-filter label {
+  color: var(--muted);
+}
+:root[data-theme="dark"] .admin-list-filter input,
+:root[data-theme="dark"] .admin-list-filter select,
+:root[data-theme="dark"] .admin-field input,
+:root[data-theme="dark"] .admin-field select,
+:root[data-theme="dark"] .admin-field textarea {
+  border-color: var(--line);
+  background: var(--background);
+  color: var(--foreground);
+}
+:root[data-theme="dark"] .admin-table th,
+:root[data-theme="dark"] .admin-table-soft th,
+:root[data-theme="dark"] .rich-text-editor-toolbar {
+  border-color: var(--line);
+  background: color-mix(in srgb, var(--foreground) 6%, var(--surface));
+  color: var(--muted);
+}
+:root[data-theme="dark"] .admin-table-soft th,
+:root[data-theme="dark"] .admin-table-soft td {
+  border-color: var(--line);
+}
+:root[data-theme="dark"] .admin-table tbody tr:hover,
+:root[data-theme="dark"] .admin-table-soft tbody tr:hover {
+  background: color-mix(in srgb, var(--foreground) 5%, var(--surface));
+}
+:root[data-theme="dark"] .admin-comments-table tbody tr.is-deleted > td {
+  background: color-mix(in srgb, var(--foreground) 6%, var(--surface));
+}
+:root[data-theme="dark"] .admin-list-chips span {
+  border-color: var(--line);
+  background: color-mix(in srgb, var(--foreground) 6%, var(--surface));
+  color: var(--muted);
+}
+
+/* 다크모드의 문의 행 배경은 표(데스크톱)에서만 칸마다 적용합니다. 모바일 카드는 카드 자체 배경을 씁니다. */
+@media (min-width: 861px) {
+  :root[data-theme="dark"] .admin-messages-table tbody tr.is-unread > td {
+    background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+  }
+  :root[data-theme="dark"] .admin-messages-table tbody tr:not(.is-unread) > td {
+    background: var(--surface);
+  }
+}
+@media (min-width: 861px) and (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .admin-messages-table tbody tr.is-unread > td {
+    background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+  }
+  :root:not([data-theme="light"]) .admin-messages-table tbody tr:not(.is-unread) > td {
+    background: var(--surface);
+  }
 }
