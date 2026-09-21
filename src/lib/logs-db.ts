@@ -12,6 +12,7 @@ type LogRow = {
   publication_status: "draft" | "private" | "published";
   display_order: number | null;
   view_count: number;
+  ai_comment: string | null;
   created_at: string;
   updated_at: string;
   // Supabase 관계 조회는 현재 SDK 설정에서 객체로 오지만, 타입 생성 방식에 따라 배열일 수도 있어 둘 다 안전하게 처리합니다.
@@ -34,6 +35,7 @@ function toLog(row: LogRow): Log {
     updatedAt: row.updated_at,
     order: row.display_order ?? undefined,
     viewCount: row.view_count,
+    aiComment: row.ai_comment ?? undefined,
     content: row.body_text,
   };
 }
@@ -47,7 +49,7 @@ export const getPublishedLogs = cache(async (filter: LogFilter = {}): Promise<Lo
   const { data, error } = await supabase
     .from("logs")
     .select(
-      "slug, title, summary, body_text, thumbnail_path, tags, publication_status, display_order, view_count, created_at, updated_at, categories(name, slug)",
+      "slug, title, summary, body_text, thumbnail_path, tags, publication_status, display_order, view_count, ai_comment, created_at, updated_at, categories(name, slug)",
     )
     .eq("publication_status", "published");
 

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { AiCommentPanel } from "@/components/admin/AiCommentPanel";
 import { LogForm } from "../../LogForm";
 import { updateLog } from "../../actions";
 
@@ -12,7 +13,7 @@ export default async function EditLogPage({ params }: PageProps<"/admin/logs/[id
   const { data: log } = await supabase
     .from("logs")
     .select(
-      "id, slug, title, summary, body_text, tags, publication_status, thumbnail_path, categories(slug)",
+      "id, slug, title, summary, body_text, tags, publication_status, thumbnail_path, ai_comment, categories(slug)",
     )
     .eq("id", id)
     .maybeSingle();
@@ -38,6 +39,12 @@ export default async function EditLogPage({ params }: PageProps<"/admin/logs/[id
         action={updateLog.bind(null, log.id)}
         defaultValues={defaultValues}
         submitLabel="수정 완료"
+      />
+      {/* 코멘트 패널은 별도 저장 흐름이라 글 수정 <form> 바깥에 둡니다. */}
+      <AiCommentPanel
+        logId={log.id}
+        initialComment={log.ai_comment ?? ""}
+        isPublished={log.publication_status === "published"}
       />
     </div>
   );

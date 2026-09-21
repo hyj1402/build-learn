@@ -23,3 +23,9 @@ export const LOG_CATEGORY_OPTIONS = [
   { value: "life", label: "LIFE · 회고" },
   { value: "etc", label: "ETC · 기타" },
 ] as const satisfies ReadonlyArray<{ value: LogCategory; label: string }>;
+
+// 대표 이미지를 등록하지 않은 프로젝트가 함께 쓰는 기본 이미지("지금까지 참여한 실무 프로젝트"의 대표 이미지)입니다.
+// 각 프로젝트 행에 이 주소를 복사해 저장하면 한 프로젝트를 수정·삭제할 때 공유 파일이 Storage에서 지워지므로,
+// DB에는 빈 값으로 두고 화면에 보여 줄 때만 대신 사용합니다.
+export const DEFAULT_PROJECT_THUMBNAIL =
+  "https://ygcksiktoeewtxujqfig.supabase.co/storage/v1/object/public/content-images/projects/87e60ca6-b19d-43b2-8f27-a288dee7d2a7.webp";

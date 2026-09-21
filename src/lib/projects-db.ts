@@ -1,4 +1,5 @@
 import { cache } from "react";
+import { DEFAULT_PROJECT_THUMBNAIL } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/server";
 import type { Project, ProjectFilter, ProjectStatus } from "@/types/project";
 
@@ -38,7 +39,8 @@ function toProject(row: ProjectRow): Project {
     slug: row.slug,
     title: row.title,
     summary: row.summary,
-    thumbnailImage: row.thumbnail_path ?? "",
+    // 대표 이미지가 없으면 공용 기본 이미지를 보여 줍니다(DB 값은 그대로 비워 둡니다).
+    thumbnailImage: row.thumbnail_path || DEFAULT_PROJECT_THUMBNAIL,
     // 카테고리가 아직 지정되지 않은 데이터도 목록에서 안전하게 보이도록 web으로 처리합니다.
     category: (category?.slug ?? "web") as Project["category"],
     status: toProjectStatus(row.project_status),

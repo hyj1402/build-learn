@@ -14,6 +14,8 @@ export type Log = {
   order?: number;
   // 상세 페이지가 조회될 때마다 DB 함수로 늘어나는 누적 조회수입니다.
   viewCount: number;
+  // 관리자가 검토·저장한 "Claude의 코멘트"입니다. 없으면 상세 화면에 코멘트 영역을 그리지 않습니다.
+  aiComment?: string;
   content: string;
 };
 export type LogFilter = { category?: LogCategory; tag?: string; query?: string };

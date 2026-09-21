@@ -578,6 +578,29 @@ a {
   line-height: 1.05;
   word-break: keep-all;
 }
+/* Project 상세 머리말: 배지·제목·요약이 서로 붙어 보이지 않도록 단계별 간격과 행간을 줍니다. */
+.project-detail .page-header {
+  padding-block: var(--space-8) var(--space-6);
+}
+.project-detail .page-header .tag-row {
+  margin-bottom: var(--space-3);
+}
+.project-detail .page-header h1 {
+  line-height: 1.2;
+  letter-spacing: -0.04em;
+}
+.project-detail .page-header p {
+  margin: var(--space-4) 0 0;
+  line-height: 1.85;
+  word-break: keep-all;
+}
+.project-detail .detail-meta {
+  margin-top: var(--space-2);
+  padding-block: var(--space-3);
+  row-gap: var(--space-1);
+  flex-wrap: wrap;
+  line-height: 1.7;
+}
 
 /* Log 상세는 색상 상자보다 폭·여백·글자 위계로 읽기 흐름을 만드는 에디토리얼 화면입니다. */
 .log-detail {
@@ -3573,4 +3596,30 @@ a {
   .admin-list-filter {
     grid-template-columns: 1fr;
   }
+}
+
+/* Log 상세 하단의 "Claude의 코멘트": 본문과 댓글 사이에서 글쓴이의 글과 구분되도록 보조 영역으로 보여 줍니다. */
+.ai-comment {
+  width: min(100%, 680px);
+  margin: var(--space-8) auto 0;
+  padding: var(--space-3) var(--space-4);
+  border-left: 3px solid var(--foreground);
+  background: var(--surface);
+}
+.ai-comment h2 {
+  margin: 0 0 var(--space-2);
+  font-size: 15px;
+  letter-spacing: 0.02em;
+}
+.ai-comment p {
+  margin: 0;
+  white-space: pre-line;
+  line-height: 1.85;
+  word-break: keep-all;
+}
+.ai-comment small {
+  display: block;
+  margin-top: var(--space-2);
+  color: var(--muted);
+  font-size: 12px;
 }

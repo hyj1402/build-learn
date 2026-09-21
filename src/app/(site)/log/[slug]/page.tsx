@@ -129,6 +129,14 @@ export default async function LogDetail({ params }: PageProps<"/log/[slug]">) {
         </nav>
       )}
       <div className="mdx-content">{content}</div>
+      {log.aiComment && (
+        <aside className="ai-comment" aria-labelledby="ai-comment-title">
+          <h2 id="ai-comment-title">Claude의 코멘트</h2>
+          {/* 줄바꿈은 CSS(white-space)로 살리고 HTML로 해석하지 않아 저장된 텍스트가 그대로 안전하게 표시됩니다. */}
+          <p>{log.aiComment}</p>
+          <small>AI가 쓴 초안을 글쓴이가 검토해 게시한 코멘트입니다.</small>
+        </aside>
+      )}
       <CommentSection
         contentType="log"
         contentSlug={slug}
