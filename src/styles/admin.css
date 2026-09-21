@@ -480,15 +480,18 @@
     display: block;
     text-align: left;
   }
+  /* 구분선과 위 여백은 칸(td)에만 줍니다. 안쪽 .admin-row-actions(div)까지 같은 규칙을 받으면 선이 두 줄로 보입니다. */
   .admin-table .admin-row-actions-cell,
-  .admin-table .admin-row-actions {
+  .admin-table td.admin-row-actions {
     width: auto;
     justify-content: flex-start;
-    flex-wrap: wrap;
     border-top: 1px solid var(--line);
     border-left: 0;
-    padding-top: 12px;
+    padding: 12px 0 0 !important;
     text-align: left;
+  }
+  .admin-table .admin-row-actions {
+    flex-wrap: wrap;
   }
   .admin-table .admin-empty-cell {
     display: block;
