@@ -96,6 +96,7 @@ Value: https://실제도메인.com
 
 ## 5. 배포 후 화면 확인
 
+- [ ] Vercel 프로젝트의 **Analytics** 탭에서 Analytics를 한 번 활성화한 뒤 새 Production 배포를 만듭니다. 코드만 추가해도 대시보드 기능은 자동 활성화되지 않습니다.
 - [ ] Home 열기
 - [ ] Projects 목록과 카테고리·검색 확인
 - [ ] Project 상세와 embed/link/download 유형 확인
@@ -111,6 +112,7 @@ Value: https://실제도메인.com
 - [ ] 카드 이미지가 터치 기기에서 컬러로 보이는지 확인
 - [ ] 데스크톱에서 흑백→컬러 Hover 확인
 - [ ] 브라우저 콘솔 오류 확인
+- [ ] Vercel Dashboard의 Analytics 탭에서 새 Production 배포의 페이지 조회가 집계되는지 확인
 
 ## 6. SEO와 공유 주소 확인
 

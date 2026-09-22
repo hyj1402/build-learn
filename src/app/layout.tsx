@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import { Noto_Sans_KR, Noto_Serif_KR, Space_Grotesk } from "next/font/google";
 import { SITE_URL } from "@/lib/site";
 import "@/styles/globals.css";
@@ -88,7 +89,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        {/* Vercel 운영 배포에서 페이지별 방문 통계를 수집하며, 결과는 Vercel 대시보드에서 확인합니다. */}
+        <Analytics />
+      </body>
     </html>
   );
 }

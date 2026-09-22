@@ -7,13 +7,14 @@ import remarkGfm from "remark-gfm";
 import { mdxComponents } from "@/components/mdx/MdxComponents";
 import { Badge } from "@/components/ui/Badge";
 import { CommentSection } from "@/components/log/CommentSection";
+import { ContentViewTracker } from "@/components/analytics/ContentViewTracker";
 import { LogCoverArt } from "@/components/log/LogCoverArt";
 import { LogToc } from "@/components/log/LogToc";
 import { ReadingProgressBar } from "@/components/log/ReadingProgressBar";
 import { LogRelated } from "@/components/log/LogRelated";
 import "@/styles/log-detail.css";
 import { getSocialImage } from "@/lib/metadata";
-import { getPublishedLogBySlug, getPublishedLogs, incrementLogView } from "@/lib/logs-db";
+import { getPublishedLogBySlug, getPublishedLogs } from "@/lib/logs-db";
 import { extractLogToc } from "@/lib/log-toc";
 import { rehypeLogSectionIds } from "@/lib/mdx-log-sections";
 import { getLogComments } from "@/lib/comments-db";
@@ -96,14 +97,11 @@ export default async function LogDetail({ params }: PageProps<"/log/[slug]">) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  const [comments, isAdmin] = await Promise.all([
-    getLogComments(slug),
-    isAdminUser(user),
-    incrementLogView(slug),
-  ]);
+  const [comments, isAdmin] = await Promise.all([getLogComments(slug), isAdminUser(user)]);
   const readingMinutes = estimateReadingMinutes(log.content);
   return (
     <article className="container detail log-detail">
+      <ContentViewTracker kind="log" slug={slug} />
       {/* 소제목이 둘 이상일 때만 진행 막대·목차를 보여 줍니다. 짧은 글에서는 훑어볼 목차 자체가 의미가 없습니다. */}
       {toc.length > 1 && <ReadingProgressBar />}
       <header className="page-header log-detail-hero">

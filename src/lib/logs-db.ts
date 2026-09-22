@@ -79,7 +79,7 @@ export const getPublishedLogBySlug = cache(async (slug: string): Promise<Log | u
 });
 
 /**
- * 상세 페이지가 렌더될 때마다 조회수를 1 늘립니다.
+ * 브라우저의 중복 조회 제한을 통과한 공개 Log 조회수를 1 늘립니다.
  * DB의 SECURITY DEFINER 함수가 공개된 글의 view_count만 건드리도록 제한하므로,
  * 로그인하지 않은 방문자도 안전하게 호출할 수 있습니다. 실패해도 페이지 렌더링을 막지 않습니다.
  */
