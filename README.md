@@ -12,10 +12,12 @@
 
 ## 주요 기능
 
-- 공개 사이트: Projects·Log 목록/상세, About, Contact
-- Google 로그인 회원은 Log 게시글에 댓글 작성 가능 (가입 화면 없이 Google 로그인 시 자동 가입, 기본 권한은 `member`)
+- 공개 사이트: Projects·Log 목록/상세(카테고리·태그·검색, 조회수), About, Contact
+- Log 상세: 대표 이미지가 없으면 분류 색으로 자동 생성하는 표지, 긴 글의 목차·읽기 진행 막대, 이전/다음 글·같은 분류 더 읽어보기
+- Google 로그인 회원은 Log·Project 게시글에 댓글 작성 가능 (가입 화면 없이 Google 로그인 시 자동 가입, 기본 권한은 `member`)
 - 다크 모드: 시스템 설정 자동 감지 + 수동 전환(관리자 사이드바에 토글 버튼)
-- `/admin`: 콘텐츠(Projects·Log) 작성/발행 관리, 문의함, Tech Radar(기술 블로그 RSS 수집), 파일 관리, 현황 대시보드(콘텐츠·회원·댓글 지표와 주간 추이)
+- `/admin`: Projects·Log 작성/발행 관리, Log/Project 댓글 관리, 문의함, Tech Radar(기술 블로그 RSS 수집·자동 분류·Claude 다이제스트 초안), 파일 관리, 현황 대시보드(콘텐츠·회원·댓글 지표와 주간 추이). 목록마다 검색·필터·정렬을 지원하고, 좁은 화면에서는 표가 카드 형태로 바뀝니다
+- Claude 연동: 관리자용 글쓰기 피드백, 관리자가 검토·수정 후 공개하는 "Claude의 코멘트" — 둘 다 실제 API 호출 비용이 들어 `ANTHROPIC_API_KEY`가 있어야 동작합니다
 - 관리자 권한은 UUID 하드코딩 비교가 아니라 `public.user_roles`/`public.is_admin()`으로 판별
 
 ## 실행
@@ -30,7 +32,7 @@ npm run dev
 
 ## 환경변수
 
-`.env.example`에 필요한 변수 이름과 설명이 있습니다. 최소한 Supabase 연결값(`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`)이 있어야 사이트와 `/admin`이 동작하며, 나머지(Resend 메일 알림, Anthropic 다이제스트 요약)는 선택 사항입니다.
+`.env.example`에 필요한 변수 이름과 설명이 있습니다. 최소한 Supabase 연결값(`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`)이 있어야 사이트와 `/admin`이 동작하며, 나머지(Resend 메일 알림, Tech Radar 다이제스트·AI 글쓰기 피드백·Claude 코멘트에 쓰는 `ANTHROPIC_API_KEY`)는 선택 사항입니다.
 
 ## 검증
 
