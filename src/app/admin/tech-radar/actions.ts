@@ -8,6 +8,7 @@ import {
   renderDigestMarkdown,
   type DigestSourceArticle,
 } from "@/lib/tech-radar/digest";
+import { classifyTechArticle, isTechArticleTopic } from "@/lib/tech-radar/topics";
 import { createClient } from "@/lib/supabase/server";
 
 async function requireAdmin() {
@@ -46,6 +47,8 @@ export async function collectSource(sourceId: string) {
         url: article.url,
         summary: article.summary,
         published_at: article.publishedAt,
+        // 수집 시점에 무료 규칙으로 우선 분류합니다. 애매한 글은 review로 남아 관리자가 볼 수 있습니다.
+        topic: classifyTechArticle(article),
       })),
       { onConflict: "url", ignoreDuplicates: true },
     );
@@ -94,6 +97,45 @@ export async function markArticleDrafted(id: string) {
   revalidatePath("/admin/tech-radar");
 }
 
+/** 관리자가 자동 분류가 애매했던 글을 직접 바로잡을 수 있도록 한 건의 분류만 변경합니다. */
+export async function updateArticleTopic(id: string, topic: string) {
+  const { supabase } = await requireAdmin();
+  if (!isTechArticleTopic(topic)) throw new Error("허용되지 않은 분류입니다.");
+  const { error } = await supabase.from("tech_articles").update({ topic }).eq("id", id);
+  if (error) throw new Error(`분류를 바꾸지 못했습니다: ${error.message}`);
+  revalidatePath("/admin/tech-radar");
+}
+
+/**
+ * 아직 "검토 필요"로 남아 있는 글만 현재 규칙으로 다시 분류합니다.
+ * 관리자가 셀렉터로 직접 고른 분류는 덮어쓰지 않으며, 삭제·상태 변경 없이 topic 값만 바뀝니다.
+ * 요청 수를 줄이기 위해 새 분류별로 묶어서 한 번에 갱신합니다.
+ */
+export async function classifyStoredArticles() {
+  const { supabase } = await requireAdmin();
+  const { data: articles, error } = await supabase
+    .from("tech_articles")
+    .select("id, title, summary")
+    .eq("topic", "review");
+  if (error) throw new Error(`기존 글을 불러오지 못했습니다: ${error.message}`);
+
+  const idsByTopic = new Map<string, string[]>();
+  for (const article of articles ?? []) {
+    const topic = classifyTechArticle(article);
+    if (topic === "review") continue;
+    idsByTopic.set(topic, [...(idsByTopic.get(topic) ?? []), article.id]);
+  }
+
+  for (const [topic, ids] of idsByTopic) {
+    const { error: updateError } = await supabase
+      .from("tech_articles")
+      .update({ topic })
+      .in("id", ids);
+    if (updateError) throw new Error(`기존 글 분류를 바꾸지 못했습니다: ${updateError.message}`);
+  }
+  revalidatePath("/admin/tech-radar");
+}
+
 type ArticleWithSource = {
   id: string;
   title: string;
@@ -112,22 +154,28 @@ function dayBounds(date: string): { start: string; end: string } {
 }
 
 /**
- * "new" 상태인 글들을 모아 Claude로 카테고리별 요약을 만들고, Log 임시저장 글로 남깁니다.
- * range를 넘기면 그 발행일 구간의 글만 포함하고, 안 넘기면 아직 처리 안 한 글 전부를 대상으로 합니다.
+ * 선택한 topic과 "new" 상태인 글들을 모아 Claude로 카테고리별 요약을 만들고, Log 임시저장 글로 남깁니다.
+ * 날짜를 넘기면 그 발행일 구간의 글만 포함하고, 안 넘기면 아직 처리 안 한 글 전부를 대상으로 합니다.
  * 바로 공개하지 않고 draft로 두어, 반드시 사람이 확인한 뒤 발행하도록 합니다.
  */
-export async function generateDailyDigest(range?: {
+export async function generateDailyDigest(options?: {
   start?: string;
   end?: string;
+  topics?: string[];
 }): Promise<{ logId: string }> {
   const { supabase, user } = await requireAdmin();
+
+  // 브라우저에서 온 값은 직접 신뢰하지 않고, 허용한 분류만 남깁니다.
+  const topics = (options?.topics ?? ["ai_development"]).filter(isTechArticleTopic);
+  if (topics.length === 0) throw new Error("다이제스트에 포함할 분류를 하나 이상 선택해주세요.");
 
   let query = supabase
     .from("tech_articles")
     .select("id, title, url, summary, tech_sources(name)")
-    .eq("status", "new");
-  if (range?.start) query = query.gte("published_at", dayBounds(range.start).start);
-  if (range?.end) query = query.lte("published_at", dayBounds(range.end).end);
+    .eq("status", "new")
+    .in("topic", topics);
+  if (options?.start) query = query.gte("published_at", dayBounds(options.start).start);
+  if (options?.end) query = query.lte("published_at", dayBounds(options.end).end);
   // 오래 기다린 글부터 먼저 포함해서, 상한에 걸려도 특정 글이 계속 뒤로 밀리지 않게 합니다.
   const { data: rows, error } = await query.order("published_at", { ascending: true });
   if (error) throw new Error(`글을 불러오지 못했습니다: ${error.message}`);
@@ -160,10 +208,10 @@ export async function generateDailyDigest(range?: {
       : "");
 
   const today = new Date().toISOString().slice(0, 10);
-  const isRange = Boolean(range?.start || range?.end);
-  const rangeLabel = isRange ? `${range?.start ?? "처음"} ~ ${range?.end ?? today}` : today;
+  const isRange = Boolean(options?.start || options?.end);
+  const rangeLabel = isRange ? `${options?.start ?? "처음"} ~ ${options?.end ?? today}` : today;
   const slug = isRange
-    ? `tech-digest-${range?.start ?? "start"}-${range?.end ?? today}`
+    ? `tech-digest-${options?.start ?? "start"}-${options?.end ?? today}`
     : `tech-digest-${today}`;
   const title = isRange
     ? `기술 블로그 다이제스트 (${rangeLabel})`

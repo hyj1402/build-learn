@@ -3,10 +3,13 @@ import Link from "next/link";
 import { AdminPagination } from "@/components/admin/AdminPagination";
 import { LogDateRangePicker } from "@/components/admin/LogDateRangePicker";
 import { createClient } from "@/lib/supabase/server";
+import { isTechArticleTopic, TECH_ARTICLE_TOPICS } from "@/lib/tech-radar/topics";
+import { ClassifyButton } from "./ClassifyButton";
 import { CollectButton } from "./CollectButton";
 import { DigestButton } from "./DigestButton";
 import { DismissButton } from "./DismissButton";
 import { DraftLink } from "./DraftLink";
+import { TopicSelect } from "./TopicSelect";
 
 export const metadata: Metadata = { title: "Tech Radar" };
 
@@ -20,6 +23,12 @@ const STATUS_TONE: Record<string, string> = {
   new: "draft",
   drafted: "published",
   dismissed: "private",
+};
+const TOPIC_TONE: Record<keyof typeof TECH_ARTICLE_TOPICS, string> = {
+  ai_development: "published",
+  product: "draft",
+  company: "private",
+  review: "draft",
 };
 const SORT_OPTIONS = ["newest", "oldest", "title", "source"] as const;
 function stringParam(value: string | string[] | undefined) {
@@ -36,6 +45,7 @@ type ArticleRow = {
   summary: string | null;
   published_at: string | null;
   status: string;
+  topic: string;
   // Supabase 관계 조회는 설정에 따라 객체 또는 배열로 오므로 둘 다 방어적으로 처리합니다.
   tech_sources: { name: string } | { name: string }[] | null;
 };
@@ -56,6 +66,8 @@ export default async function TechRadarPage({ searchParams }: PageProps<"/admin/
   const query = stringParam(values.q).toLocaleLowerCase("ko-KR");
   const selectedStatus = stringParam(values.status);
   const status = Object.hasOwn(STATUS_LABEL, selectedStatus) ? selectedStatus : "";
+  const selectedTopic = stringParam(values.topic);
+  const topic = isTechArticleTopic(selectedTopic) ? selectedTopic : "";
   const sourceId = stringParam(values.source);
   const dateFrom = dateParam(values.from);
   const dateTo = dateParam(values.to);
@@ -71,7 +83,7 @@ export default async function TechRadarPage({ searchParams }: PageProps<"/admin/
     supabase.from("tech_articles").select("*", { count: "exact", head: true }).eq("status", "new"),
     supabase
       .from("tech_articles")
-      .select("id, title, url, summary, published_at, status, tech_sources(name)", {
+      .select("id, title, url, summary, published_at, status, topic, tech_sources(name)", {
         count: "exact",
       })
       .order("published_at", { ascending: false, nullsFirst: false }),
@@ -86,6 +98,7 @@ export default async function TechRadarPage({ searchParams }: PageProps<"/admin/
     return (
       (!query || searchable.includes(query)) &&
       (!status || article.status === status) &&
+      (!topic || article.topic === topic) &&
       (!sourceId || sourceByName.get(source) === sourceId) &&
       (!dateFrom || (publishedDate && publishedDate >= dateFrom)) &&
       (!dateTo || (publishedDate && publishedDate <= dateTo))
@@ -125,14 +138,16 @@ export default async function TechRadarPage({ searchParams }: PageProps<"/admin/
           {(sources ?? []).map((source) => (
             <CollectButton key={source.id} sourceId={source.id} label={`${source.name} 수집`} />
           ))}
+          <ClassifyButton />
         </div>
       </section>
 
       <section className="admin-style-section">
         <h2>오늘의 다이제스트</h2>
         <p className="admin-style-description">
-          아직 &quot;새 글&quot; 상태인 글 전체를 Claude가 주제별로 묶고 한두 문장씩 요약해서, Log
-          임시저장 글로 만들어줍니다. 자동으로 공개되지 않으니 내용을 확인한 뒤 직접 발행하세요.
+          기본으로 &quot;개발·AI 기술&quot; 분류의 새 글만 Claude가 주제별로 묶고 한두 문장씩
+          요약해, Log 임시저장 글로 만들어줍니다. 다른 분류도 선택할 수 있으며 자동으로 공개되지는
+          않습니다.
         </p>
         <DigestButton />
       </section>
@@ -149,6 +164,17 @@ export default async function TechRadarPage({ searchParams }: PageProps<"/admin/
           <select defaultValue={status} name="status">
             <option value="">전체</option>
             {Object.entries(STATUS_LABEL).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          <span>자동 분류</span>
+          <select defaultValue={topic} name="topic">
+            <option value="">전체</option>
+            {Object.entries(TECH_ARTICLE_TOPICS).map(([value, label]) => (
               <option key={value} value={value}>
                 {label}
               </option>
@@ -201,6 +227,7 @@ export default async function TechRadarPage({ searchParams }: PageProps<"/admin/
             <tr>
               <th>제목</th>
               <th>출처</th>
+              <th>분류</th>
               <th>발행일</th>
               <th>상태</th>
               <th>
@@ -210,6 +237,8 @@ export default async function TechRadarPage({ searchParams }: PageProps<"/admin/
           </thead>
           <tbody>
             {paginatedArticles.map((article) => {
+              // DB 마이그레이션 적용 전의 예전 행도 목록을 깨지 않도록 review로 표시합니다.
+              const articleTopic = isTechArticleTopic(article.topic) ? article.topic : "review";
               const draftHref = `/admin/logs/new?${new URLSearchParams({
                 title: article.title,
                 summary: article.summary ?? "",
@@ -231,6 +260,14 @@ export default async function TechRadarPage({ searchParams }: PageProps<"/admin/
                     )}
                   </td>
                   <td data-label="출처">{sourceName(article)}</td>
+                  <td data-label="분류">
+                    <div className="admin-topic-cell">
+                      <span className={`admin-status admin-status-${TOPIC_TONE[articleTopic]}`}>
+                        {TECH_ARTICLE_TOPICS[articleTopic]}
+                      </span>
+                      <TopicSelect articleId={article.id} topic={articleTopic} />
+                    </div>
+                  </td>
                   <td className="admin-date" data-label="발행일">
                     {article.published_at
                       ? new Date(article.published_at).toLocaleDateString("ko-KR")
@@ -250,7 +287,7 @@ export default async function TechRadarPage({ searchParams }: PageProps<"/admin/
             })}
             {paginatedArticles.length === 0 && (
               <tr>
-                <td colSpan={5} className="admin-empty-cell">
+                <td colSpan={6} className="admin-empty-cell">
                   {articles?.length
                     ? "조건에 맞는 수집 글이 없습니다."
                     : "아직 수집한 글이 없습니다. 위 버튼으로 수집해보세요."}
@@ -264,7 +301,15 @@ export default async function TechRadarPage({ searchParams }: PageProps<"/admin/
         basePath="/admin/tech-radar"
         currentPage={page}
         label="Tech Radar 목록 페이지"
-        searchParams={{ q: query, status, source: sourceId, from: dateFrom, to: dateTo, sort }}
+        searchParams={{
+          q: query,
+          status,
+          topic,
+          source: sourceId,
+          from: dateFrom,
+          to: dateTo,
+          sort,
+        }}
         totalPages={totalPages}
       />
     </div>
