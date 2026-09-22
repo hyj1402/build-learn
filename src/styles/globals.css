@@ -2686,6 +2686,39 @@ a {
   border: 1px solid var(--line);
   background: var(--surface);
 }
+/* 방문 로그의 "많이 읽힌 글" 순위 목록. admin-style-section 안에서 쓰입니다. */
+.admin-top-content-list {
+  display: grid;
+  gap: 1px;
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--line);
+  background: var(--line);
+}
+.admin-top-content-list li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: 10px 14px;
+  background: var(--surface);
+}
+.admin-top-content-list a {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  min-width: 0;
+  overflow: hidden;
+  color: var(--foreground);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.admin-top-content-list strong {
+  flex: none;
+  color: var(--muted);
+  font-size: 13px;
+}
 .admin-style-table-section {
   padding: clamp(20px, 4vw, 40px);
   border-radius: 20px;

@@ -59,7 +59,10 @@ export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
     },
     {
       title: "운영",
-      items: [{ href: "/admin/storage", label: "파일 관리" }],
+      items: [
+        { href: "/admin/visits", label: "방문 로그" },
+        { href: "/admin/storage", label: "파일 관리" },
+      ],
     },
     { title: "참고", items: [{ href: "/admin/style-guide", label: "스타일 가이드" }] },
   ];
