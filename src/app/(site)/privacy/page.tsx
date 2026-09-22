@@ -11,7 +11,7 @@ export default function PrivacyPage() {
       <header className="page-header">
         <p className="eyebrow">PRIVACY</p>
         <h1>개인정보처리방침</h1>
-        <p>시행일: 2026-09-17</p>
+        <p>시행일: 2026-09-22</p>
       </header>
 
       <div className="mdx-content">
@@ -47,7 +47,7 @@ export default function PrivacyPage() {
         <ul>
           <li>Google — 로그인(OAuth) 인증</li>
           <li>Supabase — 데이터베이스 저장 및 로그인 세션 관리</li>
-          <li>Vercel — 웹사이트 호스팅</li>
+          <li>Vercel — 웹사이트 호스팅, 방문 통계(Vercel Analytics)</li>
         </ul>
 
         <h2>5. 개인정보의 국외 이전</h2>
@@ -59,9 +59,24 @@ export default function PrivacyPage() {
         <h2>6. 쿠키 등 자동 수집 장치</h2>
         <p>
           로그인 상태 유지를 위해 Supabase Auth가 발급하는 세션 쿠키를 사용합니다. 로그인·댓글
-          작성처럼 서비스 이용에 반드시 필요한 쿠키이며, 광고나 방문자 추적 목적으로는 쓰지
+          작성처럼 서비스 이용에 반드시 필요한 쿠키이며, 개인을 식별하거나 광고 목적으로는 쓰지
           않습니다.
         </p>
+        <p>
+          이 외에 아래 두 가지 자동 수집 장치를 씁니다. 둘 다 이름·이메일 같은 개인정보나 IP 주소를
+          저장하지 않고, 어떤 글이 얼마나 읽혔는지 파악하는 목적으로만 씁니다.
+        </p>
+        <ul>
+          <li>
+            Vercel Analytics — 어떤 페이지가 얼마나 조회됐는지 집계하는 통계 도구로, 쿠키를 쓰지
+            않고 개별 방문자를 식별하지 않습니다.
+          </li>
+          <li>
+            브라우저 localStorage — 같은 브라우저로 같은 게시글을 24시간 안에 다시 열면 조회수가
+            중복으로 올라가지 않도록, 마지막으로 읽은 시각만 브라우저에 저장합니다. 사이트 운영자는
+            이 값을 조회할 수 없습니다.
+          </li>
+        </ul>
 
         <h2>7. 이용자의 권리</h2>
         <p>
