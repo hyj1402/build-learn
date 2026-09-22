@@ -87,6 +87,91 @@ article.log-detail .mdx-content > :first-child.source-card + h2,
 article.log-detail .mdx-content > h2:first-child {
   margin-top: var(--space-6);
 }
+/* 목차·URL 해시로 소제목까지 바로 이동했을 때, 고정 헤더와 진행 막대에 제목이 가리지 않게 여유를 둡니다. */
+article.log-detail .mdx-content h2[id] {
+  scroll-margin-top: 96px;
+}
+
+/* ── 읽기 진행 막대 ───────────────────────────────────────── */
+
+/* 뷰포트 맨 위에 붙는 얇은 줄로, 지금 본문의 어디쯤 읽고 있는지 보여 줍니다. */
+.reading-progress {
+  position: fixed;
+  z-index: 30;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 3px;
+  background: transparent;
+}
+.reading-progress-bar {
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.1s linear;
+}
+
+/* ── 목차 (넓은 화면 전용) ─────────────────────────────────── */
+
+.log-toc {
+  display: none;
+}
+@media (min-width: 1440px) {
+  .log-toc {
+    position: fixed;
+    z-index: 5;
+    /* 본문 열(최대 820px)이 항상 화면 중앙에 오므로, 그 절반(410px) 밖에 목차를 띄웁니다. */
+    top: 148px;
+    left: calc(50% + 450px);
+    display: block;
+    width: 220px;
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+    padding-left: var(--space-3);
+    border-left: 1px solid var(--line);
+  }
+  .log-toc-title {
+    margin: 0 0 var(--space-2);
+    color: var(--muted);
+    font:
+      700 11px/1 var(--font-display),
+      sans-serif;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  .log-toc ol {
+    display: grid;
+    gap: 4px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .log-toc a {
+    display: flex;
+    gap: 8px;
+    padding: 5px 0 5px 10px;
+    border-left: 2px solid transparent;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.5;
+    word-break: keep-all;
+  }
+  .log-toc a span {
+    color: var(--line);
+    font-family: var(--font-display), sans-serif;
+    font-size: 11px;
+  }
+  .log-toc a:hover {
+    color: var(--foreground);
+  }
+  .log-toc a.is-active {
+    border-left-color: var(--accent);
+    color: var(--foreground);
+    font-weight: 700;
+  }
+  .log-toc a.is-active span {
+    color: var(--accent);
+  }
+}
 
 /* ── 출처 카드 ("원문:"으로 시작하는 인용문) ─────────────── */
 
@@ -130,4 +215,110 @@ article.log-detail .source-card {
   text-decoration-color: var(--accent);
   text-underline-offset: 3px;
   overflow-wrap: anywhere;
+}
+
+/* ── 이전/다음 글, 더 읽어보기 ─────────────────────────────── */
+
+article.log-detail .log-related {
+  width: min(100%, 680px);
+  margin: var(--space-8) auto 0;
+}
+.log-related-adjacent {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  border: 1px solid var(--line);
+  background: var(--line);
+}
+.log-related-adjacent-link {
+  display: grid;
+  gap: 6px;
+  padding: var(--space-3);
+  background: var(--surface);
+  color: var(--foreground);
+  transition: background-color var(--transition-fast);
+}
+.log-related-adjacent-link-next {
+  text-align: right;
+}
+.log-related-adjacent-link:not(.is-empty):hover {
+  background: color-mix(in srgb, var(--accent) 6%, var(--surface));
+}
+.log-related-adjacent-link > span {
+  color: var(--accent);
+  font:
+    700 12px/1 var(--font-display),
+    sans-serif;
+  letter-spacing: 0.08em;
+}
+.log-related-adjacent-link strong {
+  font-size: 16px;
+  line-height: 1.4;
+  letter-spacing: -0.02em;
+  word-break: keep-all;
+}
+/* 이전/다음 글이 없는 칸은 빈 칸으로 자리만 잡고, 클릭도 되지 않게 흐리게 둡니다. */
+.log-related-adjacent-link.is-empty {
+  color: var(--muted);
+  pointer-events: none;
+}
+.log-related-adjacent-link.is-empty > span {
+  color: var(--muted);
+}
+
+.log-related-more {
+  margin-top: var(--space-5);
+}
+.log-related-more-title {
+  margin: 0 0 var(--space-2);
+  color: var(--muted);
+  font:
+    700 11px/1 var(--font-display),
+    sans-serif;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.log-related-more ul {
+  display: grid;
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--line);
+  background: var(--line);
+}
+.log-related-more a {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  padding: 12px var(--space-3);
+  background: var(--surface);
+  color: var(--foreground);
+  transition: background-color var(--transition-fast);
+}
+.log-related-more a:hover {
+  background: color-mix(in srgb, var(--accent) 6%, var(--surface));
+}
+.log-related-more-category {
+  flex: none;
+  color: var(--accent);
+  font:
+    700 11px/1 var(--font-display),
+    sans-serif;
+  letter-spacing: 0.08em;
+}
+.log-related-more strong {
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  word-break: keep-all;
+}
+
+@media (max-width: 640px) {
+  .log-related-adjacent {
+    grid-template-columns: 1fr;
+  }
+  .log-related-adjacent-link-next {
+    text-align: left;
+  }
 }

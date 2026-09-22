@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
+import { LogCoverArt } from "@/components/log/LogCoverArt";
 import type { Log } from "@/types/log";
 
 /** DB의 ISO 시간값을 목록에서 읽기 쉬운 한국 날짜 형식으로 바꿉니다. */
@@ -28,12 +29,10 @@ export function LogCard({
   const Heading = headingLevel;
 
   return (
-    <Link
-      className={`log-card ${log.thumbnailImage ? "log-card-with-image" : ""}`}
-      href={`/log/${log.slug}`}
-    >
-      {log.thumbnailImage && (
-        <div className="log-card-image">
+    // 대표 이미지가 없어도 자동 생성 표지를 대신 보여 주므로, 카드 레이아웃은 항상 이미지가 있는 폭을 씁니다.
+    <Link className="log-card log-card-with-image" href={`/log/${log.slug}`}>
+      <div className="log-card-image">
+        {log.thumbnailImage ? (
           <Image
             src={log.thumbnailImage}
             alt={`${log.title} 대표 이미지`}
@@ -42,8 +41,10 @@ export function LogCard({
             loading={priority ? "eager" : "lazy"}
             sizes="(max-width: 800px) 100vw, 220px"
           />
-        </div>
-      )}
+        ) : (
+          <LogCoverArt category={log.category} slug={log.slug} />
+        )}
+      </div>
       <time dateTime={log.createdAt}>{formatLogDate(log.createdAt)}</time>
       <div>
         <Heading>{log.title}</Heading>

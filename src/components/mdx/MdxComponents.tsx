@@ -60,4 +60,6 @@ export function SourceAwareBlockquote(props: ComponentPropsWithoutRef<"blockquot
 }
 
 // compileMDX에 이 객체를 전달하면 MDX 본문에서 <Callout>, <InputBox> 이름을 바로 쓸 수 있습니다.
+// h2에 목차용 id(section-1, section-2…)를 붙이는 작업은 컴포넌트가 아니라 rehype 플러그인(rehypeLogSectionIds)이
+// 컴파일 시점에 한 번만 처리합니다. 렌더 중에 값을 바꾸는 카운터는 React의 순수성 규칙과 맞지 않기 때문입니다.
 export const mdxComponents = { Callout, InputBox, blockquote: SourceAwareBlockquote };
