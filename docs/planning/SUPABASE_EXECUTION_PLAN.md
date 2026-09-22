@@ -11,7 +11,7 @@
 - 공개 Project·Log DB 조회 전환, 역할 기반 관리자 권한과 RLS, Google/이메일 로그인과 세션 갱신
 - 관리자 Project·Log CRUD, TipTap Markdown 호환 에디터, 대표·본문 이미지 업로드와 Storage 관리
 - Contact DB 저장·스팸 방지·수신함·Excel 다운로드, Resend 알림 코드
-- Tech Radar RSS 수동 수집·페이지네이션·Claude 다이제스트 초안 생성
+- Tech Radar RSS 수동 수집·페이지네이션·Claude 다이제스트 초안 생성, 글 성격 분류와 다이제스트 대상 선택
 - Project 댓글 테이블·명시적 Data API 권한·RLS·변경 보호 트리거, 공개 상세 댓글 UI와 관리자 Project 댓글 관리
 - Log 기본 카테고리(`dev`/`ai`/`life`/`etc`)를 보장하는 마이그레이션과 관리자 작성·수정 분류 선택. Server Action은 category slug를 허용 목록과 활성 DB 행으로 검증해 `category_id`를 저장하며, 2026-09-20 운영 DB 적용·선택 UI 확인까지 완료했습니다.
 

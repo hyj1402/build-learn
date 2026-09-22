@@ -8,6 +8,11 @@ import { createClient } from "@/lib/supabase/server";
 const MIN_LENGTH = 50;
 const MAX_BODY_LENGTH = 20000;
 const MAX_COMMENT_LENGTH = 3000;
+const COOLDOWN_MS = 30_000;
+
+// 서버 인스턴스가 살아 있는 동안 관리자별 마지막 생성 요청을 기록합니다.
+// 여러 인스턴스 전체를 묶지는 않지만, 실수로 버튼을 연속 클릭해 API 비용이 쌓이는 일은 줄입니다.
+const lastGenerationAtByUser = new Map<string, number>();
 
 export type AiCommentResult =
   { status: "ok"; comment: string } | { status: "error"; message: string };
@@ -20,7 +25,7 @@ async function requireAdmin() {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user || !(await isAdminUser(user))) return null;
-  return supabase;
+  return { supabase, userId: user.id };
 }
 
 /**
@@ -29,8 +34,9 @@ async function requireAdmin() {
  * 초안은 저장하지 않고 화면에만 돌려주며, 관리자가 검토·수정한 뒤 saveLogAiComment로 저장합니다.
  */
 export async function generateLogAiComment(logId: string): Promise<AiCommentResult> {
-  const supabase = await requireAdmin();
-  if (!supabase) return { status: "error", message: "관리자만 사용할 수 있는 기능입니다." };
+  const admin = await requireAdmin();
+  if (!admin) return { status: "error", message: "관리자만 사용할 수 있는 기능입니다." };
+  const { supabase, userId } = admin;
 
   const { data: log } = await supabase
     .from("logs")
@@ -53,6 +59,18 @@ export async function generateLogAiComment(logId: string): Promise<AiCommentResu
     };
   }
 
+  const now = Date.now();
+  const lastGenerationAt = lastGenerationAtByUser.get(userId);
+  const remainingMs = lastGenerationAt ? COOLDOWN_MS - (now - lastGenerationAt) : 0;
+  if (remainingMs > 0) {
+    return {
+      status: "error",
+      message: `코멘트 생성은 ${Math.ceil(remainingMs / 1000)}초 후에 다시 요청할 수 있습니다.`,
+    };
+  }
+  // 외부 API 호출 직전에 기록해 동시에 도착한 요청도 한 번만 비용이 발생하도록 합니다.
+  lastGenerationAtByUser.set(userId, now);
+
   try {
     const comment = await generateLogComment({ title: log.title, markdown: body });
     return { status: "ok", comment };
@@ -67,8 +85,9 @@ export async function saveLogAiComment(
   logId: string,
   comment: string,
 ): Promise<AiCommentSaveResult> {
-  const supabase = await requireAdmin();
-  if (!supabase) return { status: "error", message: "관리자만 사용할 수 있는 기능입니다." };
+  const admin = await requireAdmin();
+  if (!admin) return { status: "error", message: "관리자만 사용할 수 있는 기능입니다." };
+  const { supabase } = admin;
 
   const text = comment.trim();
   if (text.length > MAX_COMMENT_LENGTH) {

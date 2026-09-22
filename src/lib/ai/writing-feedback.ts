@@ -8,6 +8,8 @@ export type WritingFeedback = {
   nextSteps: string[];
 };
 
+type UnknownRecord = Record<string, unknown>;
+
 // 글 한 편에 관리자가 직접 누를 때만 호출되므로, 비용보다 피드백 품질을 우선해 한 단계 큰 모델을 씁니다.
 const MODEL = "claude-sonnet-5";
 
@@ -60,6 +62,56 @@ const SYSTEM_PROMPT = `당신은 개발자의 개인 기술 블로그 글을 봐
 - 다음에 읽을 책을 추천할 때는 실제로 존재하는 책만, 확신이 없으면 주제만 제안하세요.
 - 칭찬은 구체적으로, 지적은 부드럽지만 분명하게 하세요.`;
 
+/** 외부 API의 JSON 값이 객체인지 먼저 좁혀, TypeScript 타입 단언만 믿지 않게 합니다. */
+function isRecord(value: unknown): value is UnknownRecord {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+/** 예상한 개수·문자열 형태의 목록만 통과시켜 화면의 map() 렌더링 오류를 막습니다. */
+function parseTextList(value: unknown, name: string, min: number, max: number): string[] {
+  if (!Array.isArray(value) || value.length < min || value.length > max) {
+    throw new Error(`AI ${name} 항목 수가 올바르지 않습니다.`);
+  }
+
+  const items = value.map((item) => (typeof item === "string" ? item.trim() : ""));
+  if (items.some((item) => !item)) {
+    throw new Error(`AI ${name} 항목 형식이 올바르지 않습니다.`);
+  }
+  return items;
+}
+
+/** Claude tool 응답을 실제 화면이 안전하게 표시할 수 있는 WritingFeedback 형태로 검증합니다. */
+function parseWritingFeedback(value: unknown): WritingFeedback {
+  if (!isRecord(value) || typeof value.summary !== "string" || !value.summary.trim()) {
+    throw new Error("AI 총평 형식이 올바르지 않습니다.");
+  }
+
+  if (
+    !Array.isArray(value.improvements) ||
+    value.improvements.length < 1 ||
+    value.improvements.length > 7
+  ) {
+    throw new Error("AI 개선점 항목 수가 올바르지 않습니다.");
+  }
+  const improvements = value.improvements.map((item) => {
+    if (!isRecord(item) || typeof item.issue !== "string" || typeof item.suggestion !== "string") {
+      throw new Error("AI 개선점 항목 형식이 올바르지 않습니다.");
+    }
+    const issue = item.issue.trim();
+    const suggestion = item.suggestion.trim();
+    if (!issue || !suggestion) throw new Error("AI 개선점 내용이 비어 있습니다.");
+    return { issue, suggestion };
+  });
+
+  return {
+    summary: value.summary.trim(),
+    strengths: parseTextList(value.strengths, "잘 쓴 점", 1, 6),
+    improvements,
+    missingPerspectives: parseTextList(value.missingPerspectives, "빠진 관점", 0, 4),
+    nextSteps: parseTextList(value.nextSteps, "다음 단계", 1, 6),
+  };
+}
+
 /** 글 초안을 Claude에게 보내 총평·잘한 점·개선점·빠진 관점·다음 단계 제안을 받습니다. */
 export async function getWritingFeedback(input: {
   title: string;
@@ -93,5 +145,6 @@ export async function getWritingFeedback(input: {
   );
   if (!toolUse) throw new Error("Claude가 예상한 형식으로 응답하지 않았습니다.");
 
-  return toolUse.input as WritingFeedback;
+  // Tool schema는 모델이 지켜야 할 약속이고, 이 검증은 약속이 어겨졌을 때 관리자 화면을 보호하는 마지막 안전망입니다.
+  return parseWritingFeedback(toolUse.input);
 }

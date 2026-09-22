@@ -159,7 +159,8 @@ export function RichTextEditor({
       {mode === "preview" && (
         <div className="rich-text-editor-preview">
           <p className="rich-text-editor-preview-note">
-            공개 화면과 같은 글꼴·간격으로 보여줍니다. (제목, 태그, 댓글은 제외)
+            본문 글꼴·간격 미리보기입니다. 표·체크박스·Callout 등 일부 Markdown 요소는 공개 화면과
+            다를 수 있습니다.
           </p>
           <div className={previewWrapperClass}>
             {previewHtml && previewHtml !== "<p></p>" ? (

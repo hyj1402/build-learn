@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { generateLogAiComment, saveLogAiComment } from "@/app/admin/ai-comment-actions";
+
+const COOLDOWN_SECONDS = 30;
 
 /**
  * 저장된 Log에 붙일 "Claude의 코멘트"를 만들고 검토하는 관리자 전용 패널입니다.
@@ -21,6 +23,16 @@ export function AiCommentPanel({
   const [savedComment, setSavedComment] = useState(initialComment);
   const [message, setMessage] = useState<{ type: "ok" | "error"; text: string } | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [cooldownSeconds, setCooldownSeconds] = useState(0);
+
+  // 서버의 비용 보호와 같은 시간을 화면에도 보여줘, 불필요한 재요청을 먼저 막습니다.
+  useEffect(() => {
+    if (cooldownSeconds <= 0) return;
+    const intervalId = window.setInterval(() => {
+      setCooldownSeconds((seconds) => Math.max(0, seconds - 1));
+    }, 1000);
+    return () => window.clearInterval(intervalId);
+  }, [cooldownSeconds]);
 
   function handleGenerate() {
     setMessage(null);
@@ -28,6 +40,7 @@ export function AiCommentPanel({
       const result = await generateLogAiComment(logId);
       if (result.status === "ok") {
         setComment(result.comment);
+        setCooldownSeconds(COOLDOWN_SECONDS);
         setMessage({ type: "ok", text: "초안을 만들었습니다. 검토하고 고친 뒤 저장하세요." });
       } else {
         setMessage({ type: "error", text: result.message });
@@ -68,9 +81,15 @@ export function AiCommentPanel({
           type="button"
           className="admin-action-button admin-action-outline-blue"
           onClick={handleGenerate}
-          disabled={isPending}
+          disabled={isPending || cooldownSeconds > 0}
         >
-          {isPending ? "처리 중..." : comment ? "다시 생성" : "코멘트 생성"}
+          {isPending
+            ? "처리 중..."
+            : cooldownSeconds > 0
+              ? `${cooldownSeconds}초 후 다시 생성`
+              : comment
+                ? "다시 생성"
+                : "코멘트 생성"}
         </button>
       </div>
 

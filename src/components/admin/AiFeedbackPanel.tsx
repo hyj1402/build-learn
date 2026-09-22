@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { requestWritingFeedback, type AiFeedbackState } from "@/app/admin/ai-feedback-actions";
+
+const COOLDOWN_SECONDS = 30;
 
 /**
  * 편집기 아래에서 글 초안에 대한 AI 피드백을 받는 관리자 전용 패널입니다.
@@ -17,13 +19,26 @@ export function AiFeedbackPanel({
 }) {
   const [state, setState] = useState<AiFeedbackState | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [cooldownSeconds, setCooldownSeconds] = useState(0);
+
+  // 화면의 대기 시간을 1초마다 줄여, 버튼이 다시 활성화되는 시점을 직접 알 수 있게 합니다.
+  useEffect(() => {
+    if (cooldownSeconds <= 0) return;
+    const intervalId = window.setInterval(() => {
+      setCooldownSeconds((seconds) => Math.max(0, seconds - 1));
+    }, 1000);
+    return () => window.clearInterval(intervalId);
+  }, [cooldownSeconds]);
 
   function handleRequest(event: React.MouseEvent<HTMLButtonElement>) {
     const form = event.currentTarget.closest("form");
     const title = form ? String(new FormData(form).get("title") ?? "") : "";
     const markdown = getMarkdown();
     startTransition(async () => {
-      setState(await requestWritingFeedback(title, markdown, kind));
+      const result = await requestWritingFeedback(title, markdown, kind);
+      setState(result);
+      // 서버도 같은 간격을 검사하지만, 정상 응답 뒤에는 화면에서 먼저 막아 불필요한 요청을 만들지 않습니다.
+      if (result.status === "ok") setCooldownSeconds(COOLDOWN_SECONDS);
     });
   }
 
@@ -38,9 +53,15 @@ export function AiFeedbackPanel({
           type="button"
           className="admin-action-button admin-action-outline-blue"
           onClick={handleRequest}
-          disabled={isPending}
+          disabled={isPending || cooldownSeconds > 0}
         >
-          {isPending ? "읽는 중..." : state ? "다시 받기" : "피드백 받기"}
+          {isPending
+            ? "읽는 중..."
+            : cooldownSeconds > 0
+              ? `${cooldownSeconds}초 후 다시 요청`
+              : state
+                ? "다시 받기"
+                : "피드백 받기"}
         </button>
       </div>
 

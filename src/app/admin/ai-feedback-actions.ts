@@ -6,6 +6,11 @@ import { createClient } from "@/lib/supabase/server";
 
 const MIN_LENGTH = 50;
 const MAX_LENGTH = 20000;
+const COOLDOWN_MS = 30_000;
+
+// 서버 인스턴스가 살아 있는 동안 관리자별 마지막 요청을 기억합니다.
+// 서버리스 환경의 인스턴스 사이까지 완벽히 공유되지는 않지만, 실수로 연속 클릭해 비용이 쌓이는 경우를 막는 1차 방어입니다.
+const lastRequestAtByUser = new Map<string, number>();
 
 export type AiFeedbackState =
   { status: "ok"; feedback: WritingFeedback } | { status: "error"; message: string };
@@ -34,6 +39,18 @@ export async function requestWritingFeedback(
   if (body.length > MAX_LENGTH) {
     return { status: "error", message: `본문이 너무 깁니다. ${MAX_LENGTH}자 이내로 줄여주세요.` };
   }
+
+  const now = Date.now();
+  const lastRequestAt = lastRequestAtByUser.get(user.id);
+  const remainingMs = lastRequestAt ? COOLDOWN_MS - (now - lastRequestAt) : 0;
+  if (remainingMs > 0) {
+    return {
+      status: "error",
+      message: `AI 피드백은 ${Math.ceil(remainingMs / 1000)}초 후에 다시 요청할 수 있습니다.`,
+    };
+  }
+  // 외부 API 호출 직전에 기록해, 동시에 들어온 두 요청도 각각 비용이 발생하지 않게 합니다.
+  lastRequestAtByUser.set(user.id, now);
 
   try {
     const feedback = await getWritingFeedback({
