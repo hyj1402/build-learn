@@ -6,7 +6,20 @@ import { createClient } from "@/lib/supabase/server";
 
 const PUBLIC_SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const MAX_REFERRER_LENGTH = 300;
+const MAX_REFERRER_HOST_LENGTH = 253;
+
+/** Server Action을 직접 호출하더라도 전체 URL이 저장되지 않게 서버에서 한 번 더 도메인만 남깁니다. */
+function referrerHost(referrer: string | null): string | null {
+  if (!referrer) return null;
+
+  try {
+    const url = new URL(referrer.includes("://") ? referrer : `https://${referrer}`);
+    if (url.protocol !== "http:" && url.protocol !== "https:") return null;
+    return url.hostname.slice(0, MAX_REFERRER_HOST_LENGTH) || null;
+  } catch {
+    return null;
+  }
+}
 
 /**
  * 공개 상세 화면에서만 호출하는 조회수 증가 Server Action입니다.
@@ -26,7 +39,12 @@ export async function trackPublicContentView(kind: "log" | "project", slug: stri
 
 /**
  * "이 글이 언제 읽혔는지" 관리자 전용 방문 로그(`content_view_events`)에 한 줄을 남깁니다.
- * visitorId는 브라우저가 만든 임의 UUID일 뿐 실제 신원과 연결되지 않고, referrer도 길이를 제한합니다.
+ * 입력값이 예상 형식과 다르면 조용히 무시합니다 — 방문 로그가 실패해도 페이지 표시에는 영향이 없어야 합니다.
+ * 실제 저장 가능 여부(공개 글인지)는 DB의 insert 정책이 한 번 더 검사합니다.
+ *
+ * visitorId는 브라우저가 만든 임의 UUID일 뿐 실제 신원과 연결되지 않고, 유입 경로는 도메인만 보관합니다.
+ * 입력값이 예상 형식과 다르면 조용히 무시합니다 — 방문 로그가 실패해도 페이지 표시에는 영향이 없어야 합니다.
+ * 실제 저장 가능 여부(공개 글인지)는 DB의 insert 정책이 한 번 더 검사합니다.
  * 입력값이 예상 형식과 다르면 조용히 무시합니다 — 방문 로그가 실패해도 페이지 표시에는 영향이 없어야 합니다.
  * 실제 저장 가능 여부(공개 글인지)는 DB의 insert 정책이 한 번 더 검사합니다.
  */
@@ -43,7 +61,7 @@ export async function recordContentViewEvent(
     content_type: kind,
     slug,
     visitor_id: visitorId,
-    referrer: referrer ? referrer.slice(0, MAX_REFERRER_LENGTH) : null,
+    referrer: referrerHost(referrer),
   });
   if (error) console.error(`방문 로그 저장 실패 (${kind}:${slug}):`, error.message);
 }

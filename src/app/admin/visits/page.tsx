@@ -9,6 +9,18 @@ export const metadata: Metadata = { title: "방문 로그" };
 const TYPE_LABEL: Record<string, string> = { log: "학습 기록", project: "프로젝트" };
 const DETAIL_PATH: Record<string, string> = { log: "/log", project: "/projects" };
 const STATS_WINDOW_DAYS = 30;
+const KOREA_TIME_ZONE = "Asia/Seoul";
+const KOREA_DATE_FORMATTER = new Intl.DateTimeFormat("en-US", {
+  timeZone: KOREA_TIME_ZONE,
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+const KOREA_DATE_TIME_FORMATTER = new Intl.DateTimeFormat("ko-KR", {
+  timeZone: KOREA_TIME_ZONE,
+  dateStyle: "medium",
+  timeStyle: "short",
+});
 
 type EventRow = {
   id: string;
@@ -29,10 +41,22 @@ function dateParam(value: string | string[] | undefined) {
 function referrerHost(referrer: string | null) {
   if (!referrer) return "직접 방문 · 북마크";
   try {
-    return new URL(referrer).hostname;
+    // 새 기록은 이미 hostname이지만, 기존 URL 전체 기록도 화면에서는 경로를 노출하지 않습니다.
+    return new URL(referrer.includes("://") ? referrer : `https://${referrer}`).hostname;
   } catch {
     return "알 수 없음";
   }
+}
+
+/** Vercel 서버의 UTC 시간과 무관하게 관리자 기준인 한국 날짜를 YYYY-MM-DD로 만듭니다. */
+function koreaDateKey(value: Date | string): string {
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+
+  const parts = KOREA_DATE_FORMATTER.formatToParts(date);
+  const part = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((item) => item.type === type)?.value;
+  return `${part("year")}-${part("month")}-${part("day")}`;
 }
 /** N일 전 시각을 ISO 문자열로 반환합니다. 통계 조회 시작 시점을 구하거나 "최근 N일"을 판정하는 데 씁니다. */
 function daysAgoIso(days: number): string {
@@ -41,10 +65,9 @@ function daysAgoIso(days: number): string {
 function isWithinDays(iso: string, days: number) {
   return iso >= daysAgoIso(days);
 }
-// "오늘" 판정은 관리자가 보는 로컬 시간 기준 날짜 문자열을 비교합니다(UTC 기준으로 자정을 나누면
-// 한국 시간으로는 아직 어제인데 이미 "오늘"로 잡히는 등 실제 감각과 어긋날 수 있어서입니다).
+// Vercel 서버가 UTC에서 실행되어도, 관리자 화면의 "오늘"은 한국 자정 기준으로 판정합니다.
 function isToday(iso: string) {
-  return new Date(iso).toDateString() === new Date().toDateString();
+  return koreaDateKey(iso) === koreaDateKey(new Date());
 }
 
 /**
@@ -116,7 +139,7 @@ export default async function VisitsPage({ searchParams }: PageProps<"/admin/vis
 
   const filteredEvents = (eventRows ?? []).filter((row) => {
     const title = titleOf(row).toLocaleLowerCase("ko-KR");
-    const visitedDate = row.created_at.slice(0, 10);
+    const visitedDate = koreaDateKey(row.created_at);
     return (
       (!query || title.includes(query) || row.slug.includes(query)) &&
       (!type || row.content_type === type) &&
@@ -229,7 +252,7 @@ export default async function VisitsPage({ searchParams }: PageProps<"/admin/vis
                 </td>
                 <td data-label="유입 경로">{referrerHost(row.referrer)}</td>
                 <td className="admin-date" data-label="방문 시각">
-                  {new Date(row.created_at).toLocaleString("ko-KR")}
+                  {KOREA_DATE_TIME_FORMATTER.format(new Date(row.created_at))}
                 </td>
               </tr>
             ))}

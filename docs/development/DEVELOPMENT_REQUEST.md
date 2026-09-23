@@ -10,7 +10,7 @@
 - 시작일: 2026-09-22
 - 상태: 완료
 - 참고 화면: `/log/[slug]`, `/projects/[slug]`, Vercel Analytics 대시보드
-- 작업 원칙: 이름·로그인 ID·IP는 저장하지 않고, 같은 브라우저의 반복 새로고침을 줄인다. 관리자 방문 로그는 브라우저가 만든 익명 UUID와 유입 URL만 기록하며, 운영 통계는 Vercel에도 위임한다.
+- 작업 원칙: 이름·로그인 ID·IP는 저장하지 않고, 같은 브라우저의 반복 새로고침을 줄인다. 관리자 방문 로그는 브라우저가 만든 익명 UUID와 유입 도메인만 기록하고 수집일로부터 2년 보관하며, 운영 통계는 Vercel에도 위임한다.
 
 ### 요청 배경
 
@@ -44,7 +44,7 @@
 ### 작업 결과
 
 - `ContentViewTracker`가 공개 Log·Project 상세가 화면에 표시된 뒤에만 조회수를 요청합니다. 같은 브라우저·같은 slug의 마지막 요청 시각을 localStorage에 기록해 24시간 안의 새로고침·재방문 요청을 막습니다. 저장소를 쓸 수 없는 환경에서는 본문을 막지 않고 기존처럼 요청합니다.
-- 중복 제한을 통과한 열람만 `content_view_events`에 기록해 `/admin/visits`에서 시간·글·유입 도메인별로 볼 수 있습니다. 이 이벤트는 이름·이메일·IP·로그인 ID가 아닌 브라우저 localStorage의 임의 UUID와 referrer만 보관합니다.
+- 중복 제한을 통과한 열람만 `content_view_events`에 기록해 `/admin/visits`에서 시간·글·유입 도메인별로 볼 수 있습니다. 이 이벤트는 이름·이메일·IP·로그인 ID가 아닌 브라우저 localStorage의 임의 UUID와 유입 도메인만 보관하며, 2년 뒤 정리합니다. 서버가 UTC에서 실행되어도 화면의 날짜 통계·필터·시각은 한국 시간 기준입니다.
 - Server Action은 콘텐츠 종류와 slug 형식을 제한하고, 기존 Supabase RPC가 `publication_status = 'published'` 행만 증가시키는 보호를 그대로 사용합니다. 새 테이블·마이그레이션·RLS 변경은 없습니다.
 - 루트 레이아웃에 `@vercel/analytics/next`의 `Analytics`를 연결했습니다. Vercel Dashboard에서 Analytics를 한 번 활성화한 뒤 Production으로 배포해야 실제 통계가 집계됩니다.
 - 변경 파일 lint, TypeScript, Prettier 검사와 Next.js 프로덕션 빌드를 통과했습니다. 로컬 개발 서버는 `.next` 잠금 파일 접근 거부로 실행하지 못해 브라우저에서의 반복 새로고침 수동 확인은 배포 후 운영 주소에서 진행합니다.

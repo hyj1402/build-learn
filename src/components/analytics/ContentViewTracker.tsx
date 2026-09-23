@@ -17,6 +17,21 @@ function getOrCreateVisitorId(): string {
 }
 
 /**
+ * 방문 경로 통계에는 어느 사이트에서 왔는지만 필요합니다. 검색어·게시글 경로 같은 URL의
+ * 나머지 부분은 받지 않도록 브라우저 단계에서 먼저 도메인만 추립니다.
+ */
+function getReferrerHost(): string | null {
+  if (!document.referrer) return null;
+
+  try {
+    const url = new URL(document.referrer);
+    return url.protocol === "http:" || url.protocol === "https:" ? url.hostname : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * 같은 브라우저가 같은 공개 글을 24시간 안에 다시 열면 조회수를 올리지 않는 보이지 않는 컴포넌트입니다.
  * 방문자 이름·로그인 ID·IP는 저장하지 않고, 브라우저 안의 시간값과 임의 방문자 UUID만 사용합니다.
  * 같은 24시간 판정을 통과했을 때만 관리자 전용 방문 로그(`content_view_events`)에도 한 줄 남깁니다 —
@@ -29,7 +44,7 @@ export function ContentViewTracker({ kind, slug }: { kind: "log" | "project"; sl
 
     function recordView() {
       const visitorId = getOrCreateVisitorId();
-      const referrer = document.referrer || null;
+      const referrer = getReferrerHost();
       void trackPublicContentView(kind, slug).catch(() => {
         window.localStorage.removeItem(storageKey);
       });
