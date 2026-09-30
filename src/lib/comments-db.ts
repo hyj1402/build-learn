@@ -26,7 +26,11 @@ export async function getLogComments(logSlug: string): Promise<LogComment[]> {
     .eq("log_slug", logSlug)
     .order("created_at", { ascending: true });
 
-  if (error) throw new Error(`댓글을 불러오지 못했습니다: ${error.message}`);
+  // 댓글은 본문을 보조하는 기능이므로, 일시적인 DB/RLS 오류가 글 전체 500으로 번지지 않게 빈 목록으로 대체합니다.
+  if (error) {
+    console.error(`Log 댓글을 불러오지 못했습니다 (${logSlug}):`, error.message);
+    return [];
+  }
 
   return data.map((row) => ({
     id: row.id,
@@ -47,7 +51,11 @@ export async function getProjectComments(projectSlug: string): Promise<ProjectCo
     .eq("project_slug", projectSlug)
     .order("created_at", { ascending: true });
 
-  if (error) throw new Error(`댓글을 불러오지 못했습니다: ${error.message}`);
+  // Project 본문도 댓글 장애와 분리해, 콘텐츠 자체는 계속 읽을 수 있게 합니다.
+  if (error) {
+    console.error(`Project 댓글을 불러오지 못했습니다 (${projectSlug}):`, error.message);
+    return [];
+  }
 
   return data.map((row) => ({
     id: row.id,

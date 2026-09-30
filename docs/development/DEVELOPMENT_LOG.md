@@ -1,5 +1,14 @@
 # BUILD & LEARN 누적 개발 작업 로그
 
+## 2026-09-30 (40) — 공개 상세 500 오류와 댓글 RLS 권한 충돌 수정
+
+- 운영 Log 상세에서 React #441과 공통 500 화면을 재현했습니다. 실제 원인은 `anon`의 `is_admin()` 실행 권한을 보안상 회수한 뒤에도 Log·Project의 공개 댓글 SELECT 정책이 `is_admin()`을 호출해 발생한 PostgreSQL 권한 오류였습니다.
+- 공개 읽기 정책은 `anon, authenticated`가 공개 글의 삭제되지 않은 댓글만 보도록 유지하고, 삭제 댓글까지 보는 관리자 SELECT 정책은 `authenticated` 전용으로 분리했습니다. `anon`에게 `is_admin()` 실행 권한을 다시 열지 않았으므로 앞서 적용한 최소 권한 조치는 유지됩니다.
+- 운영 DB에 `split_public_and_admin_comment_read_policies` 마이그레이션을 적용했습니다. `anon` 역할로 Log 댓글 1건과 Project 댓글 조회가 오류 없이 실행되고, `is_admin()` 실행 권한은 계속 없는 것을 확인했습니다. 운영 브라우저에서 Log 상세와 Project 상세가 모두 본문·댓글 영역까지 정상 표시되는 것도 확인했습니다.
+- 댓글은 공개 본문의 보조 기능이므로, 이후 댓글 조회가 일시적으로 실패하더라도 글 전체가 500이 되지 않게 공개 조회 함수는 오류를 서버 로그에 남기고 빈 댓글 목록으로 대체합니다.
+
+---
+
 ## 2026-09-30 (39) — 커스텀 도메인과 검색 대표 주소 정리
 
 - 가비아의 `build-learn.co.kr`을 Vercel Production 대표 주소로 연결하고, `www.build-learn.co.kr`은 대표 주소로 308 영구 리다이렉트하도록 운영 상태를 문서화했습니다. 현재 A·CNAME 레코드와 TTL, Supabase Auth의 Site URL·Redirect URL, Google Search Console TXT 소유권 확인과 sitemap 제출 절차를 배포 가이드에 남겼습니다.
