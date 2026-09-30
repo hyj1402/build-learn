@@ -1,6 +1,14 @@
 # BUILD & LEARN 배포 가이드
 
-이 문서는 BUILD & LEARN의 Vercel 재배포와 운영 검증 체크리스트입니다. GitHub 저장소·Vercel 프로젝트·운영 주소는 이미 연결되어 있으며, 최초 배포 절차는 역사 참고용으로만 유지합니다.
+이 문서는 BUILD & LEARN의 Vercel 재배포, 커스텀 도메인, DNS와 운영 검증 체크리스트입니다. GitHub 저장소·Vercel 프로젝트·운영 주소는 이미 연결되어 있으며, 최초 배포 절차는 역사 참고용으로만 유지합니다.
+
+## 현재 운영 주소
+
+- 대표 주소: `https://build-learn.co.kr`
+- `www` 주소: `https://www.build-learn.co.kr` → 대표 주소로 308 영구 리다이렉트
+- Vercel 기본 주소: `https://build-learn-five.vercel.app` (보조 주소이며 검색 대표 주소가 아님)
+- DNS 관리: 가비아
+- 애플리케이션 배포와 HTTPS 인증서: Vercel
 
 ## 운영 재배포 절차
 
@@ -70,13 +78,13 @@ Vercel Production에는 최소한 다음 값을 등록합니다.
 
 `service_role` 또는 기타 비밀 키를 `NEXT_PUBLIC_*` 이름으로 등록하지 않습니다.
 
-### 실제 도메인이 정해졌을 때
+### 현재 Production 값
 
 Vercel 프로젝트의 **Settings → Environment Variables**에서 다음 값을 추가합니다.
 
 ```text
 Name: NEXT_PUBLIC_SITE_URL
-Value: https://실제도메인.com
+Value: https://build-learn.co.kr
 ```
 
 - 마지막 `/`는 붙이지 않는 것을 권장합니다.
@@ -84,7 +92,25 @@ Value: https://실제도메인.com
 - 실제 도메인용 값은 Production 환경에 설정합니다.
 - 값을 바꾼 뒤에는 새로 배포해야 metadata와 정적 페이지에 반영됩니다.
 
-## 4. 커스텀 도메인 연결
+## 4. 커스텀 도메인과 DNS
+
+### 현재 가비아 DNS 레코드
+
+| 타입  | 호스트 | 값/위치                                | TTL | 역할                                     |
+| ----- | ------ | -------------------------------------- | --- | ---------------------------------------- |
+| A     | `@`    | `216.198.79.1`                         | 600 | 루트 도메인을 Vercel Production에 연결   |
+| CNAME | `www`  | `f369ea9f76a459df.vercel-dns-017.com.` | 600 | `www` 호스트를 Vercel에 연결             |
+| TXT   | `@`    | Google이 발급한 소유권 확인 문자열     | 600 | Google Search Console 도메인 소유권 확인 |
+
+`@`는 `build-learn.co.kr` 자체를 뜻하고, `www`는 `www.build-learn.co.kr`이라는 하위 호스트를 뜻합니다. TXT의 실제 인증 문자열은 비밀 키는 아니지만 저장소에 복사할 이유가 없으므로 문서에 기록하지 않습니다. Search Console 소유권 확인을 계속 유지하려면 해당 TXT 레코드를 삭제하지 않습니다.
+
+Vercel **Settings → Domains**의 현재 규칙은 다음과 같습니다.
+
+- `build-learn.co.kr`: Production에 연결
+- `www.build-learn.co.kr`: `build-learn.co.kr`로 308 영구 리다이렉트
+- SSL/TLS 인증서: Vercel이 자동 발급·갱신하므로 가비아에서 별도로 구매하거나 파일을 올리지 않음
+
+### 새 도메인으로 다시 연결할 때의 절차
 
 1. 도메인 구매처에서 사용할 도메인을 확보합니다.
 2. Vercel 프로젝트의 **Settings → Domains**에서 도메인을 추가합니다.
@@ -94,7 +120,27 @@ Value: https://실제도메인.com
 6. SSL 인증서는 Vercel이 자동으로 발급하므로 별도 인증서 파일을 올리지 않습니다.
 7. `NEXT_PUBLIC_SITE_URL`을 실제 `https://` 도메인으로 설정하고 다시 배포합니다.
 
-## 5. 배포 후 화면 확인
+## 5. Supabase Auth 운영 URL
+
+Supabase Dashboard의 **Authentication → URL Configuration**에서 다음 상태를 유지합니다.
+
+- Site URL: `https://build-learn.co.kr`
+- Redirect URLs:
+  - `http://localhost:3000/**`
+  - `https://build-learn-five.vercel.app/**`
+  - `https://build-learn.co.kr/**`
+
+대표 주소를 바꾸면 Google 로그인 후 되돌아오는 주소에도 영향을 주므로 Vercel 도메인, `NEXT_PUBLIC_SITE_URL`, Supabase Site URL을 함께 갱신합니다.
+
+## 6. Google Search Console과 sitemap
+
+- 도메인 속성 `build-learn.co.kr`의 소유권을 가비아 TXT 레코드로 확인했습니다.
+- `https://build-learn.co.kr/sitemap.xml`을 제출했습니다.
+- 홈 URL은 색인 생성을 요청했습니다. “URL이 Google에 등록되어 있지 않음”은 새 도메인의 최초 수집 전에는 정상이며 즉시 오류를 의미하지 않습니다.
+- sitemap 제출은 Google에 URL 목록과 갱신 시점을 알려 주는 것이며, 모든 페이지의 즉시 색인을 보장하지는 않습니다.
+- 새 공개 Log·Project는 사이트맵에 포함되는지 확인하고, 중요한 글은 Search Console의 URL 검사에서 개별 색인을 요청할 수 있습니다.
+
+## 7. 배포 후 화면 확인
 
 - [ ] Vercel 프로젝트의 **Analytics** 탭에서 Analytics를 한 번 활성화한 뒤 새 Production 배포를 만듭니다. 코드만 추가해도 대시보드 기능은 자동 활성화되지 않습니다.
 - [ ] Home 열기
@@ -114,16 +160,18 @@ Value: https://실제도메인.com
 - [ ] 브라우저 콘솔 오류 확인
 - [ ] Vercel Dashboard의 Analytics 탭에서 새 Production 배포의 페이지 조회가 집계되는지 확인
 
-## 6. SEO와 공유 주소 확인
+## 8. SEO와 공유 주소 확인
 
+- [ ] 각 공개 페이지의 `<link rel="canonical">`이 `https://build-learn.co.kr/...`를 가리키는지 확인
 - [ ] 페이지 HTML의 `og:url` 또는 OG 이미지 주소가 현재 배포 주소를 사용하는지 확인
 - [ ] `/robots.txt`가 현재 사이트의 `/sitemap.xml`을 가리키는지 확인
 - [ ] `/sitemap.xml`의 모든 URL이 현재 사이트 주소를 사용하는지 확인
+- [ ] `www`와 Vercel 기본 주소에서 대표 주소 정책이 유지되는지 확인
 - [ ] 카카오톡, Slack 등 실제 사용할 서비스에 링크를 붙여 미리보기 확인
 
 미리보기 캐시는 이전 값을 잠시 보여줄 수 있습니다. 환경변수나 OG 정보를 바꿨다면 재배포 후 서비스의 캐시 갱신 방법을 확인합니다.
 
-## 7. 외부 이미지 사용 시
+## 9. 외부 이미지 사용 시
 
 현재 프로젝트 이미지는 모두 `public/images`의 로컬 파일입니다. 나중에 외부 이미지 주소를 직접 사용하면 `next.config.ts`의 `images.remotePatterns`에 실제 이미지 도메인만 정확하게 추가해야 합니다.
 
@@ -137,10 +185,10 @@ images: {
 
 사용하지 않는 임의의 도메인을 미리 허용하지 않습니다.
 
-## 이번 작업에서 하지 않은 것
+## DNS 변경 시 주의
 
-- Vercel 프로젝트 생성
-- GitHub push
-- 실제 배포 실행
-- 도메인 구매와 DNS 변경
-- 실제 연락처와 콘텐츠 교체
+- 현재 A·CNAME 레코드를 임의의 예전 예시값으로 바꾸지 않고, Vercel Domains 화면이 해당 프로젝트에 안내하는 값을 기준으로 합니다.
+- 같은 호스트에 충돌하는 A/CNAME 레코드를 중복으로 추가하지 않습니다.
+- TTL 600은 DNS 응답을 약 10분간 캐시할 수 있다는 뜻입니다. 실제 반영은 인터넷 사업자와 기존 캐시에 따라 더 걸릴 수 있습니다.
+- Google 소유권 TXT 레코드는 사이트 연결용 A/CNAME과 역할이 다르므로 유지합니다.
+- DNS 레코드에는 Supabase 키, API 키, 비밀번호를 기록하지 않습니다.

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { LogCard } from "@/components/log/LogCard";
 import { NowBuildingCard } from "@/components/project/NowBuildingCard";
@@ -5,6 +6,9 @@ import { ProjectCard } from "@/components/project/ProjectCard";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { getPublishedLogs } from "@/lib/logs-db";
 import { getPublishedProjects } from "@/lib/projects-db";
+
+// Vercel 기본 주소로 같은 화면을 열어도 검색엔진에는 커스텀 도메인의 홈을 대표 주소로 알립니다.
+export const metadata: Metadata = { alternates: { canonical: "/" } };
 
 /**
  * Home은 서버에서 공개 Project·Log를 한 번씩 읽어 Hero와 목록에 함께 사용합니다.

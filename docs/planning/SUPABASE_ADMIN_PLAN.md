@@ -17,7 +17,8 @@
 
 - 프로젝트 위치: `C:\homeProject\build-learn`
 - 저장소: `https://github.com/hyj1402/build-learn.git`
-- 배포 사이트: `https://build-learn-five.vercel.app/`
+- 운영 사이트: `https://build-learn.co.kr/`
+- Vercel 기본 주소: `https://build-learn-five.vercel.app/` (보조 주소)
 - 기술 구성: Next.js 16 App Router, React 19, TypeScript, Tailwind CSS 4, MDX
 - 목적: 만든 프로젝트와 학습 과정을 함께 기록하는 개인 개발 아카이브
 

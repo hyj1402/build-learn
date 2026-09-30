@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getPublishedProjects } from "@/lib/projects-db";
 
-export const metadata: Metadata = { title: "About" };
+export const metadata: Metadata = { title: "About", alternates: { canonical: "/about" } };
 
 // 반복되는 기술 스택 카드를 데이터로 분리해 항목 추가와 순서 변경을 쉽게 합니다.
 const stacks = [

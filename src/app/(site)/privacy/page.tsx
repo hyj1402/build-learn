@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "개인정보처리방침" };
+export const metadata: Metadata = {
+  title: "개인정보처리방침",
+  alternates: { canonical: "/privacy" },
+};
 
 // 정적 텍스트만 있는 페이지라 별도 데이터 조회 없이 고정된 내용을 렌더링합니다.
 // Contact 폼(이름·이메일·문의내용)과 Google 로그인(이메일·이름)으로 수집하는 개인정보의

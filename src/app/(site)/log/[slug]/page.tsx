@@ -59,10 +59,12 @@ export async function generateMetadata({ params }: PageProps<"/log/[slug]">): Pr
   return {
     title: log.title,
     description: log.summary,
+    alternates: { canonical: `/log/${slug}` },
     openGraph: {
       type: "article",
       title: log.title,
       description: log.summary,
+      url: `/log/${slug}`,
       images: [{ url: image, alt: `${log.title} 대표 이미지` }],
     },
     twitter: {

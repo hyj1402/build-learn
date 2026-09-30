@@ -6,48 +6,49 @@
 
 ### 기본 정보
 
-- 작업 이름: 중복 조회 제한과 Vercel 방문 통계 연결
-- 시작일: 2026-09-22
+- 작업 이름: 커스텀 도메인 전환과 대표 URL 정리
+- 시작일: 2026-09-30
 - 상태: 완료
-- 참고 화면: `/log/[slug]`, `/projects/[slug]`, Vercel Analytics 대시보드
-- 작업 원칙: 이름·로그인 ID·IP는 저장하지 않고, 같은 브라우저의 반복 새로고침을 줄인다. 관리자 방문 로그는 브라우저가 만든 익명 UUID와 유입 도메인만 기록하고 수집일로부터 2년 보관하며, 운영 통계는 Vercel에도 위임한다.
+- 참고 화면: 가비아 DNS, Vercel Domains, Supabase Auth URL Configuration, Google Search Console
+- 작업 원칙: `https://build-learn.co.kr`을 유일한 검색 대표 주소로 사용하고, 실제 인증 문자열이나 비밀값은 Git에 기록하지 않는다.
 
 ### 요청 배경
 
-현재 상세 페이지는 서버 렌더링마다 조회수를 증가시켜 같은 방문자가 새로고침해도 숫자가 계속 올라갑니다. 또한 관리자 화면의 숫자만으로는 유입·페이지별 방문 같은 운영 통계를 볼 수 없습니다.
+가비아에서 구매한 `build-learn.co.kr`을 Vercel Production에 연결하고 `www` 리다이렉트, Supabase 로그인 반환 주소, Search Console 소유권 확인과 sitemap 제출까지 완료했습니다. 이제 소스와 운영 문서에 새 대표 주소를 일관되게 반영하고 Vercel 기본 주소·검색 조건 주소로 인한 중복 노출을 줄여야 합니다.
 
 ### 추가할 것
 
-- [x] 같은 브라우저·같은 글의 24시간 중복 조회 제한
-- [x] Vercel Analytics 패키지와 루트 수집 컴포넌트
+- [x] 공개 페이지별 canonical URL
+- [x] README와 배포 가이드의 실제 DNS·도메인 운영 정보
+- [x] Search Console·sitemap·Supabase Auth 설정 기록
 
 ### 수정할 것
 
-- [x] Log·Project 상세의 서버 렌더링 즉시 조회수 증가를 클라이언트 추적기로 교체
+- [x] 상태·기획·학습 문서의 대표 배포 주소
+- [x] 로그인 페이지의 검색 제외 metadata
 
 ### 삭제할 것
 
-- 없음
+- 없음. Vercel 기본 주소는 장애 확인용 보조 주소로 문서에 남깁니다.
 
 ### 하지 않을 것
 
-- 방문자 계정·이름·IP 저장
-- 자체 관리자 통계 대시보드 구현
+- Google Search Console TXT 인증 문자열을 저장소에 기록
+- Claude가 별도로 작업 중인 Supabase 함수 권한 마이그레이션 수정·커밋
+- DNS 레코드 재변경 또는 새 외부 서비스 도입
 
 ### 완료 조건
 
-- 같은 브라우저가 같은 공개 글을 24시간 안에 다시 열면 DB 조회수가 늘지 않음
-- 브라우저 저장소가 막혀도 공개 상세는 정상 표시됨
-- Vercel 운영 배포에서 Analytics 수집 코드가 포함됨
-- `npm run lint`, `npm run type-check`, `npm run format:check`, `npm run build` 통과
+- 공개 페이지의 canonical이 `https://build-learn.co.kr` 기준으로 생성됨
+- README와 배포 문서만 보고 현재 A·CNAME의 목적과 운영 절차를 이해할 수 있음
+- `robots.txt`와 `sitemap.xml`이 커스텀 도메인을 기준으로 생성됨
+- lint, TypeScript, Prettier, Next.js 프로덕션 빌드 검증 결과가 기록됨
 
 ### 작업 결과
 
-- `ContentViewTracker`가 공개 Log·Project 상세가 화면에 표시된 뒤에만 조회수를 요청합니다. 같은 브라우저·같은 slug의 마지막 요청 시각을 localStorage에 기록해 24시간 안의 새로고침·재방문 요청을 막습니다. 저장소를 쓸 수 없는 환경에서는 본문을 막지 않고 기존처럼 요청합니다.
-- 중복 제한을 통과한 열람만 `content_view_events`에 기록해 `/admin/visits`에서 시간·글·유입 도메인별로 볼 수 있습니다. 이 이벤트는 이름·이메일·IP·로그인 ID가 아닌 브라우저 localStorage의 임의 UUID와 유입 도메인만 보관하며, 2년 뒤 정리합니다. 서버가 UTC에서 실행되어도 화면의 날짜 통계·필터·시각은 한국 시간 기준입니다.
-- Server Action은 콘텐츠 종류와 slug 형식을 제한하고, 기존 Supabase RPC가 `publication_status = 'published'` 행만 증가시키는 보호를 그대로 사용합니다. 새 테이블·마이그레이션·RLS 변경은 없습니다.
-- 루트 레이아웃에 `@vercel/analytics/next`의 `Analytics`를 연결했습니다. Vercel Dashboard에서 Analytics를 한 번 활성화한 뒤 Production으로 배포해야 실제 통계가 집계됩니다.
-- 변경 파일 lint, TypeScript, Prettier 검사와 Next.js 프로덕션 빌드를 통과했습니다. 로컬 개발 서버는 `.next` 잠금 파일 접근 거부로 실행하지 못해 브라우저에서의 반복 새로고침 수동 확인은 배포 후 운영 주소에서 진행합니다.
+- 공개 Home·Projects·Log·About·Contact·개인정보처리방침·이용약관과 Log·Project 상세에 canonical을 추가했습니다. `metadataBase`와 운영 환경의 `NEXT_PUBLIC_SITE_URL`이 상대 경로를 `https://build-learn.co.kr/...`로 완성합니다. 로그인 화면은 `noindex, nofollow`로 검색 대상에서 제외했습니다.
+- README와 배포 가이드에 대표·보조 주소, 가비아 A/CNAME/TXT의 역할, Vercel의 `www` 308 리다이렉트·자동 HTTPS, Supabase Auth URL, Search Console·sitemap 상태를 기록했습니다. Google TXT 인증 문자열은 저장소에 남기지 않았습니다.
+- ESLint, TypeScript(`--incremental false`), 변경 파일 Prettier 검사와 `git diff --check`를 통과했습니다. Next.js 프로덕션 빌드는 실행 중인 개발 서버가 `.next/trace`를 사용 중이라 Windows `EPERM`으로 시작 단계에서 중단됐으며, 이번 metadata 변경의 컴파일 오류는 TypeScript와 ESLint에서 발견되지 않았습니다.
 
 ## 바로 이전 완료 작업
 

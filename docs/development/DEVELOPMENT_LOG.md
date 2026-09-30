@@ -1,5 +1,14 @@
 # BUILD & LEARN 누적 개발 작업 로그
 
+## 2026-09-30 (39) — 커스텀 도메인과 검색 대표 주소 정리
+
+- 가비아의 `build-learn.co.kr`을 Vercel Production 대표 주소로 연결하고, `www.build-learn.co.kr`은 대표 주소로 308 영구 리다이렉트하도록 운영 상태를 문서화했습니다. 현재 A·CNAME 레코드와 TTL, Supabase Auth의 Site URL·Redirect URL, Google Search Console TXT 소유권 확인과 sitemap 제출 절차를 배포 가이드에 남겼습니다.
+- Google 소유권 TXT의 실제 인증 문자열은 기능 이해나 복구에 필요하지 않으므로 Git 문서에 기록하지 않았습니다. Claude가 별도로 작업 중인 Supabase 함수 권한 마이그레이션과 로컬 설정 파일도 이번 변경에서 제외했습니다.
+- Home, Projects, Log, About, Contact, 개인정보처리방침, 이용약관과 공개 상세 페이지에 canonical을 지정했습니다. 검색·태그·페이지 번호나 Vercel 기본 주소로 같은 콘텐츠를 열어도 `https://build-learn.co.kr` 아래 주소를 대표로 알립니다. 로그인 화면은 검색 결과에 포함되지 않도록 `noindex, nofollow`를 지정했습니다.
+- README·현재 상태·Supabase 기획·Next.js 요청 흐름 가이드의 주소와 설명을 실제 운영 상태에 맞췄습니다. ESLint, TypeScript(`--incremental false`), 변경 파일 Prettier 검사와 `git diff --check`는 통과했습니다. Next.js 프로덕션 빌드는 실행 중인 개발 서버가 `.next/trace`를 사용 중이라 Windows `EPERM`으로 시작 단계에서 중단됐습니다.
+
+---
+
 ## 2026-09-24 (38) — 방문 기록 최소 수집과 한국 시간 기준 정리
 
 - 상세 글 열람의 유입 정보는 이전 페이지 URL 전체가 아니라 `google.com` 같은 도메인만 기록하도록 브라우저와 Server Action 양쪽에서 정규화했다. 따라서 URL 경로·검색어·해시처럼 통계에 불필요한 정보는 새 기록에 남지 않는다.

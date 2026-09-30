@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "이용약관" };
+export const metadata: Metadata = { title: "이용약관", alternates: { canonical: "/terms" } };
 
 // 정적 텍스트만 있는 페이지라 별도 데이터 조회 없이 고정된 내용을 렌더링합니다.
 // Google 로그인으로 자동 가입되는 회원(댓글 작성)에게 필요한 이용 조건을 안내합니다.

@@ -5,7 +5,8 @@ import { LogoutButton } from "@/components/auth/LogoutButton";
 import { isAdminUser } from "@/lib/auth/admin";
 import { createClient } from "@/lib/supabase/server";
 
-export const metadata: Metadata = { title: "로그인" };
+// 로그인 화면은 공개 콘텐츠가 아니므로 검색 결과에는 노출하지 않습니다.
+export const metadata: Metadata = { title: "로그인", robots: { index: false, follow: false } };
 
 // 로그인 상태를 서버에서 확인해야 해서 Server Component입니다.
 // 로그인 전에는 로그인 버튼을, 로그인 후에는 계정 정보와 로그아웃 버튼을 보여줍니다.

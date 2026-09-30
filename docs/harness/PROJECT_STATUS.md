@@ -4,7 +4,7 @@
 
 BUILD & LEARN은 만든 결과와 개발 과정에서 배운 내용을 함께 기록하는 개인 개발 아카이브입니다.
 
-## 현재 구현 상태 (2026-09-22)
+## 현재 구현 상태 (2026-09-30)
 
 - Next.js 16 기반 App Router 프로젝트
 - 기존 MDX 기반 콘텐츠 구조와 공개 URL 보존
@@ -16,7 +16,10 @@ BUILD & LEARN은 만든 결과와 개발 과정에서 배운 내용을 함께 �
 - 공개 헤더: 로그아웃 상태면 "로그인" 링크, 로그인 상태면 `user_roles`를 직접 조회해 role이 `admin`일 때만 "Admin" 링크 표시(`AuthNavLink`). 이전에는 로그인만 했으면(일반 회원도) Admin 링크가 보이는 문제가 있어 수정함 — `/admin` 서버 쪽 차단은 항상 유지되고 있었음
 - Log 상세 읽기 화면: 680px 본문 열, `Noto Serif KR` 본문 글꼴, 발행일·예상 읽기 시간 메타 정보, 무채색 중심 소제목·인용·표·Callout. 의미가 필요한 warning·success에만 상태색을 유지
 - Home Hero: 공개 Project·Log 데이터를 서버에서 읽어 대표 `BUILD & LEARN` 진행 카드, 공개 콘텐츠 수 상태 줄, 옅은 설계 도면 격자를 표시. 카드의 제목·요약·기술 스택·상태는 Project 데이터와 함께 갱신됨
-- 배포 주소: https://build-learn-five.vercel.app/
+- 운영 주소: https://build-learn.co.kr/ (`www`는 대표 주소로 308 리다이렉트)
+- Vercel 기본 주소: https://build-learn-five.vercel.app/ (보조 주소)
+- 가비아 DNS와 Vercel Production 연결, 자동 HTTPS, Supabase Auth 운영 URL, Google Search Console 소유권 확인·sitemap 제출 완료
+- 공개 Home·Projects·Log·About·Contact·법적 안내에 canonical URL을 지정하고 로그인 페이지는 검색 제외
 
 ## Supabase·관리자 기능
 
@@ -56,7 +59,7 @@ BUILD & LEARN은 만든 결과와 개발 과정에서 배운 내용을 함께 �
 
 ## 다음 작업 후보
 
-1. Vercel에서 로그인·관리자·공개/비공개·댓글 작성/삭제·다크 모드·sitemap·모바일 흐름을 운영 검증하고 MDX 보관 정책 결정
+1. 커스텀 도메인에서 로그인·관리자·공개/비공개·댓글 작성/삭제·다크 모드·canonical·모바일 흐름을 운영 검증하고 MDX 보관 정책 결정
 2. Resend·Claude 환경변수를 설정한 뒤 실제 이메일 알림과 일일 다이제스트를 검증
 3. 카테고리 관리 UI와 콘텐츠 미리보기/이탈 경고의 필요 범위를 결정
 4. Tech Radar 자동 수집/다이제스트 실행(Cron 또는 GitHub Actions)을 설계

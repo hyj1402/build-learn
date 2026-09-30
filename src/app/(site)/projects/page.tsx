@@ -4,7 +4,11 @@ import { ProjectFilterBar } from "@/components/project/ProjectFilterBar";
 import { PROJECT_CATEGORIES } from "@/lib/constants";
 import { getPublishedProjects } from "@/lib/projects-db";
 import type { ProjectCategory } from "@/types/project";
-export const metadata: Metadata = { title: "Projects", description: "만들면서 배운 프로젝트 기록" };
+export const metadata: Metadata = {
+  title: "Projects",
+  description: "만들면서 배운 프로젝트 기록",
+  alternates: { canonical: "/projects" },
+};
 
 /** URL의 category와 q 값을 읽어 서버에서 필터링한 프로젝트 목록을 만듭니다. */
 export default async function ProjectsPage({ searchParams }: PageProps<"/projects">) {

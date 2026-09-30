@@ -2,7 +2,8 @@
 
 만들고 배우고, 그 과정을 기록하는 개인 개발 아카이브입니다.
 
-- 배포 주소: https://build-learn-five.vercel.app/
+- 운영 주소: https://build-learn.co.kr/
+- Vercel 기본 주소: https://build-learn-five.vercel.app/ (운영 확인용 보조 주소)
 
 ## 스택
 
@@ -33,6 +34,16 @@ npm run dev
 ## 환경변수
 
 `.env.example`에 필요한 변수 이름과 설명이 있습니다. 최소한 Supabase 연결값(`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`)이 있어야 사이트와 `/admin`이 동작하며, 나머지(Resend 메일 알림, Tech Radar 다이제스트·AI 글쓰기 피드백·Claude 코멘트에 쓰는 `ANTHROPIC_API_KEY`)는 선택 사항입니다.
+
+운영 환경의 `NEXT_PUBLIC_SITE_URL`은 `https://build-learn.co.kr`로 설정합니다. 이 값은 canonical URL, Open Graph, `robots.txt`, `sitemap.xml`의 기준 주소로 사용됩니다.
+
+## 운영 도메인과 DNS
+
+- `build-learn.co.kr`: Vercel Production에 직접 연결된 대표 주소
+- `www.build-learn.co.kr`: 대표 주소로 308 영구 리다이렉트
+- DNS는 가비아에서 관리하며 루트(`@`) A 레코드와 `www` CNAME 레코드로 Vercel에 연결합니다.
+- Google Search Console 소유권 확인용 TXT 레코드는 유지하되, 인증 문자열 자체는 저장소에 기록하지 않습니다.
+- 상세한 현재 레코드와 변경·점검 절차는 [docs/deployment/DEPLOY.md](docs/deployment/DEPLOY.md)를 참고합니다.
 
 ## 검증
 

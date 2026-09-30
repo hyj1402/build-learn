@@ -8,6 +8,8 @@ import type { LogCategory } from "@/types/log";
 export const metadata: Metadata = {
   title: "Log",
   description: "개발과 학습 과정에서 남긴 짧고 긴 기록",
+  // 검색·태그·페이지 번호가 달라도 대표 목록 주소는 /log 하나로 통합합니다.
+  alternates: { canonical: "/log" },
 };
 
 /** 페이지가 많아져도 처음·끝과 현재 페이지 주변만 보이도록 숫자와 생략표를 만듭니다. */

@@ -659,7 +659,9 @@ src/lib/site.ts
 
 `@/`는 `src/`를 가리키도록 설정한 별칭(alias)이다. 상대경로 `../../../lib/site`를 쓰는 대신 `@/lib/site`라고 쓰므로, 폴더 깊이가 바뀌어도 경로가 더 읽기 쉽다.
 
-`SITE_URL`은 사이트의 기준 URL을 담은 상수이며, 이 Layout의 `metadataBase: new URL(SITE_URL)`에서 사용한다. 공유 이미지 같은 상대 주소를 완전한 주소로 만들 때 기준점이 된다.
+`SITE_URL`은 사이트의 기준 URL을 담은 상수이며, 이 Layout의 `metadataBase: new URL(SITE_URL)`에서 사용한다. 공유 이미지나 canonical 같은 상대 주소를 완전한 주소로 만들 때 기준점이 된다. 운영 환경에서는 `NEXT_PUBLIC_SITE_URL=https://build-learn.co.kr`이므로, 페이지가 `canonical: "/log"`라고 적어도 실제 HTML에는 `https://build-learn.co.kr/log`로 완성된다.
+
+canonical은 같은 화면을 Vercel 기본 주소나 검색 조건이 붙은 주소로 열 수 있을 때 검색엔진에 “이 페이지의 대표 주소는 이것”이라고 알려 주는 값이다. 서버 이동을 만드는 리다이렉트와 달리, HTML의 `<head>`에 검색용 힌트를 넣는다.
 
 ### 13-4. `import "@/styles/globals.css";`
 

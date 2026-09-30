@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { ContactForm } from "@/components/contact/ContactForm";
-export const metadata: Metadata = { title: "Contact" };
+export const metadata: Metadata = { title: "Contact", alternates: { canonical: "/contact" } };
 
 /** 공개 이메일·저장소 링크와, 문의를 DB에 저장하는 ContactForm을 배치하는 페이지입니다. */
 export default function ContactPage() {
