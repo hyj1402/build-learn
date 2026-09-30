@@ -308,7 +308,7 @@
 }
 .admin-storage-warning {
   margin: -12px 0 var(--space-5);
-  color: #a65316;
+  color: var(--editorial-amber);
   font-weight: 700;
 }
 .admin-storage-section {

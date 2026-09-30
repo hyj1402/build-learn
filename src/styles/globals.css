@@ -25,6 +25,19 @@
   --shadow-color: #e8e8e2;
   --danger-soft: #fff3ed;
   --danger-text: #9d2f00;
+  /* 검색·필터 칩의 "선택됨/hover" 강조에 쓰는 옅은 강조색입니다. 배경/글자색을 변수로 두어
+     다크모드에서도 옅은 색 위에 옅은 글자가 겹치는 일이 없게 합니다. */
+  --accent-soft: #fff0e9;
+  --accent-soft-text: #a52f08;
+  /* 관리자 화면 전용 톤입니다. 카드·입력 배경은 공개 사이트의 --surface를 그대로 쓰고,
+     hover·표 줄무늬 같은 보조 배경은 foreground를 살짝 섞어 라이트/다크 어디서나
+     --surface보다 한 단계만 진하게 자동 계산합니다(고정 hex를 안 써도 됨). */
+  --admin-surface-soft: color-mix(in srgb, var(--foreground) 6%, var(--surface));
+  --admin-line-strong: color-mix(in srgb, var(--foreground) 25%, var(--line));
+  /* "발행" 버튼처럼 흰 글자를 항상 올리는 채워진 초록 배경은, 다크모드에서 editorial-green이
+     밝은 민트색으로 바뀌면 흰 글자와 대비가 무너지므로 테마와 무관하게 고정된 값을 씁니다. */
+  --admin-fill-green: #187451;
+  --admin-fill-green-hover: #12553b;
   --container: 1180px;
   --text-display: clamp(54px, 8vw, 112px);
   --text-page-title: clamp(52px, 7vw, 90px);
@@ -69,6 +82,8 @@
     --shadow-color: #000;
     --danger-soft: #3a1f16;
     --danger-text: #ffb08f;
+    --accent-soft: #3a2418;
+    --accent-soft-text: #ffb08f;
   }
 }
 
@@ -92,6 +107,8 @@
   --shadow-color: #000;
   --danger-soft: #3a1f16;
   --danger-text: #ffb08f;
+  --accent-soft: #3a2418;
+  --accent-soft-text: #ffb08f;
 }
 
 /* 브라우저마다 다른 기본 계산 방식을 통일하는 전역 기초 설정입니다. */
@@ -519,7 +536,7 @@ a {
   height: 100%;
   place-items: center;
   background: linear-gradient(135deg, #f3ede3, #d9e4e6);
-  color: var(--ink);
+  color: #1a1a1a;
   font-family: var(--font-display);
   font-size: clamp(3rem, 8vw, 5rem);
   font-weight: 700;
@@ -564,7 +581,9 @@ a {
   line-height: 1.6;
 }
 .project-card:hover p {
-  color: #c8c8c2;
+  /* 카드 hover는 배경/글자색을 서로 맞바꾸므로(emphasis-bg/text), 옅은 보조 글자색도
+     고정 회색 대신 emphasis-text를 옅게 섞어 다크모드에서도 대비가 유지되게 합니다. */
+  color: color-mix(in srgb, var(--emphasis-text) 70%, transparent);
 }
 .card-meta,
 .tag-row {
@@ -586,7 +605,7 @@ a {
   color: var(--muted);
 }
 .project-card:hover .badge-tag {
-  color: #d8d8d1;
+  color: color-mix(in srgb, var(--emphasis-text) 60%, transparent);
 }
 .log-list {
   border-top: 1px solid var(--line);
@@ -762,21 +781,21 @@ a {
     color var(--transition-fast);
 }
 .filter-links a:hover {
-  border-color: #dedbd3;
-  background: #f1eee7;
+  border-color: var(--line);
+  background: var(--surface);
   color: var(--foreground);
 }
 .filter-links .active {
   border-color: var(--accent);
-  background: #fff0e9;
-  color: #a52f08;
+  background: var(--accent-soft);
+  color: var(--accent-soft-text);
 }
 .search-form {
   display: flex;
   overflow: hidden;
-  border: 1px solid #dedbd3;
+  border: 1px solid var(--line);
   border-radius: 12px;
-  background: #fffefa;
+  background: var(--surface);
   box-shadow: inset 0 1px 2px rgb(37 35 31 / 3%);
   transition:
     border-color 160ms ease,
@@ -802,20 +821,20 @@ a {
   outline: 0;
 }
 .search-form input::placeholder {
-  color: #9c9991;
+  color: var(--muted);
 }
 .search-form button {
   min-width: 72px;
-  border-left: 1px solid #dedbd3;
-  background: #f8f5ef;
+  border-left: 1px solid var(--line);
+  background: var(--background);
   padding-inline: var(--space-2);
   font-weight: 700;
   white-space: nowrap;
   cursor: pointer;
 }
 .search-form button:hover {
-  background: #fff0e9;
-  color: #a52f08;
+  background: var(--accent-soft);
+  color: var(--accent-soft-text);
 }
 .filter-stack {
   margin-bottom: var(--space-4);
@@ -1632,8 +1651,10 @@ a {
   margin: var(--space-5) 0;
   padding: var(--space-4);
   border: 1px solid var(--accent);
-  background: #fff7ed;
-  box-shadow: 6px 6px 0 #f5e3bc;
+  /* Project 상세처럼 .log-detail 밖에서 쓰일 때도 다크모드에서 글자(var(--foreground))가
+     보이도록, 고정 크림색 대신 다크모드에서 함께 어두워지는 토큰을 씁니다. */
+  background: var(--editorial-amber-soft);
+  box-shadow: 6px 6px 0 color-mix(in srgb, var(--editorial-amber) 35%, transparent);
 }
 
 /* MDX 전용 사용자 블록: Callout은 상태 안내, InputBox는 읽기 전용 핵심 정보에 사용합니다. */
@@ -1679,7 +1700,7 @@ a {
   padding: 14px 16px;
   border: 1px solid var(--line);
   border-left: 4px solid var(--accent);
-  background: #fff7ed;
+  background: var(--editorial-amber-soft);
 }
 .log-detail .mdx-input-box {
   border-left-color: var(--foreground);
@@ -2009,7 +2030,7 @@ a {
 }
 .login-google-button:hover {
   border-color: var(--foreground);
-  background: #f1f1ec;
+  background: var(--background);
 }
 .login-google-mark {
   display: inline-grid;
@@ -2062,7 +2083,7 @@ a {
 /* 관리자 화면은 공개 사이트와 같은 색상 체계를 쓰되, 글을 관리하는 작업 공간으로 정보 밀도를 높입니다. */
 .admin-page {
   min-height: 100vh;
-  background: #f0f0ea;
+  background: var(--background);
 }
 .admin-nav {
   min-height: 72px;
@@ -2190,31 +2211,31 @@ a {
   outline-offset: 2px;
 }
 .admin-action-publish {
-  border-color: var(--editorial-green);
-  background: var(--editorial-green);
+  border-color: var(--admin-fill-green);
+  background: var(--admin-fill-green);
   color: white;
 }
 .admin-action-publish:hover {
-  border-color: #12553b;
-  background: #12553b;
+  border-color: var(--admin-fill-green-hover);
+  background: var(--admin-fill-green-hover);
   box-shadow: 0 7px 16px rgb(24 116 81 / 20%);
 }
 .admin-action-draft {
   border-color: var(--editorial-amber);
   background: var(--editorial-amber-soft);
-  color: #7b4200;
+  color: var(--editorial-amber);
 }
 .admin-action-draft:hover {
-  background: #ffe8bb;
+  background: color-mix(in srgb, var(--editorial-amber) 25%, var(--editorial-amber-soft));
   box-shadow: 0 7px 16px rgb(165 90 8 / 13%);
 }
 .admin-action-violet {
   border-color: var(--editorial-violet);
   background: var(--editorial-violet-soft);
-  color: #513498;
+  color: var(--editorial-violet);
 }
 .admin-action-violet:hover {
-  background: #e7ddff;
+  background: color-mix(in srgb, var(--editorial-violet) 25%, var(--editorial-violet-soft));
   box-shadow: 0 7px 16px rgb(104 70 183 / 14%);
 }
 .admin-action-outline {
@@ -2235,17 +2256,17 @@ a {
   background: var(--editorial-blue-soft);
 }
 .admin-action-outline-danger {
-  border-color: #bd3e2a;
+  border-color: var(--danger-text);
   background: transparent;
-  color: #a62d1c;
+  color: var(--danger-text);
 }
 .admin-action-outline-danger:hover {
-  background: #fff0ed;
+  background: var(--danger-soft);
 }
 .admin-action-outline-violet {
   border-color: var(--editorial-violet);
   background: transparent;
-  color: #513498;
+  color: var(--editorial-violet);
 }
 .admin-action-outline-violet:hover {
   background: var(--editorial-violet-soft);
@@ -2260,14 +2281,14 @@ a {
   color: var(--muted);
 }
 .admin-action-ghost:hover {
-  background: #f0eee8;
+  background: var(--admin-surface-soft);
   color: var(--foreground);
 }
 .admin-action-ghost-danger {
-  color: #a62d1c;
+  color: var(--danger-text);
 }
 .admin-action-ghost-danger:hover {
-  background: #fff0ed;
+  background: var(--danger-soft);
 }
 .admin-stat-grid {
   display: grid;
@@ -2335,7 +2356,7 @@ a {
   vertical-align: middle;
 }
 .admin-table th {
-  background: #f8f8f4;
+  background: var(--admin-surface-soft);
   color: var(--muted);
   font-size: 11px;
   letter-spacing: 0.08em;
@@ -2345,7 +2366,7 @@ a {
   border-bottom: 0;
 }
 .admin-table tbody tr:hover {
-  background: #fff9f5;
+  background: var(--admin-surface-soft);
 }
 .admin-table code {
   color: var(--muted);
@@ -2398,12 +2419,12 @@ a {
 }
 /* 문의 수신함은 콘텐츠 공개 상태와 의미가 다르므로 읽음 여부 전용 색을 사용합니다. */
 .admin-status-unread {
-  color: #9d2f00;
-  background: #fff0e9;
+  color: var(--accent-soft-text);
+  background: var(--accent-soft);
 }
 .admin-status-read {
-  color: #5d625c;
-  background: #efefe9;
+  color: var(--muted);
+  background: var(--admin-surface-soft);
 }
 .admin-empty-cell {
   padding: var(--space-6) !important;
@@ -2422,9 +2443,9 @@ a {
   display: grid;
   gap: var(--space-4);
   padding: clamp(20px, 4vw, 40px);
-  border: 1px solid #e3e0d8;
+  border: 1px solid var(--line);
   border-radius: 20px;
-  background: #fffdf9;
+  background: var(--surface);
   box-shadow: 0 18px 45px rgb(37 35 31 / 7%);
 }
 .admin-form-row {
@@ -2450,9 +2471,9 @@ a {
 .admin-field textarea {
   width: 100%;
   min-height: 48px;
-  border: 1px solid #dedbd3;
+  border: 1px solid var(--line);
   border-radius: 12px;
-  background: #fffefa;
+  background: var(--surface);
   padding: 12px 14px;
   box-shadow: inset 0 1px 2px rgb(37 35 31 / 3%);
   color: var(--foreground);
@@ -2464,12 +2485,12 @@ a {
 }
 .admin-field input::placeholder,
 .admin-field textarea::placeholder {
-  color: #9c9991;
+  color: var(--muted);
 }
 .admin-field input:hover,
 .admin-field select:hover,
 .admin-field textarea:hover {
-  border-color: #c9c4ba;
+  border-color: var(--admin-line-strong);
 }
 .admin-field input:focus,
 .admin-field select:focus,
@@ -2490,9 +2511,9 @@ a {
   min-height: 48px;
   align-items: center;
   justify-content: space-between;
-  border: 1px solid #dedbd3;
+  border: 1px solid var(--line);
   border-radius: 12px;
-  background: #fffefa;
+  background: var(--surface);
   padding: 12px 14px;
   box-shadow: inset 0 1px 2px rgb(37 35 31 / 3%);
   color: var(--foreground);
@@ -2505,7 +2526,7 @@ a {
     background-color 160ms ease;
 }
 .admin-select-trigger:hover {
-  border-color: #c9c4ba;
+  border-color: var(--admin-line-strong);
 }
 .admin-select-trigger:focus-visible {
   border-color: var(--accent);
@@ -2528,9 +2549,9 @@ a {
   right: 0;
   left: 0;
   overflow: hidden;
-  border: 1px solid #dedbd3;
+  border: 1px solid var(--line);
   border-radius: 12px;
-  background: #fffefa;
+  background: var(--surface);
   box-shadow: 0 16px 30px rgb(37 35 31 / 14%);
 }
 .admin-select-option {
@@ -2540,7 +2561,7 @@ a {
   align-items: center;
   justify-content: space-between;
   border: 0;
-  border-bottom: 1px solid #eeeae2;
+  border-bottom: 1px solid var(--line);
   background: transparent;
   padding: 10px 14px;
   color: var(--foreground);
@@ -2553,8 +2574,8 @@ a {
 }
 .admin-select-option:hover,
 .admin-select-option[aria-selected="true"] {
-  background: #fff0e9;
-  color: #a52f08;
+  background: var(--accent-soft);
+  color: var(--accent-soft-text);
 }
 .admin-checkbox {
   display: inline-flex;
@@ -2563,9 +2584,9 @@ a {
   gap: 10px;
   min-height: 42px;
   padding: 10px 14px;
-  border: 1px solid #e3e0d8;
+  border: 1px solid var(--line);
   border-radius: 12px;
-  background: #faf7f0;
+  background: var(--admin-surface-soft);
   font-weight: 600;
 }
 .admin-checkbox input {
@@ -2643,20 +2664,20 @@ a {
   padding: 9px 11px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #fffefa;
+  background: var(--surface);
   color: var(--foreground);
   font-size: 13px;
   font-weight: 700;
   text-align: center;
 }
 .admin-pagination span {
-  background: #f1eee7;
-  color: #aaa59b;
+  background: var(--admin-surface-soft);
+  color: var(--muted);
 }
 .admin-pagination a:hover {
   border-color: var(--accent);
-  background: #fff0e9;
-  color: #a52f08;
+  background: var(--accent-soft);
+  color: var(--accent-soft-text);
 }
 .admin-pagination-numbers {
   display: flex;
@@ -2719,10 +2740,44 @@ a {
   color: var(--muted);
   font-size: 13px;
 }
+.admin-visits-ranking {
+  margin-bottom: var(--space-5);
+}
+.admin-ranking-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: var(--space-3);
+  color: var(--muted);
+  font-size: 12px;
+}
+.admin-ranking-pagination a,
+.admin-ranking-pagination span {
+  padding: 5px 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--background);
+  color: var(--foreground);
+  font-weight: 700;
+}
+.admin-ranking-pagination a:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.admin-ranking-pagination span[aria-disabled="true"] {
+  color: var(--muted);
+  opacity: 0.45;
+}
+.admin-ranking-pagination strong {
+  min-width: 34px;
+  color: var(--muted);
+  text-align: center;
+}
 .admin-style-table-section {
   padding: clamp(20px, 4vw, 40px);
   border-radius: 20px;
-  background: #fffdf9;
+  background: var(--surface);
   box-shadow: 0 18px 45px rgb(37 35 31 / 7%);
 }
 .admin-table-guide-heading {
@@ -2739,16 +2794,16 @@ a {
   flex: 0 0 auto;
   padding: 7px 10px;
   border-radius: 999px;
-  background: #f1eee7;
+  background: var(--admin-surface-soft);
   color: var(--muted);
   font-size: 13px;
   font-weight: 700;
 }
 .admin-table-wrap-soft {
   overflow: auto;
-  border: 1px solid #e3e0d8;
+  border: 1px solid var(--line);
   border-radius: 14px;
-  background: #fffefa;
+  background: var(--surface);
   box-shadow: 0 8px 20px rgb(37 35 31 / 4%);
 }
 .admin-list-filter {
@@ -2758,14 +2813,14 @@ a {
   align-items: end;
   margin: 0 0 12px;
   padding: 16px;
-  border: 1px solid #e3e0d8;
+  border: 1px solid var(--line);
   border-radius: 14px;
-  background: #fffefa;
+  background: var(--surface);
 }
 .admin-list-filter label {
   display: grid;
   gap: 6px;
-  color: #77726a;
+  color: var(--muted);
   font-size: 12px;
   font-weight: 700;
 }
@@ -2773,10 +2828,10 @@ a {
 .admin-list-filter select {
   width: 100%;
   min-height: 38px;
-  border: 1px solid #d8d3ca;
+  border: 1px solid var(--line);
   border-radius: 8px;
-  background: #fff;
-  color: var(--ink);
+  background: var(--surface);
+  color: var(--foreground);
   padding: 7px 9px;
   font: inherit;
 }
@@ -2800,19 +2855,19 @@ a {
   min-height: 38px;
   align-items: center;
   gap: 8px;
-  border: 1px solid #d8d3ca;
+  border: 1px solid var(--line);
   border-radius: 8px;
-  background: #fff;
+  background: var(--surface);
   padding: 7px 9px;
-  color: var(--ink);
+  color: var(--foreground);
   font: inherit;
   text-align: left;
   cursor: pointer;
 }
 .admin-date-range-trigger:hover,
 .admin-date-range-trigger[aria-expanded="true"] {
-  border-color: #d27652;
-  box-shadow: 0 0 0 3px rgb(210 118 82 / 10%);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 12%, transparent);
 }
 .admin-date-range-trigger svg {
   width: 17px;
@@ -2825,7 +2880,7 @@ a {
 }
 .admin-date-range-trigger > span:nth-child(2) {
   overflow: hidden;
-  color: #5f5a52;
+  color: var(--muted);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -2843,15 +2898,15 @@ a {
   top: calc(100% + 8px);
   left: 0;
   width: 318px;
-  border: 1px solid #ded8ce;
+  border: 1px solid var(--line);
   border-radius: 14px;
-  background: #fffefa;
+  background: var(--surface);
   box-shadow: 0 18px 38px rgb(37 35 31 / 16%);
   padding: 14px;
 }
 .admin-date-range-popover .rdp-root {
-  --rdp-accent-color: #a94d2b;
-  --rdp-accent-background-color: #fff0e9;
+  --rdp-accent-color: var(--accent-soft-text);
+  --rdp-accent-background-color: var(--accent-soft);
   margin: 0;
 }
 .admin-date-range-popover .rdp-month {
@@ -2882,7 +2937,7 @@ a {
   border: 0;
   background: transparent;
   padding: 4px 18px 4px 4px;
-  color: var(--ink);
+  color: var(--foreground);
   font: inherit;
   cursor: pointer;
 }
@@ -2911,17 +2966,17 @@ a {
   width: 28px;
   height: 28px;
   place-items: center;
-  border: 1px solid #e1dcd4;
+  border: 1px solid var(--line);
   border-radius: 7px;
   background: transparent;
-  color: #625b54;
+  color: var(--muted);
   cursor: pointer;
 }
 .admin-date-range-popover .rdp-button_previous:hover,
 .admin-date-range-popover .rdp-button_next:hover {
-  border-color: #d27652;
-  background: #fff0e9;
-  color: #a94d2b;
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-soft-text);
 }
 .admin-date-range-popover .rdp-chevron {
   width: 15px;
@@ -2936,7 +2991,7 @@ a {
 }
 .admin-date-range-popover .rdp-weekday {
   height: 32px;
-  color: #938d83;
+  color: var(--muted);
   font-size: 11px;
   font-weight: 800;
   text-align: center;
@@ -2953,38 +3008,40 @@ a {
   border: 0;
   border-radius: 8px;
   background: transparent;
-  color: #37332e;
+  color: var(--foreground);
   font:
     600 13px/1 var(--font-sans),
     sans-serif;
   cursor: pointer;
 }
 .admin-date-range-popover .rdp-day_button:hover {
-  background: #f6eee6;
-  color: #8f3e21;
+  background: var(--admin-surface-soft);
+  color: var(--accent-soft-text);
 }
 .admin-date-range-popover .rdp-outside .rdp-day_button {
-  color: #c0bbb3;
+  color: var(--muted);
 }
 .admin-date-range-popover .rdp-today .rdp-day_button {
-  box-shadow: inset 0 0 0 1px #d27652;
-  color: #a94d2b;
+  box-shadow: inset 0 0 0 1px var(--accent);
+  color: var(--accent-soft-text);
 }
 .admin-date-range-popover .rdp-range_middle {
-  background: #fff0e9;
+  background: var(--accent-soft);
 }
 .admin-date-range-popover .rdp-range_middle .rdp-day_button {
   border-radius: 0;
 }
 .admin-date-range-popover .rdp-range_start,
 .admin-date-range-popover .rdp-range_end {
-  background: #fff0e9;
+  background: var(--accent-soft);
 }
 .admin-date-range-popover .rdp-range_start .rdp-day_button,
 .admin-date-range-popover .rdp-range_end .rdp-day_button,
 .admin-date-range-popover .rdp-selected:not(.rdp-range_middle) .rdp-day_button {
-  background: #a94d2b;
-  color: #fff;
+  /* 선택된 날짜는 흰 글자를 올리는 칠해진 배경이라, 다크모드에서도 밝기가 뒤집히지 않는
+     accent(이미 admin-brand 등에서 흰 글자와 함께 검증된 패턴)를 그대로 씁니다. */
+  background: var(--accent);
+  color: white;
 }
 .admin-date-range-popover .rdp-focused .rdp-day_button:focus-visible,
 .admin-date-range-popover .rdp-day_button:focus-visible,
@@ -2997,29 +3054,29 @@ a {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  border-top: 1px solid #ece7df;
+  border-top: 1px solid var(--line);
   margin-top: 9px;
   padding-top: 11px;
 }
 .admin-date-range-presets button {
-  border: 1px solid #e1dcd4;
+  border: 1px solid var(--line);
   border-radius: 999px;
-  background: #faf7f0;
+  background: var(--admin-surface-soft);
   padding: 5px 9px;
-  color: #625b54;
+  color: var(--muted);
   font:
     700 11px/1 var(--font-sans),
     sans-serif;
   cursor: pointer;
 }
 .admin-date-range-presets button:hover {
-  border-color: #d27652;
-  background: #fff0e9;
-  color: #a94d2b;
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-soft-text);
 }
 .admin-date-range-help {
   margin: 10px 0 0;
-  color: #77726a;
+  color: var(--muted);
   font-size: 11px;
   text-align: center;
 }
@@ -3030,7 +3087,7 @@ a {
 }
 .admin-list-filter-result strong,
 .admin-number-value {
-  color: var(--ink);
+  color: var(--foreground);
   font-variant-numeric: tabular-nums;
 }
 .admin-category-label {
@@ -3048,11 +3105,11 @@ a {
 .admin-table-soft th,
 .admin-table-soft td {
   padding: 18px 20px;
-  border-color: #ebe7df;
+  border-color: var(--line);
 }
 .admin-table-soft th {
-  background: #f8f5ef;
-  color: #77726a;
+  background: var(--admin-surface-soft);
+  color: var(--muted);
   font-size: 11px;
   letter-spacing: 0.1em;
 }
@@ -3060,17 +3117,17 @@ a {
   transition: background-color var(--transition-fast);
 }
 .admin-table-soft tbody tr:hover {
-  background: #fff5ef;
+  background: var(--accent-soft);
 }
 /* 문의 행은 상태별 배경색을 모든 셀에 직접 적용해 마지막 작업 칸까지 같은 줄로 보이게 합니다. */
 .admin-messages-table tbody tr.is-unread > td {
-  background: #fffaf5;
+  background: var(--admin-surface-soft);
 }
 .admin-messages-table tbody tr:not(.is-unread) > td {
-  background: #fffefa;
+  background: var(--surface);
 }
 .admin-messages-table .admin-row-actions-cell {
-  border-left: 1px solid #ebe7df;
+  border-left: 1px solid var(--line);
 }
 .admin-table-soft td:first-child {
   min-width: 260px;
@@ -3099,7 +3156,7 @@ a {
   margin-top: 8px;
 }
 .admin-comments-table tbody tr.is-deleted > td {
-  background: #f3f1ed;
+  background: var(--admin-surface-soft);
   color: var(--muted);
 }
 .admin-comment-body {
@@ -3160,7 +3217,7 @@ a {
   display: inline-block;
   max-width: 250px;
   overflow: hidden;
-  color: #77726a;
+  color: var(--muted);
   font-size: 12px;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -3184,8 +3241,8 @@ a {
     color var(--transition-fast);
 }
 .admin-table-action:hover {
-  background: #ffe9df;
-  color: #a52f08;
+  background: var(--accent-soft);
+  color: var(--accent-soft-text);
 }
 .admin-table-action:focus-visible {
   outline: 3px solid rgb(255 77 0 / 25%);
@@ -3199,11 +3256,11 @@ a {
   max-width: 260px;
 }
 .admin-list-chips span {
-  border: 1px solid #e0ddd5;
+  border: 1px solid var(--line);
   border-radius: 999px;
-  background: #faf8f3;
+  background: var(--admin-surface-soft);
   padding: 4px 7px;
-  color: #67635b;
+  color: var(--muted);
   font-size: 11px;
   font-weight: 700;
   white-space: nowrap;
@@ -3240,9 +3297,9 @@ a {
   font-size: 12px;
 }
 .admin-action-button:disabled {
-  border-color: #dfdcd4;
-  background: #f4f2ed;
-  color: #aaa59b;
+  border-color: var(--line);
+  background: var(--admin-surface-soft);
+  color: var(--muted);
   cursor: not-allowed;
   transform: none;
 }
@@ -3254,7 +3311,7 @@ a {
 }
 .rich-text-editor.is-image-dragging .rich-text-editor-content {
   border-color: var(--accent);
-  background: #fff7f2;
+  background: var(--accent-soft);
   box-shadow: 0 0 0 4px rgb(255 77 0 / 12%);
 }
 .rich-text-editor-drop-guide {
@@ -3268,8 +3325,8 @@ a {
   place-items: center;
   border: 2px dashed var(--accent);
   border-radius: 12px;
-  background: rgb(255 247 242 / 92%);
-  color: #a52f08;
+  background: color-mix(in srgb, var(--accent-soft) 92%, transparent);
+  color: var(--accent-soft-text);
   font-weight: 800;
   pointer-events: none;
 }
@@ -3290,10 +3347,10 @@ a {
   align-items: center;
   gap: 5px;
   min-height: 54px;
-  border: 1px solid #dfdcd4;
+  border: 1px solid var(--line);
   border-bottom: 0;
   border-radius: 14px 14px 0 0;
-  background: #f8f5ef;
+  background: var(--admin-surface-soft);
   padding: 8px 10px;
   color: var(--muted);
   font-size: 13px;
@@ -3311,16 +3368,16 @@ a {
   cursor: pointer;
 }
 .rich-text-editor-toolbar button:hover {
-  border-color: #dedad1;
-  background: #fffefa;
+  border-color: var(--line);
+  background: var(--surface);
 }
 .rich-text-editor-toolbar button.is-active {
-  border-color: #ffa078;
-  background: #fff0e9;
-  color: #a52f08;
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-soft-text);
 }
 .rich-text-editor-toolbar button:disabled {
-  color: #aaa59b;
+  color: var(--muted);
   cursor: not-allowed;
 }
 .rich-text-editor-toolbar button:focus-visible {
@@ -3330,14 +3387,14 @@ a {
 .rich-text-editor-divider {
   width: 1px;
   height: 22px;
-  background: #dedad1;
+  background: var(--line);
   margin-inline: 3px;
 }
 .rich-text-editor-content {
   min-height: 420px;
-  border: 1px solid #dfdcd4;
+  border: 1px solid var(--line);
   border-radius: 0 0 14px 14px;
-  background: #fffefa;
+  background: var(--surface);
   padding: clamp(18px, 3vw, 32px);
   color: var(--foreground);
   font-size: 16px;
@@ -3376,9 +3433,9 @@ a {
 }
 .rich-text-editor-content blockquote {
   border-left: 3px solid var(--accent);
-  background: #fff7f2;
+  background: var(--accent-soft);
   padding: 10px 16px;
-  color: #625b54;
+  color: var(--muted);
 }
 .rich-text-editor-content pre {
   overflow-x: auto;
@@ -3397,15 +3454,15 @@ a {
   border-radius: 10px;
 }
 .rich-text-editor-content a {
-  color: #a52f08;
+  color: var(--accent-soft-text);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 .rich-text-editor-upload {
   margin-top: 12px;
-  border: 1px dashed #d8d4cb;
+  border: 1px dashed var(--line);
   border-radius: 12px;
-  background: #faf8f3;
+  background: var(--admin-surface-soft);
   padding: 14px;
 }
 .rich-text-editor-upload strong {
@@ -3431,7 +3488,7 @@ a {
   cursor: pointer;
 }
 .admin-messages-table tbody tr.is-unread {
-  background: #fffaf5;
+  background: var(--admin-surface-soft);
 }
 .admin-message-preview {
   display: -webkit-box;
@@ -3445,7 +3502,7 @@ a {
   line-clamp: 1;
   text-align: left;
   text-decoration: underline;
-  text-decoration-color: #d7d3ca;
+  text-decoration-color: var(--line);
   text-underline-offset: 3px;
   cursor: pointer;
   -webkit-box-orient: vertical;
@@ -3489,7 +3546,7 @@ a {
 }
 .log-pagination > span {
   min-width: 92px;
-  color: #aaa69f;
+  color: var(--muted);
 }
 .log-pagination-numbers {
   display: flex;
@@ -3508,8 +3565,8 @@ a {
 }
 .log-pagination .log-pagination-number:hover {
   border-color: var(--accent);
-  background: #fff0e9;
-  color: #a52f08;
+  background: var(--accent-soft);
+  color: var(--accent-soft-text);
 }
 .log-pagination .log-pagination-number.is-current {
   border-color: var(--foreground);
@@ -3540,6 +3597,36 @@ a {
   gap: 12px;
   margin-top: 18px;
 }
+/* Tech Radar 상단의 "지금 수집하기"/"오늘의 다이제스트"를 한 덩어리로 묶어 여백을 줄인
+   압축 변형입니다. 다른 admin-style-section 사용처(방문 로그, 스타일 가이드)에는 영향 없습니다. */
+.admin-toolbar-panel {
+  display: grid;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+.admin-toolbar-panel .admin-style-section {
+  padding: var(--space-3);
+}
+.admin-toolbar-panel h2 {
+  margin: 0 0 4px;
+  font-size: 15px;
+}
+.admin-toolbar-panel .admin-style-description {
+  margin: 0 0 var(--space-2);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.admin-toolbar-panel .admin-button-row {
+  gap: 8px;
+  margin-top: var(--space-2);
+}
+.admin-toolbar-panel .admin-topic-options {
+  margin: 0 0 var(--space-2);
+}
+.admin-toolbar-panel .admin-topic-options label {
+  min-height: 30px;
+  padding: 5px 9px;
+}
 .admin-field textarea {
   min-height: 180px;
   resize: none;
@@ -3560,10 +3647,10 @@ a {
 .content-image-upload img {
   width: min(100%, 360px);
   aspect-ratio: 16 / 9;
-  border: 1px solid #dedbd3;
+  border: 1px solid var(--line);
   border-radius: 12px;
   object-fit: contain;
-  background: #f6f6f1;
+  background: var(--admin-surface-soft);
 }
 .content-image-upload label input {
   position: absolute;
@@ -3577,9 +3664,9 @@ a {
 }
 .log-body-editor-upload {
   margin-top: 12px;
-  border: 1px dashed #c8c4b8;
+  border: 1px dashed var(--line);
   border-radius: 12px;
-  background: #fafaf6;
+  background: var(--admin-surface-soft);
   padding: 14px;
 }
 .log-body-editor-upload > strong {
@@ -3616,9 +3703,9 @@ a {
   align-items: center;
   gap: 8px;
   padding: 9px 14px;
-  border: 1px solid #e3e0d8;
+  border: 1px solid var(--line);
   border-radius: 999px;
-  background: #faf7f0;
+  background: var(--admin-surface-soft);
   color: var(--muted);
   font-size: 14px;
   font-weight: 700;
@@ -3637,9 +3724,9 @@ a {
 }
 .admin-radio:has(input:checked) {
   border-color: rgb(255 92 42 / 45%);
-  background: #fff0e9;
+  background: var(--accent-soft);
   box-shadow: 0 4px 12px rgb(255 92 42 / 10%);
-  color: #a52f08;
+  color: var(--accent-soft-text);
 }
 .admin-form > .admin-primary-action {
   justify-self: start;
@@ -3663,9 +3750,9 @@ a {
   background: rgb(20 18 15 / 45%);
 }
 .admin-dialog-panel {
-  border: 1px solid #e3e0d8;
+  border: 1px solid var(--line);
   border-radius: 20px;
-  background: #fffdf9;
+  background: var(--surface);
   box-shadow: 0 24px 60px rgb(37 35 31 / 18%);
   padding: clamp(20px, 4vw, 28px);
 }

@@ -127,30 +127,30 @@ export default async function TechRadarPage({ searchParams }: PageProps<"/admin/
         </div>
       </header>
 
-      <section className="admin-style-section">
-        <h2>지금 수집하기</h2>
-        <p className="admin-style-description">
-          아직 자동 수집(매일 1회)은 붙이기 전이라, 버튼을 눌러 그 시점 기준으로 가져옵니다. 이미
-          가져온 글은 다시 추가되지 않습니다.
-        </p>
-        <div className="admin-button-row">
-          <CollectButton label="전체 수집" className="admin-action-button admin-action-publish" />
-          {(sources ?? []).map((source) => (
-            <CollectButton key={source.id} sourceId={source.id} label={`${source.name} 수집`} />
-          ))}
-          <ClassifyButton />
-        </div>
-      </section>
+      <div className="admin-toolbar-panel">
+        <section className="admin-style-section">
+          <h2>지금 수집하기</h2>
+          <p className="admin-style-description">
+            버튼을 누르면 그 시점 기준으로 가져옵니다. 이미 가져온 글은 다시 추가되지 않습니다.
+          </p>
+          <div className="admin-button-row">
+            <CollectButton label="전체 수집" className="admin-action-button admin-action-publish" />
+            {(sources ?? []).map((source) => (
+              <CollectButton key={source.id} sourceId={source.id} label={`${source.name} 수집`} />
+            ))}
+            <ClassifyButton />
+          </div>
+        </section>
 
-      <section className="admin-style-section">
-        <h2>오늘의 다이제스트</h2>
-        <p className="admin-style-description">
-          기본으로 &quot;개발·AI 기술&quot; 분류의 새 글만 Claude가 주제별로 묶고 한두 문장씩
-          요약해, Log 임시저장 글로 만들어줍니다. 다른 분류도 선택할 수 있으며 자동으로 공개되지는
-          않습니다.
-        </p>
-        <DigestButton />
-      </section>
+        <section className="admin-style-section">
+          <h2>오늘의 다이제스트</h2>
+          <p className="admin-style-description">
+            선택한 분류의 새 글을 Claude가 요약해 Log 임시저장 글로 만듭니다. 자동으로 공개되지는
+            않습니다.
+          </p>
+          <DigestButton />
+        </section>
+      </div>
 
       {error && <p className="admin-error-message">목록을 불러오지 못했습니다: {error.message}</p>}
 

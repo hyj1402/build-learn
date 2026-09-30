@@ -40,6 +40,9 @@ yarn-error.log*
 # Supabase CLI 로컬 캐시 (버전 정보 등, 팀원마다 달라질 수 있어 커밋하지 않음)
 supabase/.temp/
 
+# Claude Code의 PC별 도구 권한 설정
+.claude/settings.local.json
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

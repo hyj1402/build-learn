@@ -9,6 +9,8 @@ export const metadata: Metadata = { title: "방문 로그" };
 const TYPE_LABEL: Record<string, string> = { log: "학습 기록", project: "프로젝트" };
 const DETAIL_PATH: Record<string, string> = { log: "/log", project: "/projects" };
 const STATS_WINDOW_DAYS = 30;
+const VISIT_PAGE_SIZE = 10;
+const RANKING_PAGE_SIZE = 3;
 const KOREA_TIME_ZONE = "Asia/Seoul";
 const KOREA_DATE_FORMATTER = new Intl.DateTimeFormat("en-US", {
   timeZone: KOREA_TIME_ZONE,
@@ -79,12 +81,14 @@ export default async function VisitsPage({ searchParams }: PageProps<"/admin/vis
   const values = await searchParams;
   const pageValue = Number(stringParam(values.page));
   const requestedPage = Number.isInteger(pageValue) && pageValue > 0 ? pageValue : 1;
+  const rankingPageValue = Number(stringParam(values.rankPage));
+  const requestedRankingPage =
+    Number.isInteger(rankingPageValue) && rankingPageValue > 0 ? rankingPageValue : 1;
   const query = stringParam(values.q).toLocaleLowerCase("ko-KR");
   const selectedType = stringParam(values.type);
   const type = selectedType === "log" || selectedType === "project" ? selectedType : "";
   const dateFrom = dateParam(values.from);
   const dateTo = dateParam(values.to);
-  const pageSize = 30;
 
   const supabase = await createClient();
   const statsSince = daysAgoIso(STATS_WINDOW_DAYS);
@@ -126,7 +130,7 @@ export default async function VisitsPage({ searchParams }: PageProps<"/admin/vis
     },
   ];
 
-  const topContent = (() => {
+  const rankedContent = (() => {
     const counts = new Map<string, { content_type: string; slug: string; count: number }>();
     for (const row of stats) {
       const key = `${row.content_type}:${row.slug}`;
@@ -134,8 +138,16 @@ export default async function VisitsPage({ searchParams }: PageProps<"/admin/vis
       if (current) current.count += 1;
       else counts.set(key, { content_type: row.content_type, slug: row.slug, count: 1 });
     }
-    return [...counts.values()].sort((a, b) => b.count - a.count).slice(0, 5);
+    return [...counts.values()].sort(
+      (a, b) => b.count - a.count || titleOf(a).localeCompare(titleOf(b), "ko-KR"),
+    );
   })();
+  const rankingTotalPages = Math.max(1, Math.ceil(rankedContent.length / RANKING_PAGE_SIZE));
+  const rankingPage = Math.min(requestedRankingPage, rankingTotalPages);
+  const topContent = rankedContent.slice(
+    (rankingPage - 1) * RANKING_PAGE_SIZE,
+    rankingPage * RANKING_PAGE_SIZE,
+  );
 
   const filteredEvents = (eventRows ?? []).filter((row) => {
     const title = titleOf(row).toLocaleLowerCase("ko-KR");
@@ -147,12 +159,25 @@ export default async function VisitsPage({ searchParams }: PageProps<"/admin/vis
       (!dateTo || visitedDate <= dateTo)
     );
   });
-  const totalPages = Math.max(1, Math.ceil(filteredEvents.length / pageSize));
+  const totalPages = Math.max(1, Math.ceil(filteredEvents.length / VISIT_PAGE_SIZE));
   const page = Math.min(requestedPage, totalPages);
-  const pagedEvents = filteredEvents.slice((page - 1) * pageSize, page * pageSize);
+  const pagedEvents = filteredEvents.slice((page - 1) * VISIT_PAGE_SIZE, page * VISIT_PAGE_SIZE);
+
+  /** 상단 순위와 하단 방문 목록의 페이지 번호를 서로 유지한 채 순위 페이지만 바꿉니다. */
+  const rankingHref = (nextRankingPage: number) => {
+    const params = new URLSearchParams();
+    if (query) params.set("q", query);
+    if (type) params.set("type", type);
+    if (dateFrom) params.set("from", dateFrom);
+    if (dateTo) params.set("to", dateTo);
+    if (page > 1) params.set("page", String(page));
+    if (nextRankingPage > 1) params.set("rankPage", String(nextRankingPage));
+    const search = params.toString();
+    return search ? `/admin/visits?${search}` : "/admin/visits";
+  };
 
   return (
-    <div className="admin-list-page">
+    <div className="admin-list-page admin-visits-page">
       <header className="admin-page-heading">
         <div>
           <p className="eyebrow">OPERATIONS / VISITS</p>
@@ -175,7 +200,7 @@ export default async function VisitsPage({ searchParams }: PageProps<"/admin/vis
       </dl>
 
       {topContent.length > 0 && (
-        <section className="admin-style-section">
+        <section className="admin-style-section admin-visits-ranking">
           <h2>최근 {STATS_WINDOW_DAYS}일 많이 읽힌 글</h2>
           <ol className="admin-top-content-list">
             {topContent.map((item) => (
@@ -188,6 +213,23 @@ export default async function VisitsPage({ searchParams }: PageProps<"/admin/vis
               </li>
             ))}
           </ol>
+          {rankingTotalPages > 1 && (
+            <nav className="admin-ranking-pagination" aria-label="많이 읽힌 글 페이지">
+              {rankingPage > 1 ? (
+                <Link href={rankingHref(rankingPage - 1)}>← 이전</Link>
+              ) : (
+                <span aria-disabled="true">← 이전</span>
+              )}
+              <strong>
+                {rankingPage} / {rankingTotalPages}
+              </strong>
+              {rankingPage < rankingTotalPages ? (
+                <Link href={rankingHref(rankingPage + 1)}>다음 →</Link>
+              ) : (
+                <span aria-disabled="true">다음 →</span>
+              )}
+            </nav>
+          )}
         </section>
       )}
 
@@ -222,6 +264,12 @@ export default async function VisitsPage({ searchParams }: PageProps<"/admin/vis
 
       <p className="admin-list-filter-result" aria-live="polite">
         조건에 맞는 방문 <strong>{filteredEvents.length.toLocaleString("ko-KR")}건</strong>
+        {totalPages > 1 && (
+          <span>
+            {" "}
+            · {page} / {totalPages} 페이지
+          </span>
+        )}
       </p>
 
       <div className="admin-table-wrap admin-table-wrap-soft">
@@ -273,7 +321,13 @@ export default async function VisitsPage({ searchParams }: PageProps<"/admin/vis
         basePath="/admin/visits"
         currentPage={page}
         label="방문 로그 페이지"
-        searchParams={{ q: query, type, from: dateFrom, to: dateTo }}
+        searchParams={{
+          q: query,
+          type,
+          from: dateFrom,
+          to: dateTo,
+          rankPage: rankingPage > 1 ? String(rankingPage) : undefined,
+        }}
         totalPages={totalPages}
       />
     </div>
