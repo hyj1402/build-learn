@@ -14,9 +14,9 @@ export const metadata: Metadata = { title: "로그인", robots: { index: false, 
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ redirectTo?: string; error?: string }>;
+  searchParams: Promise<{ redirectTo?: string; error?: string; reason?: string }>;
 }) {
-  const { redirectTo, error } = await searchParams;
+  const { redirectTo, error, reason } = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -37,6 +37,19 @@ export default async function LoginPage({
           {error && (
             <p className="login-message login-message-error" role="alert">
               로그인에 실패했습니다. 다시 시도해주세요.
+            </p>
+          )}
+
+          {!error && reason === "idle" && (
+            <p className="login-message login-message-error" role="alert">
+              관리자 화면에서 30분 동안 저장·이동 등의 요청이 없어 자동으로 로그아웃되었습니다. 다시
+              로그인해주세요.
+            </p>
+          )}
+
+          {!error && reason === "expired" && (
+            <p className="login-message login-message-error" role="alert">
+              보안을 위해 관리자 세션 시작 후 12시간이 지나 다시 로그인이 필요합니다.
             </p>
           )}
 

@@ -33,5 +33,7 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  return { response, user };
+  // supabase도 함께 돌려줘서, 호출한 쪽(proxy.ts)이 유휴·절대 시간 제한에 걸렸을 때
+  // 같은 클라이언트로 signOut()을 호출해 쿠키를 지울 수 있게 합니다.
+  return { response, user, supabase };
 }

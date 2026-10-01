@@ -1,4 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
+import { ADMIN_SESSION_COOKIE_NAMES } from "@/lib/auth/admin-session";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 // 폼 제출로 Server Action을 실행하는 방식이라 이 컴포넌트 자체는 Server Component로 둘 수 있습니다.
@@ -8,7 +10,10 @@ export function LogoutButton({ className = "text-link" }: { className?: string }
   async function logout() {
     "use server";
     const supabase = await createClient();
-    await supabase.auth.signOut();
+    // 일반 로그아웃은 현재 브라우저 세션만 종료하고, 관리자 시간 추적 쿠키도 함께 지웁니다.
+    await supabase.auth.signOut({ scope: "local" });
+    const cookieStore = await cookies();
+    ADMIN_SESSION_COOKIE_NAMES.forEach((name) => cookieStore.delete(name));
     redirect("/");
   }
 

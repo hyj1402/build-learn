@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { AdminActionNotice } from "@/components/admin/AdminActionNotice";
+import { AdminSessionActivity } from "@/components/admin/AdminSessionActivity";
 import { AdminSidebarNav } from "@/components/admin/AdminSidebarNav";
 import { LogoutButton } from "@/components/auth/LogoutButton";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
@@ -69,6 +70,7 @@ export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
 
   return (
     <div className="admin-shell">
+      <AdminSessionActivity />
       <aside className="admin-side">
         <Link className="admin-side-brand" href="/admin">
           BUILD &amp; LEARN <span>ADMIN</span>

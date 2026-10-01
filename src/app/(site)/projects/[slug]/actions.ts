@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import type { ProjectComment } from "@/lib/comments-db";
+import { moderateComment } from "@/lib/ai/comment-moderation";
 
 const MAX_COMMENT_LENGTH = 1000;
 
@@ -40,6 +41,12 @@ export async function addProjectComment(
   if (!trimmed) throw new Error("댓글 내용을 입력해주세요.");
   if (trimmed.length > MAX_COMMENT_LENGTH) {
     throw new Error(`댓글은 ${MAX_COMMENT_LENGTH}자 이내로 작성해주세요.`);
+  }
+
+  // 저장 전에 스팸·욕설 여부를 가볍게 확인합니다. AI 호출이 실패해도 통과시키는 보조 장치입니다.
+  const moderation = await moderateComment(trimmed);
+  if (moderation.blocked) {
+    throw new Error(moderation.reason ?? "등록할 수 없는 댓글입니다.");
   }
 
   // 이메일을 공개하지 않도록 로그인 제공자가 준 표시 이름만 저장합니다.
@@ -110,6 +117,11 @@ export async function updateProjectComment(
   if (!trimmed) throw new Error("댓글 내용을 입력해주세요.");
   if (trimmed.length > MAX_COMMENT_LENGTH) {
     throw new Error(`댓글은 ${MAX_COMMENT_LENGTH}자 이내로 작성해주세요.`);
+  }
+
+  const moderation = await moderateComment(trimmed);
+  if (moderation.blocked) {
+    throw new Error(moderation.reason ?? "등록할 수 없는 댓글입니다.");
   }
 
   const { data, error } = await supabase
